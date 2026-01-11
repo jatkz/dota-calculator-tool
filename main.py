@@ -88,7 +88,7 @@ class DotaCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Dota 2 Damage Calculator")
-        self.root.geometry("700x700")
+        self.root.geometry("700x800")
         
         # Configure style
         style = ttk.Style()
@@ -96,14 +96,19 @@ class DotaCalculator:
         
         self.physical_rows = []
         self.magic_rows = []
+        self.pure_rows = []
         self.physical_counter = 0
         self.magic_counter = 0
+        self.pure_counter = 0
+        
+        self.pure_section_visible = False
         
         self.create_widgets()
         
         # Add initial rows
         self.add_physical_row()
         self.add_magic_row()
+        self.add_pure_row()
     
     def create_widgets(self):
         # Main canvas and scrollbar for scrolling
@@ -210,7 +215,51 @@ class DotaCalculator:
         # Separator
         ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=15)
         
-        # Grand Total Section
+        # Pure Damage Toggle Button
+        pure_toggle_frame = ttk.Frame(main_frame)
+        pure_toggle_frame.pack(fill="x", pady=(5, 5))
+        
+        self.pure_toggle_button = ttk.Button(pure_toggle_frame, 
+                                             text="▶ Show Pure Damage Section",
+                                             command=self.toggle_pure_section)
+        self.pure_toggle_button.pack(side="left")
+        
+        # Pure Damage Section (collapsible)
+        self.pure_section_frame = ttk.Frame(main_frame)
+        
+        # Pure Damage Header
+        pure_header = ttk.Frame(self.pure_section_frame)
+        pure_header.pack(fill="x", pady=(10, 5))
+        
+        ttk.Label(pure_header, text="Pure Damage", 
+                 font=('Arial', 12, 'bold')).pack(side="left")
+        
+        ttk.Label(pure_header, text="(Ignores all resistances)", 
+                 font=('Arial', 9, 'italic'), foreground='#666').pack(side="left", padx=(10, 0))
+        
+        ttk.Button(pure_header, text="+ Add Row", 
+                  command=self.add_pure_row).pack(side="right", padx=5)
+        
+        # Pure rows container
+        self.pure_container = ttk.Frame(self.pure_section_frame)
+        self.pure_container.pack(fill="x", pady=5)
+        
+        # Pure total
+        pure_total_frame = ttk.Frame(self.pure_section_frame)
+        pure_total_frame.pack(fill="x", pady=(5, 10))
+        self.pure_total_var = tk.StringVar(value="Pure Total: 0.00")
+        ttk.Label(pure_total_frame, textvariable=self.pure_total_var,
+                 font=('Arial', 11, 'bold')).pack(side="right", padx=5)
+        
+        # Separator after pure section
+        self.pure_separator = ttk.Separator(main_frame, orient='horizontal')
+        
+        # Don't pack pure_section_frame by default (it's hidden)
+        
+        # Grand Total Section (store reference for positioning)
+        self.total_separator = ttk.Separator(main_frame, orient='horizontal')
+        self.total_separator.pack(fill="x", pady=15)
+        
         total_frame = ttk.Frame(main_frame, relief='solid', borderwidth=2, padding="10")
         total_frame.pack(fill="x", pady=10)
         
@@ -221,6 +270,21 @@ class DotaCalculator:
         # Clear button
         ttk.Button(main_frame, text="Clear All", 
                   command=self.clear_all).pack(pady=10)
+    
+    def toggle_pure_section(self):
+        """Toggle the visibility of the pure damage section"""
+        if self.pure_section_visible:
+            # Hide the section
+            self.pure_section_frame.pack_forget()
+            self.pure_separator.pack_forget()
+            self.pure_toggle_button.config(text="▶ Show Pure Damage Section")
+            self.pure_section_visible = False
+        else:
+            # Show the section - insert before the total separator
+            self.pure_section_frame.pack(fill="x", pady=5, before=self.total_separator)
+            self.pure_separator.pack(fill="x", pady=15, before=self.total_separator)
+            self.pure_toggle_button.config(text="▼ Hide Pure Damage Section")
+            self.pure_section_visible = True
     
     def add_physical_row(self):
         """Add a new physical damage row"""
@@ -240,6 +304,15 @@ class DotaCalculator:
         self.magic_rows.append(row)
         self.calculate_all()
     
+    def add_pure_row(self):
+        """Add a new pure damage row"""
+        self.pure_counter += 1
+        row = DamageRow(self.pure_container, self.pure_counter, "Pure",
+                       self.calculate_all, self.delete_pure_row)
+        row.pack(pady=2, fill="x")
+        self.pure_rows.append(row)
+        self.calculate_all()
+    
     def delete_physical_row(self, row):
         """Delete a physical damage row"""
         if len(self.physical_rows) > 1:
@@ -257,6 +330,15 @@ class DotaCalculator:
             self.calculate_all()
         else:
             messagebox.showinfo("Info", "Must keep at least one magic damage row")
+    
+    def delete_pure_row(self, row):
+        """Delete a pure damage row"""
+        if len(self.pure_rows) > 1:
+            self.pure_rows.remove(row)
+            row.destroy()
+            self.calculate_all()
+        else:
+            messagebox.showinfo("Info", "Must keep at least one pure damage row")
     
     def calculate_all(self):
         """Calculate all damage totals automatically"""
@@ -279,8 +361,12 @@ class DotaCalculator:
             magic_total = sum(row.get_damage(magic_reduction) for row in self.magic_rows)
             self.magic_total_var.set(f"Magic Total: {magic_total:.2f}")
             
+            # Calculate pure total (0% reduction - pure damage ignores resistances)
+            pure_total = sum(row.get_damage(0) for row in self.pure_rows)
+            self.pure_total_var.set(f"Pure Total: {pure_total:.2f}")
+            
             # Calculate grand total
-            grand_total = physical_total + magic_total
+            grand_total = physical_total + magic_total + pure_total
             self.grand_total_var.set(f"TOTAL DAMAGE: {grand_total:.2f}")
             
         except ValueError:
@@ -300,6 +386,12 @@ class DotaCalculator:
         self.magic_rows.clear()
         self.magic_counter = 0
         
+        # Clear pure rows
+        for row in self.pure_rows[:]:
+            row.destroy()
+        self.pure_rows.clear()
+        self.pure_counter = 0
+        
         # Reset reductions
         self.physical_reduction_var.set("0")
         self.magic_reduction_var.set("0")
@@ -307,6 +399,7 @@ class DotaCalculator:
         # Add initial rows back
         self.add_physical_row()
         self.add_magic_row()
+        self.add_pure_row()
 
 
 def main():

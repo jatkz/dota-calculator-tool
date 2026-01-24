@@ -229,6 +229,12 @@ class DotaCalculator:
         self.grand_total_vars = []
         self.grand_total_labels = []
 
+        # HP and delta vars
+        self.hp_vars = []
+        self.hp_entries = []
+        self.delta_vars = []
+        self.delta_labels = []
+
         self.create_widgets()
         self._add_column_inputs()  # Add first column
 
@@ -399,6 +405,20 @@ class DotaCalculator:
         self.grand_totals_container = ttk.Frame(self.total_frame)
         self.grand_totals_container.pack()
 
+        # HP input row
+        hp_row = ttk.Frame(self.total_frame)
+        hp_row.pack(fill="x", pady=(10, 0))
+        ttk.Label(hp_row, text="HP:", font=('Arial', 10)).pack(side="left", padx=5)
+        self.hp_inputs_frame = ttk.Frame(hp_row)
+        self.hp_inputs_frame.pack(side="left")
+
+        # Remaining HP (delta) display row
+        delta_row = ttk.Frame(self.total_frame)
+        delta_row.pack(fill="x", pady=(5, 0))
+        ttk.Label(delta_row, text="Remaining:", font=('Arial', 10)).pack(side="left", padx=5)
+        self.delta_display_frame = ttk.Frame(delta_row)
+        self.delta_display_frame.pack(side="left")
+
         # Clear button
         ttk.Button(main_frame, text="Clear All",
                   command=self.clear_all).pack(pady=10)
@@ -462,6 +482,25 @@ class DotaCalculator:
         self.grand_total_vars.append(grand_var)
         self.grand_total_labels.append(grand_label)
 
+        # HP input
+        if col_idx > 0:
+            ttk.Label(self.hp_inputs_frame, text="vs", foreground='#666').pack(side="left", padx=3)
+
+        hp_var = tk.StringVar(value="")
+        hp_var.trace('w', lambda *args: self.calculate_all())
+        hp_entry = ttk.Entry(self.hp_inputs_frame, textvariable=hp_var, width=7)
+        hp_entry.pack(side="left", padx=2)
+        self.hp_vars.append(hp_var)
+        self.hp_entries.append(hp_entry)
+
+        # Delta (remaining HP) label
+        delta_var = tk.StringVar(value="")
+        delta_label = ttk.Label(self.delta_display_frame, textvariable=delta_var,
+                               font=('Arial', 11, 'bold'), foreground=color, width=12)
+        delta_label.pack(side="left", padx=5)
+        self.delta_vars.append(delta_var)
+        self.delta_labels.append(delta_label)
+
     def _remove_column_inputs(self):
         """Remove input fields for last column"""
         if len(self.physical_vars) <= 1:
@@ -498,6 +537,18 @@ class DotaCalculator:
 
         self.grand_total_vars.pop()
         self.grand_total_labels.pop().destroy()
+
+        # Remove HP input
+        self.hp_vars.pop()
+        self.hp_entries.pop().destroy()
+
+        children = self.hp_inputs_frame.winfo_children()
+        if children and isinstance(children[-1], ttk.Label):
+            children[-1].destroy()
+
+        # Remove delta label
+        self.delta_vars.pop()
+        self.delta_labels.pop().destroy()
 
     def add_column(self):
         """Add a new comparison column"""
@@ -781,11 +832,30 @@ class DotaCalculator:
                 pure_total += results[0]
             self.pure_total_var.set(f"Pure: {pure_total:.2f}")
 
-            # Calculate grand totals
+            # Calculate grand totals and delta (remaining HP)
             for i in range(self.num_columns):
                 grand = physical_totals[i] + magic_totals[i] + pure_total
                 prefix = "TOTAL: " if i == 0 else "vs "
                 self.grand_total_vars[i].set(f"{prefix}{grand:.2f}")
+
+                # Calculate remaining HP if HP is specified
+                if i < len(self.hp_vars):
+                    hp_str = self.hp_vars[i].get().strip()
+                    if hp_str:
+                        hp = self.safe_eval(hp_str)
+                        if hp is not None:
+                            remaining = hp - grand
+                            color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
+                            if remaining < 0:
+                                self.delta_labels[i].configure(foreground='#c62828')  # Red for overkill
+                                self.delta_vars[i].set(f"{remaining:.0f} (dead)")
+                            else:
+                                self.delta_labels[i].configure(foreground=color)
+                                self.delta_vars[i].set(f"{remaining:.0f}")
+                        else:
+                            self.delta_vars[i].set("")
+                    else:
+                        self.delta_vars[i].set("")
 
             self.update_physical_display()
 
@@ -814,6 +884,8 @@ class DotaCalculator:
             var.set("0")
         for var in self.magic_vars:
             var.set("0")
+        for var in self.hp_vars:
+            var.set("")
 
         self.add_physical_row()
         self.add_magic_row()

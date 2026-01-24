@@ -41,9 +41,12 @@ class DamageRow:
                                            font=('Arial', 9), foreground='#666', width=8)
         self.base_damage_label.grid(row=0, column=3, padx=2)
 
-        # Result labels (dynamic)
+        # Result labels and per-column checkboxes (dynamic)
         self.result_vars = []
         self.result_labels = []
+        self.column_enabled_vars = []
+        self.column_checkboxes = []
+        self.column_frames = []  # Frames to hold checkbox + result together
         self._create_result_labels()
 
         # Delete button
@@ -52,22 +55,39 @@ class DamageRow:
         self._position_delete_button()
 
     def _create_result_labels(self):
-        """Create result labels for all columns"""
+        """Create result labels with per-column checkboxes"""
         # Clear existing
-        for label in self.result_labels:
-            label.destroy()
+        for frame in self.column_frames:
+            frame.destroy()
         self.result_vars.clear()
         self.result_labels.clear()
+        self.column_enabled_vars.clear()
+        self.column_checkboxes.clear()
+        self.column_frames.clear()
 
         # For pure damage, only show one column
         cols_to_show = 1 if self.is_pure else self.num_columns
 
         for i in range(cols_to_show):
+            # Create a frame to hold checkbox and result together
+            col_frame = ttk.Frame(self.frame)
+            col_frame.grid(row=0, column=4 + i, padx=1)
+            self.column_frames.append(col_frame)
+
+            # Per-column checkbox
+            col_enabled_var = tk.BooleanVar(value=True)
+            col_enabled_var.trace('w', lambda *args: self.on_change())
+            col_checkbox = ttk.Checkbutton(col_frame, variable=col_enabled_var)
+            col_checkbox.pack(side="left")
+            self.column_enabled_vars.append(col_enabled_var)
+            self.column_checkboxes.append(col_checkbox)
+
+            # Result label
             result_var = tk.StringVar(value="= 0.00")
             color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
-            result_label = ttk.Label(self.frame, textvariable=result_var,
-                                    font=('Arial', 9, 'bold'), foreground=color, width=10)
-            result_label.grid(row=0, column=4 + i, padx=3)
+            result_label = ttk.Label(col_frame, textvariable=result_var,
+                                    font=('Arial', 9, 'bold'), foreground=color, width=9)
+            result_label.pack(side="left")
             self.result_vars.append(result_var)
             self.result_labels.append(result_label)
 
@@ -78,9 +98,17 @@ class DamageRow:
 
     def update_columns(self, num_columns):
         """Update the number of result columns"""
+        # Save current enabled states
+        old_enabled = [var.get() for var in self.column_enabled_vars]
+
         self.num_columns = num_columns
         self._create_result_labels()
         self._position_delete_button()
+
+        # Restore enabled states for existing columns
+        for i, enabled in enumerate(old_enabled):
+            if i < len(self.column_enabled_vars):
+                self.column_enabled_vars[i].set(enabled)
 
     def safe_eval(self, expression):
         """Safely evaluate mathematical expressions"""
@@ -99,18 +127,13 @@ class DamageRow:
 
     def calculate(self, reductions):
         """Calculate damage for this row with given reductions (list)"""
-        # Check if row is disabled
+        # Check if entire row is disabled
         if not self.enabled_var.get():
             self.base_damage_var.set("")
             for i, var in enumerate(self.result_vars):
                 var.set("= (off)")
                 self.result_labels[i].configure(foreground='#999')
             return [0] * len(reductions)
-
-        # Reset colors
-        for i, label in enumerate(self.result_labels):
-            color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
-            label.configure(foreground=color)
 
         try:
             damage_str = self.damage_var.get()
@@ -130,10 +153,24 @@ class DamageRow:
 
             results = []
             for i, reduction in enumerate(reductions):
-                final_damage = damage * (1 - reduction / 100)
-                if i < len(self.result_vars):
-                    self.result_vars[i].set(f"= {final_damage:.2f}")
-                results.append(final_damage)
+                # Check if this specific column is enabled
+                col_enabled = True
+                if i < len(self.column_enabled_vars):
+                    col_enabled = self.column_enabled_vars[i].get()
+
+                if col_enabled:
+                    final_damage = damage * (1 - reduction / 100)
+                    if i < len(self.result_vars):
+                        color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
+                        self.result_labels[i].configure(foreground=color)
+                        self.result_vars[i].set(f"= {final_damage:.2f}")
+                    results.append(final_damage)
+                else:
+                    # Column disabled for this row
+                    if i < len(self.result_vars):
+                        self.result_labels[i].configure(foreground='#999')
+                        self.result_vars[i].set("= (off)")
+                    results.append(0)
 
             return results
 

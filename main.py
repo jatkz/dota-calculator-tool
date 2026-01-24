@@ -3,82 +3,135 @@ from tkinter import ttk, messagebox
 import re
 
 
+# Colors for different columns
+COLUMN_COLORS = ['#2e7d32', '#1565c0', '#c62828', '#6a1b9a', '#ef6c00', '#00838f']
+
+
 class DamageRow:
     """Represents a single damage calculation row"""
-    def __init__(self, parent, row_num, damage_type, on_change_callback, on_delete_callback):
+    def __init__(self, parent, row_num, damage_type, on_change_callback, on_delete_callback, num_columns=1, is_pure=False):
         self.parent = parent
         self.row_num = row_num
         self.damage_type = damage_type
         self.on_change = on_change_callback
         self.on_delete = on_delete_callback
-        
+        self.is_pure = is_pure
+        self.num_columns = num_columns
+
         self.frame = ttk.Frame(parent)
-        
+
+        # Enabled checkbox
+        self.enabled_var = tk.BooleanVar(value=True)
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_checkbox = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_checkbox.grid(row=0, column=0, padx=(0, 2))
+
         # Damage input
         ttk.Label(self.frame, text=f"{damage_type} #{row_num}:", width=12).grid(
-            row=0, column=0, sticky=tk.W, padx=5)
-        
+            row=0, column=1, sticky=tk.W, padx=5)
+
         self.damage_var = tk.StringVar(value="0")
         self.damage_var.trace('w', lambda *args: self.on_change())
-        damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=20)
-        damage_entry.grid(row=0, column=1, padx=5)
-        
-        # Result label
-        self.result_var = tk.StringVar(value="= 0.00")
-        result_label = ttk.Label(self.frame, textvariable=self.result_var, 
-                                font=('Arial', 9, 'bold'), foreground='#2e7d32', width=15)
-        result_label.grid(row=0, column=2, padx=10)
-        
+        damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=12)
+        damage_entry.grid(row=0, column=2, padx=5)
+
+        # Result labels (dynamic)
+        self.result_vars = []
+        self.result_labels = []
+        self._create_result_labels()
+
         # Delete button
-        delete_btn = ttk.Button(self.frame, text="✕", width=3, 
+        self.delete_btn = ttk.Button(self.frame, text="✕", width=3,
                                command=lambda: self.on_delete(self))
-        delete_btn.grid(row=0, column=3, padx=5)
-    
+        self._position_delete_button()
+
+    def _create_result_labels(self):
+        """Create result labels for all columns"""
+        # Clear existing
+        for label in self.result_labels:
+            label.destroy()
+        self.result_vars.clear()
+        self.result_labels.clear()
+
+        # For pure damage, only show one column
+        cols_to_show = 1 if self.is_pure else self.num_columns
+
+        for i in range(cols_to_show):
+            result_var = tk.StringVar(value="= 0.00")
+            color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
+            result_label = ttk.Label(self.frame, textvariable=result_var,
+                                    font=('Arial', 9, 'bold'), foreground=color, width=10)
+            result_label.grid(row=0, column=3 + i, padx=3)
+            self.result_vars.append(result_var)
+            self.result_labels.append(result_label)
+
+    def _position_delete_button(self):
+        """Position delete button after all result columns"""
+        cols_to_show = 1 if self.is_pure else self.num_columns
+        self.delete_btn.grid(row=0, column=3 + cols_to_show, padx=5)
+
+    def update_columns(self, num_columns):
+        """Update the number of result columns"""
+        self.num_columns = num_columns
+        self._create_result_labels()
+        self._position_delete_button()
+
     def safe_eval(self, expression):
         """Safely evaluate mathematical expressions"""
         try:
-            # Remove whitespace
             expression = expression.strip()
-            
-            # Only allow numbers, basic operators, parentheses, and decimal points
             if not re.match(r'^[\d+\-*/().\s]+$', expression):
                 return None
-            
-            # Evaluate the expression
             result = eval(expression, {"__builtins__": {}}, {})
             return float(result)
         except:
             return None
-    
-    def calculate(self, reduction_percent):
-        """Calculate damage for this row with given reduction"""
+
+    def calculate(self, reductions):
+        """Calculate damage for this row with given reductions (list)"""
+        # Check if row is disabled
+        if not self.enabled_var.get():
+            for i, var in enumerate(self.result_vars):
+                var.set("= (off)")
+                self.result_labels[i].configure(foreground='#999')
+            return [0] * len(reductions)
+
+        # Reset colors
+        for i, label in enumerate(self.result_labels):
+            color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
+            label.configure(foreground=color)
+
         try:
-            # Parse damage (support expressions like "66*4")
             damage_str = self.damage_var.get()
             damage = self.safe_eval(damage_str)
-            
+
             if damage is None:
-                self.result_var.set("= Invalid")
-                return 0
-            
-            # Calculate final damage
-            final_damage = damage * (1 - reduction_percent / 100)
-            self.result_var.set(f"= {final_damage:.2f}")
-            
-            return final_damage
-            
+                for var in self.result_vars:
+                    var.set("= Invalid")
+                return [0] * len(reductions)
+
+            results = []
+            for i, reduction in enumerate(reductions):
+                final_damage = damage * (1 - reduction / 100)
+                if i < len(self.result_vars):
+                    self.result_vars[i].set(f"= {final_damage:.2f}")
+                results.append(final_damage)
+
+            return results
+
         except ValueError:
-            self.result_var.set("= Invalid")
-            return 0
-    
-    def get_damage(self, reduction_percent):
+            for var in self.result_vars:
+                var.set("= Invalid")
+            return [0] * len(reductions)
+
+    def get_damage(self, reductions):
         """Get the calculated damage value"""
-        return self.calculate(reduction_percent)
-    
+        return self.calculate(reductions)
+
     def destroy(self):
         """Remove this row"""
         self.frame.destroy()
-    
+
     def pack(self, **kwargs):
         """Pack the frame"""
         self.frame.pack(**kwargs)
@@ -88,231 +141,430 @@ class DotaCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Dota 2 Damage Calculator")
-        self.root.geometry("700x800")
-        
-        # Configure style
+        self.root.geometry("900x950")
+
         style = ttk.Style()
         style.theme_use('clam')
-        
+
         self.physical_rows = []
         self.magic_rows = []
         self.pure_rows = []
         self.physical_counter = 0
         self.magic_counter = 0
         self.pure_counter = 0
-        
+
         self.pure_section_visible = False
-        
+        self.physical_armor_mode = True
+
+        # Dynamic columns - store as lists
+        self.num_columns = 1
+        self.physical_vars = []  # List of StringVars for armor/reduction
+        self.physical_converted_vars = []  # List of StringVars for converted display
+        self.physical_entries = []  # List of Entry widgets
+        self.physical_converted_labels = []
+        self.magic_vars = []
+        self.magic_entries = []
+
+        # Total display vars
+        self.physical_total_vars = []
+        self.physical_total_labels = []
+        self.magic_total_vars = []
+        self.magic_total_labels = []
+        self.grand_total_vars = []
+        self.grand_total_labels = []
+
         self.create_widgets()
-        
+        self._add_column_inputs()  # Add first column
+
         # Add initial rows
         self.add_physical_row()
         self.add_magic_row()
         self.add_pure_row()
-    
+
     def create_widgets(self):
         # Main canvas and scrollbar for scrolling
         main_canvas = tk.Canvas(self.root, highlightthickness=0)
         scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=main_canvas.yview)
         scrollable_frame = ttk.Frame(main_canvas)
-        
+
         scrollable_frame.bind(
             "<Configure>",
             lambda e: main_canvas.configure(scrollregion=main_canvas.bbox("all"))
         )
-        
+
         main_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         main_canvas.configure(yscrollcommand=scrollbar.set)
-        
-        # Pack scrollbar and canvas
+
         scrollbar.pack(side="right", fill="y")
         main_canvas.pack(side="left", fill="both", expand=True)
-        
-        # Main frame inside scrollable area
+
         main_frame = ttk.Frame(scrollable_frame, padding="20")
         main_frame.pack(fill="both", expand=True)
-        
+
         # Title
-        title = ttk.Label(main_frame, text="Dota 2 Damage Calculator", 
+        title = ttk.Label(main_frame, text="Dota 2 Damage Calculator",
                          font=('Arial', 16, 'bold'))
         title.pack(pady=(0, 20))
-        
+
         # Instructions
-        instructions = ttk.Label(main_frame, 
+        instructions = ttk.Label(main_frame,
                                 text="Enter damage values or expressions (e.g., '66*4' or '100+50'). Calculations update automatically.",
                                 font=('Arial', 9), foreground='#555')
-        instructions.pack(pady=(0, 15))
-        
+        instructions.pack(pady=(0, 10))
+
+        # Column controls
+        column_control_frame = ttk.Frame(main_frame)
+        column_control_frame.pack(fill="x", pady=(0, 15))
+
+        ttk.Label(column_control_frame, text="Comparison Columns:",
+                 font=('Arial', 10, 'bold')).pack(side="left", padx=5)
+
+        ttk.Button(column_control_frame, text="+ Add Column",
+                  command=self.add_column).pack(side="left", padx=5)
+
+        ttk.Button(column_control_frame, text="- Remove Column",
+                  command=self.remove_column).pack(side="left", padx=5)
+
+        self.column_count_var = tk.StringVar(value="(1 column)")
+        ttk.Label(column_control_frame, textvariable=self.column_count_var,
+                 foreground='#666').pack(side="left", padx=10)
+
         # Physical Damage Section
         physical_header = ttk.Frame(main_frame)
         physical_header.pack(fill="x", pady=(10, 5))
-        
-        ttk.Label(physical_header, text="Physical Damage", 
+
+        ttk.Label(physical_header, text="Physical Damage",
                  font=('Arial', 12, 'bold')).pack(side="left")
-        
-        ttk.Button(physical_header, text="+ Add Row", 
+
+        ttk.Button(physical_header, text="+ Add Row",
                   command=self.add_physical_row).pack(side="right", padx=5)
-        
-        # Physical reduction (shared across all physical rows)
-        physical_reduction_frame = ttk.Frame(main_frame)
-        physical_reduction_frame.pack(fill="x", pady=5)
-        
-        ttk.Label(physical_reduction_frame, text="Physical Reduction (%):").pack(side="left", padx=5)
-        self.physical_reduction_var = tk.StringVar(value="0")
-        self.physical_reduction_var.trace('w', lambda *args: self.calculate_all())
-        physical_reduction_entry = ttk.Entry(physical_reduction_frame, 
-                                            textvariable=self.physical_reduction_var, 
-                                            width=10)
-        physical_reduction_entry.pack(side="left", padx=5)
-        
+
+        # Physical reduction/armor toggle section
+        physical_toggle_frame = ttk.Frame(main_frame)
+        physical_toggle_frame.pack(fill="x", pady=5)
+
+        self.physical_toggle_button = ttk.Button(physical_toggle_frame,
+                                                 text="Switch to Reduction",
+                                                 command=self.toggle_armor_mode,
+                                                 width=15)
+        self.physical_toggle_button.pack(side="left", padx=5)
+
+        self.physical_label_var = tk.StringVar(value="Armor:")
+        ttk.Label(physical_toggle_frame, textvariable=self.physical_label_var).pack(side="left", padx=5)
+
+        # Container for physical input entries (dynamic)
+        self.physical_inputs_frame = ttk.Frame(physical_toggle_frame)
+        self.physical_inputs_frame.pack(side="left", fill="x")
+
         # Physical rows container
         self.physical_container = ttk.Frame(main_frame)
         self.physical_container.pack(fill="x", pady=5)
-        
-        # Physical total
-        physical_total_frame = ttk.Frame(main_frame)
-        physical_total_frame.pack(fill="x", pady=(5, 10))
-        self.physical_total_var = tk.StringVar(value="Physical Total: 0.00")
-        ttk.Label(physical_total_frame, textvariable=self.physical_total_var,
-                 font=('Arial', 11, 'bold')).pack(side="right", padx=5)
-        
+
+        # Physical total frame
+        self.physical_total_frame = ttk.Frame(main_frame)
+        self.physical_total_frame.pack(fill="x", pady=(5, 10))
+
         # Separator
         ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=15)
-        
+
         # Magic Damage Section
         magic_header = ttk.Frame(main_frame)
         magic_header.pack(fill="x", pady=(10, 5))
-        
-        ttk.Label(magic_header, text="Magic Damage", 
+
+        ttk.Label(magic_header, text="Magic Damage",
                  font=('Arial', 12, 'bold')).pack(side="left")
-        
-        ttk.Button(magic_header, text="+ Add Row", 
+
+        ttk.Button(magic_header, text="+ Add Row",
                   command=self.add_magic_row).pack(side="right", padx=5)
-        
-        # Magic reduction (shared across all magic rows)
+
+        # Magic reduction frame
         magic_reduction_frame = ttk.Frame(main_frame)
         magic_reduction_frame.pack(fill="x", pady=5)
-        
+
         ttk.Label(magic_reduction_frame, text="Magic Reduction (%):").pack(side="left", padx=5)
-        self.magic_reduction_var = tk.StringVar(value="0")
-        self.magic_reduction_var.trace('w', lambda *args: self.calculate_all())
-        magic_reduction_entry = ttk.Entry(magic_reduction_frame, 
-                                         textvariable=self.magic_reduction_var, 
-                                         width=10)
-        magic_reduction_entry.pack(side="left", padx=5)
-        
+
+        # Container for magic input entries (dynamic)
+        self.magic_inputs_frame = ttk.Frame(magic_reduction_frame)
+        self.magic_inputs_frame.pack(side="left", fill="x")
+
         # Magic rows container
         self.magic_container = ttk.Frame(main_frame)
         self.magic_container.pack(fill="x", pady=5)
-        
-        # Magic total
-        magic_total_frame = ttk.Frame(main_frame)
-        magic_total_frame.pack(fill="x", pady=(5, 10))
-        self.magic_total_var = tk.StringVar(value="Magic Total: 0.00")
-        ttk.Label(magic_total_frame, textvariable=self.magic_total_var,
-                 font=('Arial', 11, 'bold')).pack(side="right", padx=5)
-        
+
+        # Magic total frame
+        self.magic_total_frame = ttk.Frame(main_frame)
+        self.magic_total_frame.pack(fill="x", pady=(5, 10))
+
         # Separator
         ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=15)
-        
+
         # Pure Damage Toggle Button
         pure_toggle_frame = ttk.Frame(main_frame)
         pure_toggle_frame.pack(fill="x", pady=(5, 5))
-        
-        self.pure_toggle_button = ttk.Button(pure_toggle_frame, 
+
+        self.pure_toggle_button = ttk.Button(pure_toggle_frame,
                                              text="▶ Show Pure Damage Section",
                                              command=self.toggle_pure_section)
         self.pure_toggle_button.pack(side="left")
-        
+
         # Pure Damage Section (collapsible)
         self.pure_section_frame = ttk.Frame(main_frame)
-        
-        # Pure Damage Header
+
         pure_header = ttk.Frame(self.pure_section_frame)
         pure_header.pack(fill="x", pady=(10, 5))
-        
-        ttk.Label(pure_header, text="Pure Damage", 
+
+        ttk.Label(pure_header, text="Pure Damage",
                  font=('Arial', 12, 'bold')).pack(side="left")
-        
-        ttk.Label(pure_header, text="(Ignores all resistances)", 
+
+        ttk.Label(pure_header, text="(Ignores all resistances, same for all columns)",
                  font=('Arial', 9, 'italic'), foreground='#666').pack(side="left", padx=(10, 0))
-        
-        ttk.Button(pure_header, text="+ Add Row", 
+
+        ttk.Button(pure_header, text="+ Add Row",
                   command=self.add_pure_row).pack(side="right", padx=5)
-        
-        # Pure rows container
+
         self.pure_container = ttk.Frame(self.pure_section_frame)
         self.pure_container.pack(fill="x", pady=5)
-        
-        # Pure total
+
         pure_total_frame = ttk.Frame(self.pure_section_frame)
         pure_total_frame.pack(fill="x", pady=(5, 10))
-        self.pure_total_var = tk.StringVar(value="Pure Total: 0.00")
+        self.pure_total_var = tk.StringVar(value="Pure: 0.00")
         ttk.Label(pure_total_frame, textvariable=self.pure_total_var,
-                 font=('Arial', 11, 'bold')).pack(side="right", padx=5)
-        
-        # Separator after pure section
+                 font=('Arial', 10, 'bold'), foreground='#e69500').pack(side="left", padx=5)
+
         self.pure_separator = ttk.Separator(main_frame, orient='horizontal')
-        
-        # Don't pack pure_section_frame by default (it's hidden)
-        
-        # Grand Total Section (store reference for positioning)
+
+        # Grand Total Section
         self.total_separator = ttk.Separator(main_frame, orient='horizontal')
         self.total_separator.pack(fill="x", pady=15)
-        
-        total_frame = ttk.Frame(main_frame, relief='solid', borderwidth=2, padding="10")
-        total_frame.pack(fill="x", pady=10)
-        
-        self.grand_total_var = tk.StringVar(value="TOTAL DAMAGE: 0.00")
-        ttk.Label(total_frame, textvariable=self.grand_total_var,
-                 font=('Arial', 14, 'bold'), foreground='#d32f2f').pack()
-        
+
+        self.total_frame = ttk.Frame(main_frame, relief='solid', borderwidth=2, padding="10")
+        self.total_frame.pack(fill="x", pady=10)
+
+        self.grand_totals_container = ttk.Frame(self.total_frame)
+        self.grand_totals_container.pack()
+
         # Clear button
-        ttk.Button(main_frame, text="Clear All", 
+        ttk.Button(main_frame, text="Clear All",
                   command=self.clear_all).pack(pady=10)
-    
+
+    def _add_column_inputs(self):
+        """Add input fields for a new column"""
+        col_idx = len(self.physical_vars)
+        color = COLUMN_COLORS[col_idx % len(COLUMN_COLORS)]
+
+        # Physical input
+        if col_idx > 0:
+            ttk.Label(self.physical_inputs_frame, text="vs", foreground='#666').pack(side="left", padx=3)
+
+        phys_var = tk.StringVar(value="0")
+        phys_var.trace('w', lambda *args: self.calculate_all())
+        phys_entry = ttk.Entry(self.physical_inputs_frame, textvariable=phys_var, width=6)
+        phys_entry.pack(side="left", padx=2)
+        self.physical_vars.append(phys_var)
+        self.physical_entries.append(phys_entry)
+
+        # Physical converted display
+        conv_var = tk.StringVar(value="")
+        conv_label = ttk.Label(self.physical_inputs_frame, textvariable=conv_var,
+                               foreground=color, font=('Arial', 8))
+        conv_label.pack(side="left", padx=(0, 5))
+        self.physical_converted_vars.append(conv_var)
+        self.physical_converted_labels.append(conv_label)
+
+        # Magic input
+        if col_idx > 0:
+            ttk.Label(self.magic_inputs_frame, text="vs", foreground='#666').pack(side="left", padx=3)
+
+        magic_var = tk.StringVar(value="0")
+        magic_var.trace('w', lambda *args: self.calculate_all())
+        magic_entry = ttk.Entry(self.magic_inputs_frame, textvariable=magic_var, width=6)
+        magic_entry.pack(side="left", padx=2)
+        self.magic_vars.append(magic_var)
+        self.magic_entries.append(magic_entry)
+
+        # Physical total label
+        phys_total_var = tk.StringVar(value="0.00")
+        phys_total_label = ttk.Label(self.physical_total_frame, textvariable=phys_total_var,
+                                     font=('Arial', 10, 'bold'), foreground=color)
+        phys_total_label.pack(side="left", padx=5)
+        self.physical_total_vars.append(phys_total_var)
+        self.physical_total_labels.append(phys_total_label)
+
+        # Magic total label
+        magic_total_var = tk.StringVar(value="0.00")
+        magic_total_label = ttk.Label(self.magic_total_frame, textvariable=magic_total_var,
+                                      font=('Arial', 10, 'bold'), foreground=color)
+        magic_total_label.pack(side="left", padx=5)
+        self.magic_total_vars.append(magic_total_var)
+        self.magic_total_labels.append(magic_total_label)
+
+        # Grand total label
+        grand_var = tk.StringVar(value="TOTAL: 0.00")
+        grand_label = ttk.Label(self.grand_totals_container, textvariable=grand_var,
+                               font=('Arial', 12, 'bold'), foreground=color)
+        grand_label.pack(side="left", padx=10)
+        self.grand_total_vars.append(grand_var)
+        self.grand_total_labels.append(grand_label)
+
+    def _remove_column_inputs(self):
+        """Remove input fields for last column"""
+        if len(self.physical_vars) <= 1:
+            return
+
+        # Remove physical
+        self.physical_vars.pop()
+        entry = self.physical_entries.pop()
+        entry.destroy()
+        conv_var = self.physical_converted_vars.pop()
+        conv_label = self.physical_converted_labels.pop()
+        conv_label.destroy()
+
+        # Remove "vs" label if exists
+        children = self.physical_inputs_frame.winfo_children()
+        if children and isinstance(children[-1], ttk.Label):
+            children[-1].destroy()
+
+        # Remove magic
+        self.magic_vars.pop()
+        magic_entry = self.magic_entries.pop()
+        magic_entry.destroy()
+
+        children = self.magic_inputs_frame.winfo_children()
+        if children and isinstance(children[-1], ttk.Label):
+            children[-1].destroy()
+
+        # Remove totals
+        self.physical_total_vars.pop()
+        self.physical_total_labels.pop().destroy()
+
+        self.magic_total_vars.pop()
+        self.magic_total_labels.pop().destroy()
+
+        self.grand_total_vars.pop()
+        self.grand_total_labels.pop().destroy()
+
+    def add_column(self):
+        """Add a new comparison column"""
+        if self.num_columns >= 6:
+            messagebox.showinfo("Info", "Maximum 6 columns allowed")
+            return
+
+        self.num_columns += 1
+        self._add_column_inputs()
+        self._update_all_rows_columns()
+        self.column_count_var.set(f"({self.num_columns} column{'s' if self.num_columns > 1 else ''})")
+        self.calculate_all()
+
+    def remove_column(self):
+        """Remove the last comparison column"""
+        if self.num_columns <= 1:
+            messagebox.showinfo("Info", "Must keep at least one column")
+            return
+
+        self.num_columns -= 1
+        self._remove_column_inputs()
+        self._update_all_rows_columns()
+        self.column_count_var.set(f"({self.num_columns} column{'s' if self.num_columns > 1 else ''})")
+        self.calculate_all()
+
+    def _update_all_rows_columns(self):
+        """Update all rows to match current column count"""
+        for row in self.physical_rows:
+            row.update_columns(self.num_columns)
+        for row in self.magic_rows:
+            row.update_columns(self.num_columns)
+        # Pure rows stay at 1 column
+
     def toggle_pure_section(self):
         """Toggle the visibility of the pure damage section"""
         if self.pure_section_visible:
-            # Hide the section
             self.pure_section_frame.pack_forget()
             self.pure_separator.pack_forget()
             self.pure_toggle_button.config(text="▶ Show Pure Damage Section")
             self.pure_section_visible = False
         else:
-            # Show the section - insert before the total separator
             self.pure_section_frame.pack(fill="x", pady=5, before=self.total_separator)
             self.pure_separator.pack(fill="x", pady=15, before=self.total_separator)
             self.pure_toggle_button.config(text="▼ Hide Pure Damage Section")
             self.pure_section_visible = True
-    
+
+    def toggle_armor_mode(self):
+        """Toggle between Armor and Physical Reduction mode"""
+        self.physical_armor_mode = not self.physical_armor_mode
+
+        if self.physical_armor_mode:
+            self.physical_label_var.set("Armor:")
+            self.physical_toggle_button.config(text="Switch to Reduction")
+            # Convert all reduction values to armor
+            for var in self.physical_vars:
+                reduction = float(var.get() or 0)
+                armor = self.reduction_to_armor(reduction)
+                var.set(f"{armor:.1f}")
+        else:
+            self.physical_label_var.set("Reduction (%):")
+            self.physical_toggle_button.config(text="Switch to Armor")
+            # Convert all armor values to reduction
+            for var in self.physical_vars:
+                armor = float(var.get() or 0)
+                reduction = self.armor_to_reduction(armor)
+                var.set(f"{reduction:.1f}")
+
+        self.update_physical_display()
+
+    def armor_to_reduction(self, armor):
+        """Convert armor value to physical reduction percentage"""
+        return (0.06 * armor) / (1 + 0.06 * armor) * 100
+
+    def reduction_to_armor(self, reduction):
+        """Convert reduction percentage to armor value"""
+        if reduction >= 100:
+            return 999
+        return reduction / (0.06 * (100 - reduction))
+
+    def update_physical_display(self):
+        """Update the physical reduction display based on current mode"""
+        try:
+            for i, var in enumerate(self.physical_vars):
+                value = float(var.get() or 0)
+                if self.physical_armor_mode:
+                    reduction = self.armor_to_reduction(value)
+                    self.physical_converted_vars[i].set(f"({reduction:.0f}%)")
+                else:
+                    self.physical_converted_vars[i].set("")
+        except (ValueError, ZeroDivisionError):
+            for conv_var in self.physical_converted_vars:
+                conv_var.set("")
+
     def add_physical_row(self):
         """Add a new physical damage row"""
         self.physical_counter += 1
         row = DamageRow(self.physical_container, self.physical_counter, "Physical",
-                       self.calculate_all, self.delete_physical_row)
+                       self.calculate_all, self.delete_physical_row,
+                       num_columns=self.num_columns, is_pure=False)
         row.pack(pady=2, fill="x")
         self.physical_rows.append(row)
         self.calculate_all()
-    
+
     def add_magic_row(self):
         """Add a new magic damage row"""
         self.magic_counter += 1
         row = DamageRow(self.magic_container, self.magic_counter, "Magic",
-                       self.calculate_all, self.delete_magic_row)
+                       self.calculate_all, self.delete_magic_row,
+                       num_columns=self.num_columns, is_pure=False)
         row.pack(pady=2, fill="x")
         self.magic_rows.append(row)
         self.calculate_all()
-    
+
     def add_pure_row(self):
         """Add a new pure damage row"""
         self.pure_counter += 1
         row = DamageRow(self.pure_container, self.pure_counter, "Pure",
-                       self.calculate_all, self.delete_pure_row)
+                       self.calculate_all, self.delete_pure_row,
+                       num_columns=1, is_pure=True)
         row.pack(pady=2, fill="x")
         self.pure_rows.append(row)
         self.calculate_all()
-    
+
     def delete_physical_row(self, row):
         """Delete a physical damage row"""
         if len(self.physical_rows) > 1:
@@ -321,7 +573,7 @@ class DotaCalculator:
             self.calculate_all()
         else:
             messagebox.showinfo("Info", "Must keep at least one physical damage row")
-    
+
     def delete_magic_row(self, row):
         """Delete a magic damage row"""
         if len(self.magic_rows) > 1:
@@ -330,7 +582,7 @@ class DotaCalculator:
             self.calculate_all()
         else:
             messagebox.showinfo("Info", "Must keep at least one magic damage row")
-    
+
     def delete_pure_row(self, row):
         """Delete a pure damage row"""
         if len(self.pure_rows) > 1:
@@ -339,64 +591,93 @@ class DotaCalculator:
             self.calculate_all()
         else:
             messagebox.showinfo("Info", "Must keep at least one pure damage row")
-    
+
     def calculate_all(self):
         """Calculate all damage totals automatically"""
         try:
-            # Get reduction percentages
-            physical_reduction = float(self.physical_reduction_var.get())
-            magic_reduction = float(self.magic_reduction_var.get())
-            
-            # Validate percentages
-            if physical_reduction < 0 or physical_reduction > 100:
-                physical_reduction = 0
-            if magic_reduction < 0 or magic_reduction > 100:
-                magic_reduction = 0
-            
-            # Calculate physical total
-            physical_total = sum(row.get_damage(physical_reduction) for row in self.physical_rows)
-            self.physical_total_var.set(f"Physical Total: {physical_total:.2f}")
-            
-            # Calculate magic total
-            magic_total = sum(row.get_damage(magic_reduction) for row in self.magic_rows)
-            self.magic_total_var.set(f"Magic Total: {magic_total:.2f}")
-            
-            # Calculate pure total (0% reduction - pure damage ignores resistances)
-            pure_total = sum(row.get_damage(0) for row in self.pure_rows)
-            self.pure_total_var.set(f"Pure Total: {pure_total:.2f}")
-            
-            # Calculate grand total
-            grand_total = physical_total + magic_total + pure_total
-            self.grand_total_var.set(f"TOTAL DAMAGE: {grand_total:.2f}")
-            
+            # Get physical reductions for all columns
+            physical_reductions = []
+            for var in self.physical_vars:
+                value = float(var.get() or 0)
+                if self.physical_armor_mode:
+                    reduction = self.armor_to_reduction(value)
+                else:
+                    reduction = value
+                reduction = max(0, min(100, reduction))
+                physical_reductions.append(reduction)
+
+            # Get magic reductions for all columns
+            magic_reductions = []
+            for var in self.magic_vars:
+                value = float(var.get() or 0)
+                value = max(0, min(100, value))
+                magic_reductions.append(value)
+
+            # Calculate physical totals
+            physical_totals = [0] * self.num_columns
+            for row in self.physical_rows:
+                results = row.get_damage(physical_reductions)
+                for i, r in enumerate(results):
+                    if i < self.num_columns:
+                        physical_totals[i] += r
+
+            for i, total in enumerate(physical_totals):
+                prefix = "Phys: " if i == 0 else "vs "
+                self.physical_total_vars[i].set(f"{prefix}{total:.2f}")
+
+            # Calculate magic totals
+            magic_totals = [0] * self.num_columns
+            for row in self.magic_rows:
+                results = row.get_damage(magic_reductions)
+                for i, r in enumerate(results):
+                    if i < self.num_columns:
+                        magic_totals[i] += r
+
+            for i, total in enumerate(magic_totals):
+                prefix = "Magic: " if i == 0 else "vs "
+                self.magic_total_vars[i].set(f"{prefix}{total:.2f}")
+
+            # Calculate pure total (same for all columns)
+            pure_total = 0
+            for row in self.pure_rows:
+                results = row.get_damage([0])
+                pure_total += results[0]
+            self.pure_total_var.set(f"Pure: {pure_total:.2f}")
+
+            # Calculate grand totals
+            for i in range(self.num_columns):
+                grand = physical_totals[i] + magic_totals[i] + pure_total
+                prefix = "TOTAL: " if i == 0 else "vs "
+                self.grand_total_vars[i].set(f"{prefix}{grand:.2f}")
+
+            self.update_physical_display()
+
         except ValueError:
             pass
-    
+
     def clear_all(self):
         """Clear all rows and reset"""
-        # Clear physical rows
         for row in self.physical_rows[:]:
             row.destroy()
         self.physical_rows.clear()
         self.physical_counter = 0
-        
-        # Clear magic rows
+
         for row in self.magic_rows[:]:
             row.destroy()
         self.magic_rows.clear()
         self.magic_counter = 0
-        
-        # Clear pure rows
+
         for row in self.pure_rows[:]:
             row.destroy()
         self.pure_rows.clear()
         self.pure_counter = 0
-        
-        # Reset reductions
-        self.physical_reduction_var.set("0")
-        self.magic_reduction_var.set("0")
-        
-        # Add initial rows back
+
+        # Reset all reduction values
+        for var in self.physical_vars:
+            var.set("0")
+        for var in self.magic_vars:
+            var.set("0")
+
         self.add_physical_row()
         self.add_magic_row()
         self.add_pure_row()

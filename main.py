@@ -35,6 +35,12 @@ class DamageRow:
         damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=12)
         damage_entry.grid(row=0, column=2, padx=5)
 
+        # Base damage label (shows evaluated expression)
+        self.base_damage_var = tk.StringVar(value="")
+        self.base_damage_label = ttk.Label(self.frame, textvariable=self.base_damage_var,
+                                           font=('Arial', 9), foreground='#666', width=8)
+        self.base_damage_label.grid(row=0, column=3, padx=2)
+
         # Result labels (dynamic)
         self.result_vars = []
         self.result_labels = []
@@ -61,14 +67,14 @@ class DamageRow:
             color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
             result_label = ttk.Label(self.frame, textvariable=result_var,
                                     font=('Arial', 9, 'bold'), foreground=color, width=10)
-            result_label.grid(row=0, column=3 + i, padx=3)
+            result_label.grid(row=0, column=4 + i, padx=3)
             self.result_vars.append(result_var)
             self.result_labels.append(result_label)
 
     def _position_delete_button(self):
         """Position delete button after all result columns"""
         cols_to_show = 1 if self.is_pure else self.num_columns
-        self.delete_btn.grid(row=0, column=3 + cols_to_show, padx=5)
+        self.delete_btn.grid(row=0, column=4 + cols_to_show, padx=5)
 
     def update_columns(self, num_columns):
         """Update the number of result columns"""
@@ -87,10 +93,15 @@ class DamageRow:
         except:
             return None
 
+    def _is_expression(self, s):
+        """Check if string contains operators (is an expression)"""
+        return any(op in s for op in ['+', '-', '*', '/']) and not s.strip().startswith('-')
+
     def calculate(self, reductions):
         """Calculate damage for this row with given reductions (list)"""
         # Check if row is disabled
         if not self.enabled_var.get():
+            self.base_damage_var.set("")
             for i, var in enumerate(self.result_vars):
                 var.set("= (off)")
                 self.result_labels[i].configure(foreground='#999')
@@ -106,9 +117,16 @@ class DamageRow:
             damage = self.safe_eval(damage_str)
 
             if damage is None:
+                self.base_damage_var.set("")
                 for var in self.result_vars:
                     var.set("= Invalid")
                 return [0] * len(reductions)
+
+            # Show base damage if input is an expression
+            if self._is_expression(damage_str):
+                self.base_damage_var.set(f"({damage:.0f})")
+            else:
+                self.base_damage_var.set("")
 
             results = []
             for i, reduction in enumerate(reductions):
@@ -120,6 +138,7 @@ class DamageRow:
             return results
 
         except ValueError:
+            self.base_damage_var.set("")
             for var in self.result_vars:
                 var.set("= Invalid")
             return [0] * len(reductions)
@@ -497,16 +516,15 @@ class DotaCalculator:
             self.physical_toggle_button.config(text="Switch to Reduction")
             # Convert all reduction values to armor
             for var in self.physical_vars:
-                reduction = float(var.get() or 0)
+                reduction = self.eval_reduction_expression(var.get() or "0")
                 armor = self.reduction_to_armor(reduction)
                 var.set(f"{armor:.1f}")
         else:
             self.physical_label_var.set("Reduction (%):")
             self.physical_toggle_button.config(text="Switch to Armor")
-            # Convert all armor values to reduction
+            # Convert all armor values to reduction (evaluate expression first)
             for var in self.physical_vars:
-                armor = float(var.get() or 0)
-                reduction = self.armor_to_reduction(armor)
+                reduction, _ = self.eval_armor_expression(var.get() or "0")
                 var.set(f"{reduction:.1f}")
 
         self.update_physical_display()
@@ -521,19 +539,100 @@ class DotaCalculator:
             return 999
         return reduction / (0.06 * (100 - reduction))
 
+    def safe_eval(self, expression):
+        """Safely evaluate mathematical expressions"""
+        try:
+            expression = expression.strip()
+            if not expression:
+                return 0
+            if not re.match(r'^[\d+\-*/().\s]+$', expression):
+                return None
+            result = eval(expression, {"__builtins__": {}}, {})
+            return float(result)
+        except:
+            return None
+
+    def eval_armor_expression(self, expr_str):
+        """
+        Evaluate armor expression with special handling:
+        - Addition/subtraction: operate on armor values
+        - Multiplication/division: operate on reduction values
+        Returns (reduction_value, display_armor_value)
+        """
+        expr_str = expr_str.strip()
+        if not expr_str:
+            return 0, 0
+
+        # Check if it's a simple number
+        try:
+            armor = float(expr_str)
+            return self.armor_to_reduction(armor), armor
+        except ValueError:
+            pass
+
+        # Check for multiplication/division at the END of expression: (expr) * number or expr * number
+        # This handles cases like "(5+2)*1.6" or "10+5*1.2" - we find the LAST * or / with a number after it
+        mult_match = re.match(r'^(.+)\*\s*([\d.]+)$', expr_str)
+        if mult_match:
+            left_expr = mult_match.group(1).strip()
+            multiplier = float(mult_match.group(2))
+            # Evaluate left side as armor (recursively handles addition in left side)
+            left_armor = self.safe_eval(left_expr)
+            if left_armor is not None:
+                base_reduction = self.armor_to_reduction(left_armor)
+                final_reduction = base_reduction * multiplier
+                return final_reduction, None  # No simple armor equivalent
+
+        div_match = re.match(r'^(.+)/\s*([\d.]+)$', expr_str)
+        if div_match:
+            left_expr = div_match.group(1).strip()
+            divisor = float(div_match.group(2))
+            if divisor != 0:
+                left_armor = self.safe_eval(left_expr)
+                if left_armor is not None:
+                    base_reduction = self.armor_to_reduction(left_armor)
+                    final_reduction = base_reduction / divisor
+                    return final_reduction, None
+
+        # For addition/subtraction or other expressions, evaluate as armor
+        result = self.safe_eval(expr_str)
+        if result is not None:
+            return self.armor_to_reduction(result), result
+
+        return 0, 0
+
+    def eval_reduction_expression(self, expr_str):
+        """Evaluate reduction expression (simple eval)"""
+        result = self.safe_eval(expr_str)
+        return result if result is not None else 0
+
     def update_physical_display(self):
         """Update the physical reduction display based on current mode"""
         try:
             for i, var in enumerate(self.physical_vars):
-                value = float(var.get() or 0)
+                expr_str = var.get() or "0"
                 if self.physical_armor_mode:
-                    reduction = self.armor_to_reduction(value)
-                    self.physical_converted_vars[i].set(f"({reduction:.0f}%)")
+                    reduction, armor = self.eval_armor_expression(expr_str)
+                    reduction = max(0, min(100, reduction))
+                    if armor is not None and self._has_operators(expr_str):
+                        # Show evaluated armor and reduction
+                        self.physical_converted_vars[i].set(f"={armor:.0f} ({reduction:.0f}%)")
+                    else:
+                        self.physical_converted_vars[i].set(f"({reduction:.0f}%)")
                 else:
-                    self.physical_converted_vars[i].set("")
+                    # Reduction mode - show evaluated value if expression
+                    reduction = self.eval_reduction_expression(expr_str)
+                    if self._has_operators(expr_str):
+                        self.physical_converted_vars[i].set(f"={reduction:.1f}%")
+                    else:
+                        self.physical_converted_vars[i].set("")
         except (ValueError, ZeroDivisionError):
             for conv_var in self.physical_converted_vars:
                 conv_var.set("")
+
+    def _has_operators(self, s):
+        """Check if string contains math operators"""
+        return any(op in s for op in ['+', '*', '/']) or (s.count('-') > 1 or (s.count('-') == 1 and not s.strip().startswith('-')))
 
     def add_physical_row(self):
         """Add a new physical damage row"""
@@ -598,20 +697,21 @@ class DotaCalculator:
             # Get physical reductions for all columns
             physical_reductions = []
             for var in self.physical_vars:
-                value = float(var.get() or 0)
+                expr_str = var.get() or "0"
                 if self.physical_armor_mode:
-                    reduction = self.armor_to_reduction(value)
+                    reduction, _ = self.eval_armor_expression(expr_str)
                 else:
-                    reduction = value
+                    reduction = self.eval_reduction_expression(expr_str)
                 reduction = max(0, min(100, reduction))
                 physical_reductions.append(reduction)
 
             # Get magic reductions for all columns
             magic_reductions = []
             for var in self.magic_vars:
-                value = float(var.get() or 0)
-                value = max(0, min(100, value))
-                magic_reductions.append(value)
+                expr_str = var.get() or "0"
+                reduction = self.eval_reduction_expression(expr_str)
+                reduction = max(0, min(100, reduction))
+                magic_reductions.append(reduction)
 
             # Calculate physical totals
             physical_totals = [0] * self.num_columns

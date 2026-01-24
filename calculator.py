@@ -7,6 +7,8 @@ from utils import (
     has_operators, eval_armor_expression, eval_reduction_expression
 )
 from damage_row import DamageRow
+from targets_section import TargetsSection
+from attack_mode import AttackModeSection
 
 
 class DotaCalculator:
@@ -50,6 +52,12 @@ class DotaCalculator:
         self.hp_entries = []
         self.delta_vars = []
         self.delta_labels = []
+
+        # Variables
+        self.variable_rows = []  # List of variable row widgets
+
+        # Column change subscribers
+        self.column_change_subscribers = []
 
         self.create_widgets()
         self._add_column_inputs()
@@ -106,6 +114,22 @@ class DotaCalculator:
         self.column_count_var = tk.StringVar(value="(1 column)")
         ttk.Label(column_control_frame, textvariable=self.column_count_var,
                   foreground='#666').pack(side="left", padx=10)
+
+        # Variables Section
+        variables_header = ttk.Frame(main_frame)
+        variables_header.pack(fill="x", pady=(10, 5))
+
+        ttk.Label(variables_header, text="Variables",
+                  font=('Arial', 12, 'bold')).pack(side="left")
+
+        ttk.Button(variables_header, text="+ Add Variable",
+                   command=self.add_variable).pack(side="right", padx=5)
+
+        self.variables_container = ttk.Frame(main_frame)
+        self.variables_container.pack(fill="x", pady=5)
+
+        # Separator
+        ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=10)
 
         # Physical Damage Section
         physical_header = ttk.Frame(main_frame)
@@ -210,6 +234,29 @@ class DotaCalculator:
                   font=('Arial', 10, 'bold'), foreground='#e69500').pack(side="left", padx=5)
 
         self.pure_separator = ttk.Separator(main_frame, orient='horizontal')
+
+        # Targets Section (above Attack Mode)
+        self.targets_section = TargetsSection(
+            main_frame,
+            get_variables=self.get_variables,
+            get_num_columns=lambda: self.num_columns,
+            on_columns_change_subscribe=self.subscribe_to_column_changes
+        )
+        self.targets_section.pack_toggle(fill="x", pady=(5, 5))
+
+        # Attack Mode Section
+        self.attack_mode = AttackModeSection(
+            main_frame,
+            get_variables=self.get_variables,
+            get_num_columns=lambda: self.num_columns,
+            on_columns_change_subscribe=self.subscribe_to_column_changes
+        )
+        self.attack_mode.pack_toggle(fill="x", pady=(5, 5))
+
+        # Connect attack mode results to target section
+        self.attack_mode.set_on_attack_results_changed(self.targets_section.set_attack_results)
+
+        self.attack_mode_separator = ttk.Separator(main_frame, orient='horizontal')
 
         # Grand Total Section
         self.total_separator = ttk.Separator(main_frame, orient='horizontal')
@@ -375,6 +422,7 @@ class DotaCalculator:
         self.num_columns += 1
         self._add_column_inputs()
         self._update_all_rows_columns()
+        self._notify_column_change()
         self.column_count_var.set(f"({self.num_columns} column{'s' if self.num_columns > 1 else ''})")
         self.calculate_all()
 
@@ -387,8 +435,18 @@ class DotaCalculator:
         self.num_columns -= 1
         self._remove_column_inputs()
         self._update_all_rows_columns()
+        self._notify_column_change()
         self.column_count_var.set(f"({self.num_columns} column{'s' if self.num_columns > 1 else ''})")
         self.calculate_all()
+
+    def subscribe_to_column_changes(self, callback):
+        """Subscribe to column count changes"""
+        self.column_change_subscribers.append(callback)
+
+    def _notify_column_change(self):
+        """Notify all subscribers of column count change"""
+        for callback in self.column_change_subscribers:
+            callback(self.num_columns)
 
     def _update_all_rows_columns(self):
         """Update all rows to match current column count"""
@@ -414,13 +472,14 @@ class DotaCalculator:
     def toggle_armor_mode(self):
         """Toggle between Armor and Physical Reduction mode"""
         self.physical_armor_mode = not self.physical_armor_mode
+        variables = self.get_variables()
 
         if self.physical_armor_mode:
             self.physical_label_var.set("Armor:")
             self.physical_toggle_button.config(text="Switch to Reduction")
             # Convert all reduction values to armor
             for var in self.physical_vars:
-                reduction = eval_reduction_expression(var.get() or "0")
+                reduction = eval_reduction_expression(var.get() or "0", variables)
                 armor = reduction_to_armor(reduction)
                 var.set(f"{armor:.1f}")
         else:
@@ -428,7 +487,7 @@ class DotaCalculator:
             self.physical_toggle_button.config(text="Switch to Armor")
             # Convert all armor values to reduction
             for var in self.physical_vars:
-                reduction, _ = eval_armor_expression(var.get() or "0")
+                reduction, _ = eval_armor_expression(var.get() or "0", variables)
                 var.set(f"{reduction:.1f}")
 
         self.update_physical_display()
@@ -436,17 +495,18 @@ class DotaCalculator:
     def update_physical_display(self):
         """Update the physical reduction display based on current mode"""
         try:
+            variables = self.get_variables()
             for i, var in enumerate(self.physical_vars):
                 expr_str = var.get() or "0"
                 if self.physical_armor_mode:
-                    reduction, armor = eval_armor_expression(expr_str)
+                    reduction, armor = eval_armor_expression(expr_str, variables)
                     reduction = max(0, min(100, reduction))
                     if armor is not None and has_operators(expr_str):
                         self.physical_converted_vars[i].set(f"={armor:.0f} ({reduction:.0f}%)")
                     else:
                         self.physical_converted_vars[i].set(f"({reduction:.0f}%)")
                 else:
-                    reduction = eval_reduction_expression(expr_str)
+                    reduction = eval_reduction_expression(expr_str, variables)
                     if has_operators(expr_str):
                         self.physical_converted_vars[i].set(f"={reduction:.1f}%")
                     else:
@@ -455,12 +515,100 @@ class DotaCalculator:
             for conv_var in self.physical_converted_vars:
                 conv_var.set("")
 
+    def get_variables(self):
+        """Get dictionary of enabled variables"""
+        variables = {}
+        for var_row in self.variable_rows:
+            if var_row['enabled_var'].get():
+                name = var_row['name_var'].get().strip()
+                value_str = var_row['value_var'].get().strip()
+                if name and value_str:
+                    # Evaluate the value (can be an expression using other variables)
+                    value = safe_eval(value_str, variables)
+                    if value is not None:
+                        variables[name] = value
+        return variables
+
+    def add_variable(self):
+        """Add a new variable row"""
+        var_frame = ttk.Frame(self.variables_container)
+        var_frame.pack(fill="x", pady=2)
+
+        # Enabled checkbox
+        enabled_var = tk.BooleanVar(value=True)
+        enabled_var.trace('w', lambda *args: self.calculate_all())
+        enabled_cb = ttk.Checkbutton(var_frame, variable=enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Variable name
+        name_var = tk.StringVar(value="")
+        name_entry = ttk.Entry(var_frame, textvariable=name_var, width=10)
+        name_entry.pack(side="left", padx=2)
+        name_var.trace('w', lambda *args: self.calculate_all())
+
+        ttk.Label(var_frame, text="=").pack(side="left", padx=5)
+
+        # Variable value
+        value_var = tk.StringVar(value="0")
+        value_entry = ttk.Entry(var_frame, textvariable=value_var, width=15)
+        value_entry.pack(side="left", padx=2)
+        value_var.trace('w', lambda *args: self.calculate_all())
+
+        # Evaluated display
+        eval_var = tk.StringVar(value="")
+        eval_label = ttk.Label(var_frame, textvariable=eval_var, foreground='#666',
+                               font=('Arial', 9))
+        eval_label.pack(side="left", padx=5)
+
+        # Store reference for deletion
+        var_row = {
+            'frame': var_frame,
+            'enabled_var': enabled_var,
+            'name_var': name_var,
+            'value_var': value_var,
+            'eval_var': eval_var
+        }
+
+        # Delete button
+        delete_btn = ttk.Button(var_frame, text="✕", width=3,
+                                command=lambda: self.delete_variable(var_row))
+        delete_btn.pack(side="left", padx=5)
+
+        self.variable_rows.append(var_row)
+        self.calculate_all()
+
+    def delete_variable(self, var_row):
+        """Delete a variable row"""
+        var_row['frame'].destroy()
+        self.variable_rows.remove(var_row)
+        self.calculate_all()
+
+    def update_variable_displays(self):
+        """Update the evaluated value displays for variables"""
+        variables = {}
+        for var_row in self.variable_rows:
+            name = var_row['name_var'].get().strip()
+            value_str = var_row['value_var'].get().strip()
+            if var_row['enabled_var'].get() and name and value_str:
+                value = safe_eval(value_str, variables)
+                if value is not None:
+                    variables[name] = value
+                    var_row['eval_var'].set(f"→ {value:.2f}")
+                else:
+                    var_row['eval_var'].set("→ Invalid")
+            else:
+                if not var_row['enabled_var'].get():
+                    var_row['eval_var'].set("(disabled)")
+                else:
+                    var_row['eval_var'].set("")
+
     def add_physical_row(self):
         """Add a new physical damage row"""
         self.physical_counter += 1
         row = DamageRow(self.physical_container, self.physical_counter, "Physical",
                         self.calculate_all, self.delete_physical_row,
-                        num_columns=self.num_columns, is_pure=False)
+                        num_columns=self.num_columns, is_pure=False,
+                        get_variables=self.get_variables)
         row.pack(pady=2, fill="x")
         self.physical_rows.append(row)
         self.calculate_all()
@@ -470,7 +618,8 @@ class DotaCalculator:
         self.magic_counter += 1
         row = DamageRow(self.magic_container, self.magic_counter, "Magic",
                         self.calculate_all, self.delete_magic_row,
-                        num_columns=self.num_columns, is_pure=False)
+                        num_columns=self.num_columns, is_pure=False,
+                        get_variables=self.get_variables)
         row.pack(pady=2, fill="x")
         self.magic_rows.append(row)
         self.calculate_all()
@@ -480,7 +629,8 @@ class DotaCalculator:
         self.pure_counter += 1
         row = DamageRow(self.pure_container, self.pure_counter, "Pure",
                         self.calculate_all, self.delete_pure_row,
-                        num_columns=1, is_pure=True)
+                        num_columns=1, is_pure=True,
+                        get_variables=self.get_variables)
         row.pack(pady=2, fill="x")
         self.pure_rows.append(row)
         self.calculate_all()
@@ -515,14 +665,20 @@ class DotaCalculator:
     def calculate_all(self):
         """Calculate all damage totals automatically"""
         try:
+            # Update variable displays first
+            self.update_variable_displays()
+
+            # Get variables for use in expressions
+            variables = self.get_variables()
+
             # Get physical reductions for all columns
             physical_reductions = []
             for var in self.physical_vars:
                 expr_str = var.get() or "0"
                 if self.physical_armor_mode:
-                    reduction, _ = eval_armor_expression(expr_str)
+                    reduction, _ = eval_armor_expression(expr_str, variables)
                 else:
-                    reduction = eval_reduction_expression(expr_str)
+                    reduction = eval_reduction_expression(expr_str, variables)
                 reduction = max(0, min(100, reduction))
                 physical_reductions.append(reduction)
 
@@ -530,7 +686,7 @@ class DotaCalculator:
             magic_reductions = []
             for var in self.magic_vars:
                 expr_str = var.get() or "0"
-                reduction = eval_reduction_expression(expr_str)
+                reduction = eval_reduction_expression(expr_str, variables)
                 reduction = max(0, min(100, reduction))
                 magic_reductions.append(reduction)
 
@@ -575,7 +731,7 @@ class DotaCalculator:
                 if i < len(self.hp_vars):
                     hp_str = self.hp_vars[i].get().strip()
                     if hp_str:
-                        hp = safe_eval(hp_str)
+                        hp = safe_eval(hp_str, variables)
                         if hp is not None:
                             remaining = hp - grand
                             color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
@@ -591,6 +747,12 @@ class DotaCalculator:
                         self.delta_vars[i].set("")
 
             self.update_physical_display()
+
+            # Update attack mode calculations
+            self.attack_mode.calculate()
+
+            # Update target mode calculations
+            self.targets_section.calculate()
 
         except ValueError:
             pass
@@ -619,6 +781,15 @@ class DotaCalculator:
             var.set("0")
         for var in self.hp_vars:
             var.set("")
+
+        # Clear all variables
+        for var_row in self.variable_rows[:]:
+            var_row['frame'].destroy()
+        self.variable_rows.clear()
+
+        # Clear attack mode and target mode
+        self.attack_mode.clear()
+        self.targets_section.clear()
 
         self.add_physical_row()
         self.add_magic_row()

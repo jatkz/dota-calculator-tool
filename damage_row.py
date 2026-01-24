@@ -8,7 +8,7 @@ from utils import safe_eval, is_expression
 class DamageRow:
     """Represents a single damage calculation row"""
 
-    def __init__(self, parent, row_num, damage_type, on_change_callback, on_delete_callback, num_columns=1, is_pure=False):
+    def __init__(self, parent, row_num, damage_type, on_change_callback, on_delete_callback, num_columns=1, is_pure=False, get_variables=None):
         self.parent = parent
         self.row_num = row_num
         self.damage_type = damage_type
@@ -17,6 +17,7 @@ class DamageRow:
         self.is_pure = is_pure
         self.num_columns = num_columns
         self.row_mode = "basic"  # "basic" or "dps"
+        self.get_variables = get_variables  # Callback to get current variables dict
 
         self.frame = ttk.Frame(parent)
 
@@ -157,9 +158,14 @@ class DamageRow:
                 self.result_labels[i].configure(foreground='#999')
             return [0] * len(reductions)
 
+        # Get variables if callback is provided
+        variables = None
+        if self.get_variables:
+            variables = self.get_variables()
+
         try:
             damage_str = self.damage_var.get()
-            damage = safe_eval(damage_str)
+            damage = safe_eval(damage_str, variables)
 
             if damage is None:
                 self.base_damage_var.set("")
@@ -174,9 +180,9 @@ class DamageRow:
                 as_str = self.attack_speed_var.get()
                 bat_str = self.bat_var.get()
                 sec_str = self.seconds_var.get()
-                as_val = safe_eval(as_str)
-                bat_val = safe_eval(bat_str)
-                sec_val = safe_eval(sec_str)
+                as_val = safe_eval(as_str, variables)
+                bat_val = safe_eval(bat_str, variables)
+                sec_val = safe_eval(sec_str, variables)
                 if as_val is not None and bat_val is not None and bat_val > 0:
                     attack_rate = as_val / (100 * bat_val)
                 else:

@@ -1,12 +1,22 @@
 import re
 
 
-def safe_eval(expression):
-    """Safely evaluate mathematical expressions"""
+def safe_eval(expression, variables=None):
+    """Safely evaluate mathematical expressions with optional variables"""
     try:
         expression = expression.strip()
         if not expression:
             return 0
+
+        # If we have variables, substitute them first
+        if variables:
+            # Sort by length (longest first) to avoid partial replacements
+            for name in sorted(variables.keys(), key=len, reverse=True):
+                value = variables[name]
+                # Replace variable name with its value (as string)
+                expression = re.sub(r'\b' + re.escape(name) + r'\b', str(value), expression)
+
+        # Now check if expression is valid (numbers and operators only)
         if not re.match(r'^[\d+\-*/().\s]+$', expression):
             return None
         result = eval(expression, {"__builtins__": {}}, {})
@@ -38,7 +48,7 @@ def is_expression(s):
     return any(op in s for op in ['+', '-', '*', '/']) and not s.strip().startswith('-')
 
 
-def eval_armor_expression(expr_str):
+def eval_armor_expression(expr_str, variables=None):
     """
     Evaluate armor expression with special handling:
     - Addition/subtraction: operate on armor values
@@ -61,7 +71,7 @@ def eval_armor_expression(expr_str):
     if mult_match:
         left_expr = mult_match.group(1).strip()
         multiplier = float(mult_match.group(2))
-        left_armor = safe_eval(left_expr)
+        left_armor = safe_eval(left_expr, variables)
         if left_armor is not None:
             base_reduction = armor_to_reduction(left_armor)
             final_reduction = base_reduction * multiplier
@@ -72,21 +82,21 @@ def eval_armor_expression(expr_str):
         left_expr = div_match.group(1).strip()
         divisor = float(div_match.group(2))
         if divisor != 0:
-            left_armor = safe_eval(left_expr)
+            left_armor = safe_eval(left_expr, variables)
             if left_armor is not None:
                 base_reduction = armor_to_reduction(left_armor)
                 final_reduction = base_reduction / divisor
                 return final_reduction, None
 
     # For addition/subtraction or other expressions, evaluate as armor
-    result = safe_eval(expr_str)
+    result = safe_eval(expr_str, variables)
     if result is not None:
         return armor_to_reduction(result), result
 
     return 0, 0
 
 
-def eval_reduction_expression(expr_str):
+def eval_reduction_expression(expr_str, variables=None):
     """Evaluate reduction expression (simple eval)"""
-    result = safe_eval(expr_str)
+    result = safe_eval(expr_str, variables)
     return result if result is not None else 0

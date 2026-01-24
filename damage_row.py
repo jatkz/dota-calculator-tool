@@ -41,7 +41,7 @@ class DamageRow:
         damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=10)
         damage_entry.grid(row=0, column=3, padx=2)
 
-        # Attack speed and BAT inputs (for DPS mode, hidden by default)
+        # Attack speed, BAT, and seconds inputs (for DPS mode, hidden by default)
         self.as_frame = ttk.Frame(self.frame)
         ttk.Label(self.as_frame, text="AS:", font=('Arial', 8)).pack(side="left")
         self.attack_speed_var = tk.StringVar(value=str(DEFAULT_ATTACK_SPEED))
@@ -53,6 +53,11 @@ class DamageRow:
         self.bat_var.trace('w', lambda *args: self.on_change())
         self.bat_entry = ttk.Entry(self.as_frame, textvariable=self.bat_var, width=4)
         self.bat_entry.pack(side="left", padx=1)
+        ttk.Label(self.as_frame, text="Sec:", font=('Arial', 8)).pack(side="left", padx=(3, 0))
+        self.seconds_var = tk.StringVar(value="1")
+        self.seconds_var.trace('w', lambda *args: self.on_change())
+        self.seconds_entry = ttk.Entry(self.as_frame, textvariable=self.seconds_var, width=3)
+        self.seconds_entry.pack(side="left", padx=1)
         # Don't grid as_frame yet - it's hidden by default
 
         # Base damage label (shows evaluated expression)
@@ -164,15 +169,22 @@ class DamageRow:
 
             # Get attack rate for DPS mode: r = AS / (100 × BAT)
             attack_rate = 1.0
+            total_seconds = 1.0
             if self.row_mode == "dps":
                 as_str = self.attack_speed_var.get()
                 bat_str = self.bat_var.get()
+                sec_str = self.seconds_var.get()
                 as_val = safe_eval(as_str)
                 bat_val = safe_eval(bat_str)
+                sec_val = safe_eval(sec_str)
                 if as_val is not None and bat_val is not None and bat_val > 0:
                     attack_rate = as_val / (100 * bat_val)
                 else:
                     attack_rate = 1.0
+                if sec_val is not None and sec_val > 0:
+                    total_seconds = sec_val
+                else:
+                    total_seconds = 1.0
 
             # Show base damage/dps info if input is an expression
             if is_expression(damage_str):
@@ -195,9 +207,9 @@ class DamageRow:
 
                 if col_enabled:
                     final_damage = damage * (1 - reduction / 100)
-                    # Apply attack rate for DPS mode: DPS = damage * attack_rate
+                    # Apply attack rate and seconds for DPS mode: total = damage * attack_rate * seconds
                     if self.row_mode == "dps":
-                        final_damage = final_damage * attack_rate
+                        final_damage = final_damage * attack_rate * total_seconds
                     if i < len(self.result_vars):
                         color = PURE_DAMAGE_COLOR if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
                         self.result_labels[i].configure(foreground=color)

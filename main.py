@@ -17,6 +17,7 @@ class DamageRow:
         self.on_delete = on_delete_callback
         self.is_pure = is_pure
         self.num_columns = num_columns
+        self.row_mode = "basic"  # "basic" or "dps"
 
         self.frame = ttk.Frame(parent)
 
@@ -26,20 +27,40 @@ class DamageRow:
         enabled_checkbox = ttk.Checkbutton(self.frame, variable=self.enabled_var)
         enabled_checkbox.grid(row=0, column=0, padx=(0, 2))
 
+        # Row type toggle button
+        self.mode_btn_var = tk.StringVar(value="DMG")
+        self.mode_btn = ttk.Button(self.frame, textvariable=self.mode_btn_var, width=4,
+                                   command=self._toggle_mode)
+        self.mode_btn.grid(row=0, column=1, padx=2)
+
         # Damage input
-        ttk.Label(self.frame, text=f"{damage_type} #{row_num}:", width=12).grid(
-            row=0, column=1, sticky=tk.W, padx=5)
+        ttk.Label(self.frame, text=f"{damage_type} #{row_num}:", width=10).grid(
+            row=0, column=2, sticky=tk.W, padx=2)
 
         self.damage_var = tk.StringVar(value="0")
         self.damage_var.trace('w', lambda *args: self.on_change())
-        damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=12)
-        damage_entry.grid(row=0, column=2, padx=5)
+        damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=10)
+        damage_entry.grid(row=0, column=3, padx=2)
+
+        # Attack speed and BAT inputs (for DPS mode, hidden by default)
+        self.as_frame = ttk.Frame(self.frame)
+        ttk.Label(self.as_frame, text="AS:", font=('Arial', 8)).pack(side="left")
+        self.attack_speed_var = tk.StringVar(value="100")
+        self.attack_speed_var.trace('w', lambda *args: self.on_change())
+        self.as_entry = ttk.Entry(self.as_frame, textvariable=self.attack_speed_var, width=4)
+        self.as_entry.pack(side="left", padx=1)
+        ttk.Label(self.as_frame, text="BAT:", font=('Arial', 8)).pack(side="left", padx=(3,0))
+        self.bat_var = tk.StringVar(value="1.7")
+        self.bat_var.trace('w', lambda *args: self.on_change())
+        self.bat_entry = ttk.Entry(self.as_frame, textvariable=self.bat_var, width=4)
+        self.bat_entry.pack(side="left", padx=1)
+        # Don't grid as_frame yet - it's hidden by default
 
         # Base damage label (shows evaluated expression)
         self.base_damage_var = tk.StringVar(value="")
         self.base_damage_label = ttk.Label(self.frame, textvariable=self.base_damage_var,
                                            font=('Arial', 9), foreground='#666', width=8)
-        self.base_damage_label.grid(row=0, column=3, padx=2)
+        self.base_damage_label.grid(row=0, column=5, padx=2)
 
         # Result labels and per-column checkboxes (dynamic)
         self.result_vars = []
@@ -53,6 +74,18 @@ class DamageRow:
         self.delete_btn = ttk.Button(self.frame, text="✕", width=3,
                                command=lambda: self.on_delete(self))
         self._position_delete_button()
+
+    def _toggle_mode(self):
+        """Toggle between basic damage and DPS mode"""
+        if self.row_mode == "basic":
+            self.row_mode = "dps"
+            self.mode_btn_var.set("DPS")
+            self.as_frame.grid(row=0, column=4, padx=2)
+        else:
+            self.row_mode = "basic"
+            self.mode_btn_var.set("DMG")
+            self.as_frame.grid_forget()
+        self.on_change()
 
     def _create_result_labels(self):
         """Create result labels with per-column checkboxes"""
@@ -71,7 +104,7 @@ class DamageRow:
         for i in range(cols_to_show):
             # Create a frame to hold checkbox and result together
             col_frame = ttk.Frame(self.frame)
-            col_frame.grid(row=0, column=4 + i, padx=1)
+            col_frame.grid(row=0, column=6 + i, padx=1)
             self.column_frames.append(col_frame)
 
             # Per-column checkbox
@@ -94,7 +127,7 @@ class DamageRow:
     def _position_delete_button(self):
         """Position delete button after all result columns"""
         cols_to_show = 1 if self.is_pure else self.num_columns
-        self.delete_btn.grid(row=0, column=4 + cols_to_show, padx=5)
+        self.delete_btn.grid(row=0, column=6 + cols_to_show, padx=5)
 
     def update_columns(self, num_columns):
         """Update the number of result columns"""
@@ -145,11 +178,29 @@ class DamageRow:
                     var.set("= Invalid")
                 return [0] * len(reductions)
 
-            # Show base damage if input is an expression
+            # Get attack rate for DPS mode: r = AS / (100 × BAT)
+            attack_rate = 1.0
+            if self.row_mode == "dps":
+                as_str = self.attack_speed_var.get()
+                bat_str = self.bat_var.get()
+                as_val = self.safe_eval(as_str)
+                bat_val = self.safe_eval(bat_str)
+                if as_val is not None and bat_val is not None and bat_val > 0:
+                    attack_rate = as_val / (100 * bat_val)
+                else:
+                    attack_rate = 1.0
+
+            # Show base damage/dps info if input is an expression
             if self._is_expression(damage_str):
-                self.base_damage_var.set(f"({damage:.0f})")
+                if self.row_mode == "dps":
+                    self.base_damage_var.set(f"({damage:.0f}@{attack_rate:.2f}/s)")
+                else:
+                    self.base_damage_var.set(f"({damage:.0f})")
             else:
-                self.base_damage_var.set("")
+                if self.row_mode == "dps":
+                    self.base_damage_var.set(f"(@{attack_rate:.2f}/s)")
+                else:
+                    self.base_damage_var.set("")
 
             results = []
             for i, reduction in enumerate(reductions):
@@ -160,6 +211,9 @@ class DamageRow:
 
                 if col_enabled:
                     final_damage = damage * (1 - reduction / 100)
+                    # Apply attack rate for DPS mode: DPS = damage * attack_rate
+                    if self.row_mode == "dps":
+                        final_damage = final_damage * attack_rate
                     if i < len(self.result_vars):
                         color = '#e69500' if self.is_pure else COLUMN_COLORS[i % len(COLUMN_COLORS)]
                         self.result_labels[i].configure(foreground=color)

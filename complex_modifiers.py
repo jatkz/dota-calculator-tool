@@ -79,6 +79,32 @@ class ComplexModifier(ABC):
         """
         pass
 
+    def get_magic_damage_for_hit(self, hit_number):
+        """
+        Calculate magic damage for a specific hit (reduced by magic resistance).
+        Override in modifiers that deal magic damage.
+
+        Args:
+            hit_number: The hit number (1-indexed)
+
+        Returns:
+            Magic damage for this hit (default: 0)
+        """
+        return 0
+
+    def get_total_magic_damage_for_hits(self, num_hits):
+        """
+        Calculate total magic damage across multiple hits.
+        Override in modifiers that deal magic damage.
+
+        Args:
+            num_hits: Number of hits
+
+        Returns:
+            Total magic damage across all hits (default: 0)
+        """
+        return 0
+
     def is_enabled(self):
         """Check if modifier is enabled"""
         return self.enabled_var.get()
@@ -340,6 +366,159 @@ class CritModifier(ComplexModifier):
         mult = self._get_crit_multiplier()
         avg_multiplier = 1 + chance * (mult - 1)
         return base_dph * avg_multiplier * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@ComplexModifier.register
+class MagicDamageOnHitModifier(ComplexModifier):
+    """
+    Magic Damage on Hit: Chance to deal bonus magic damage on each attack.
+    Average bonus damage per hit = proc_chance * magic_damage
+
+    Example: 65% proc chance, 55 magic damage
+    Average bonus = 0.65 * 55 = 35.75 magic damage per hit
+    """
+
+    TYPE_NAME = "Magic on Hit"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Magic on Hit",
+                  font=('Arial', 9, 'bold'), foreground='#4169E1').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Magic Proc")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=10)
+        label_entry.pack(side="left", padx=2)
+
+        # Proc chance input
+        ttk.Label(self.frame, text="Chance:").pack(side="left", padx=(10, 0))
+        self.chance_var = tk.StringVar(value="65")
+        self.chance_var.trace('w', lambda *args: self.on_change())
+        chance_entry = ttk.Entry(self.frame, textvariable=self.chance_var, width=4)
+        chance_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Magic damage input
+        ttk.Label(self.frame, text="Damage:").pack(side="left", padx=(10, 0))
+        self.damage_var = tk.StringVar(value="55")
+        self.damage_var.trace('w', lambda *args: self.on_change())
+        damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=5)
+        damage_entry.pack(side="left", padx=2)
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        chance = self._get_proc_chance()
+        damage = self._get_magic_damage()
+        if chance > 0 and damage > 0:
+            avg_damage = chance * damage
+            self.info_var.set(f"Avg: +{avg_damage:.1f}")
+        else:
+            self.info_var.set("")
+
+    def _get_proc_chance(self):
+        """Get proc chance as decimal (0-1)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.chance_var.get(), variables)
+        if value is None:
+            return 0
+        return min(100, max(0, value)) / 100  # Clamp 0-100, convert to decimal
+
+    def _get_magic_damage(self):
+        """Get magic damage value"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.damage_var.get(), variables)
+        return value if value is not None else 0
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """
+        Physical damage is unchanged - magic damage is separate.
+
+        Args:
+            hit_number: The hit number
+            base_dph: Base damage per hit
+
+        Returns:
+            Base physical damage (unchanged)
+        """
+        return base_dph
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """
+        Physical damage is unchanged - magic damage is separate.
+
+        Args:
+            num_hits: Number of hits
+            base_dph: Base damage per hit
+
+        Returns:
+            Total physical damage (unchanged)
+        """
+        return base_dph * num_hits
+
+    def get_magic_damage_for_hit(self, hit_number):
+        """
+        Calculate average magic damage for a specific hit.
+
+        Args:
+            hit_number: The hit number
+
+        Returns:
+            Average magic damage for this hit
+        """
+        if not self.is_enabled():
+            return 0
+
+        chance = self._get_proc_chance()
+        damage = self._get_magic_damage()
+        return chance * damage
+
+    def get_total_magic_damage_for_hits(self, num_hits):
+        """
+        Calculate total average magic damage across multiple hits.
+
+        Args:
+            num_hits: Number of hits
+
+        Returns:
+            Total average magic damage
+        """
+        if not self.is_enabled():
+            return 0
+
+        chance = self._get_proc_chance()
+        damage = self._get_magic_damage()
+        return chance * damage * num_hits
 
     def update_display(self):
         """Update the display"""

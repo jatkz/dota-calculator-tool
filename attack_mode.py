@@ -357,12 +357,18 @@ class AttackModeSection:
                 label_text = f"{attack_label} > {target_label}:"
                 ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
-                reduction = target.get_physical_reduction()
+                phys_reduction = target.get_physical_reduction()
+                magic_reduction = target.get_magic_resistance()
                 for n in range(1, 11):
-                    # Use row's method to calculate total damage for N hits (handles complex mods)
-                    total_damage = row.get_total_damage_for_hits(n)
-                    damage_reduced = total_damage * (1 - reduction)
-                    ttk.Label(row_frame, text=f"{damage_reduced:.0f}", width=7,
+                    # Physical damage reduced by armor
+                    phys_damage = row.get_total_damage_for_hits(n)
+                    phys_reduced = phys_damage * (1 - phys_reduction)
+                    # Magic damage reduced by magic resistance
+                    magic_damage = row.get_total_magic_damage_for_hits(n)
+                    magic_reduced = magic_damage * (1 - magic_reduction)
+                    # Total damage
+                    total = phys_reduced + magic_reduced
+                    ttk.Label(row_frame, text=f"{total:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.n_hits_frame.pack_forget()
@@ -425,13 +431,15 @@ class AttackModeSection:
                 row_frame = ttk.Frame(self.dps_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                reduction = target.get_physical_reduction()
+                phys_reduction = target.get_physical_reduction()
+                magic_reduction = target.get_magic_resistance()
 
                 # For DPS with complex modifiers, calculate damage over 10 seconds and divide
                 hits_in_10s = int(attack_rate * 10)
                 if hits_in_10s > 0:
-                    total_10s = row.get_total_damage_for_hits(hits_in_10s) * (1 - reduction)
-                    dps = total_10s / 10
+                    phys_10s = row.get_total_damage_for_hits(hits_in_10s) * (1 - phys_reduction)
+                    magic_10s = row.get_total_magic_damage_for_hits(hits_in_10s) * (1 - magic_reduction)
+                    dps = (phys_10s + magic_10s) / 10
                 else:
                     dps = 0
 
@@ -445,10 +453,12 @@ class AttackModeSection:
                     # Calculate hits in this time period
                     hits = int(attack_rate * seconds)
                     if hits > 0:
-                        damage = row.get_total_damage_for_hits(hits) * (1 - reduction)
+                        phys_damage = row.get_total_damage_for_hits(hits) * (1 - phys_reduction)
+                        magic_damage = row.get_total_magic_damage_for_hits(hits) * (1 - magic_reduction)
+                        total = phys_damage + magic_damage
                     else:
-                        damage = 0
-                    ttk.Label(row_frame, text=f"{damage:.0f}", width=7,
+                        total = 0
+                    ttk.Label(row_frame, text=f"{total:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.dps_frame.pack_forget()

@@ -473,6 +473,38 @@ class AttackRow:
             total += hit_damage
         return total
 
+    def get_magic_damage_for_hit(self, hit_number):
+        """
+        Calculate magic damage for a specific hit from complex modifiers.
+
+        Args:
+            hit_number: The hit number (1-indexed)
+
+        Returns:
+            Magic damage for this hit
+        """
+        total_magic = 0
+        for mod in self.selected_complex_modifiers:
+            if mod.is_enabled():
+                total_magic += mod.get_magic_damage_for_hit(hit_number)
+        return total_magic
+
+    def get_total_magic_damage_for_hits(self, num_hits):
+        """
+        Calculate total magic damage for N hits from complex modifiers.
+
+        Args:
+            num_hits: Number of hits
+
+        Returns:
+            Total magic damage across all hits
+        """
+        total_magic = 0
+        for mod in self.selected_complex_modifiers:
+            if mod.is_enabled():
+                total_magic += mod.get_total_magic_damage_for_hits(num_hits)
+        return total_magic
+
     def is_enabled(self):
         """Check if row is enabled"""
         return self.enabled_var.get()

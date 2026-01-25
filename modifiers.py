@@ -25,18 +25,18 @@ class Modifier(ABC):
 
     @classmethod
     def register(cls, modifier_class):
-        """Register a complex modifier type"""
+        """Register a modifier type"""
         cls.REGISTRY[modifier_class.TYPE_NAME] = modifier_class
         return modifier_class
 
     @classmethod
     def get_available_types(cls):
-        """Get list of available complex modifier type names"""
+        """Get list of available modifier type names"""
         return list(cls.REGISTRY.keys())
 
     @classmethod
     def create(cls, type_name, parent, on_change, on_delete, get_variables=None):
-        """Factory method to create a complex modifier by type name"""
+        """Factory method to create a modifier by type name"""
         if type_name in cls.REGISTRY:
             return cls.REGISTRY[type_name](parent, on_change, on_delete, get_variables)
         return None
@@ -114,6 +114,16 @@ class Modifier(ABC):
 
         Returns:
             True strike chance as decimal (0-1), default: 0
+        """
+        return 0
+
+    def get_armor_reduction(self):
+        """
+        Get the armor reduction to apply to target.
+        Override in modifiers that reduce armor.
+
+        Returns:
+            Armor reduction value (default: 0)
         """
         return 0
 
@@ -981,6 +991,90 @@ class PhantomCritModifier(Modifier):
         crit = self._get_crit_chance()
         bonus = self._get_bonus_magic()
         return total_physical_damage * crit * bonus
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@Modifier.register
+class CorruptionModifier(Modifier):
+    """
+    Corruption: Reduces target armor for damage calculations.
+
+    Example: 7 armor reduction
+    Target with 20 armor becomes 13 armor for this attack.
+    """
+
+    TYPE_NAME = "Corruption"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Corruption",
+                  font=('Arial', 9, 'bold'), foreground='#2F4F4F').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Corruption")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=12)
+        label_entry.pack(side="left", padx=2)
+
+        # Armor reduction input
+        ttk.Label(self.frame, text="Armor Reduction:").pack(side="left", padx=(10, 0))
+        self.armor_var = tk.StringVar(value="6")
+        self.armor_var.trace('w', lambda *args: self.on_change())
+        armor_entry = ttk.Entry(self.frame, textvariable=self.armor_var, width=4)
+        armor_entry.pack(side="left", padx=2)
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        reduction = self._get_armor_value()
+        if reduction != 0:
+            self.info_var.set(f"= -{reduction:.0f} armor")
+        else:
+            self.info_var.set("")
+
+    def _get_armor_value(self):
+        """Get the armor reduction value"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.armor_var.get(), variables)
+        return value if value is not None else 0
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_armor_reduction(self):
+        """Get the armor reduction to apply to target"""
+        return self._get_armor_value()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """Corruption doesn't modify damage directly - affects target armor"""
+        return base_dph
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """Corruption doesn't modify damage directly - affects target armor"""
+        return base_dph * num_hits
 
     def update_display(self):
         """Update the display"""

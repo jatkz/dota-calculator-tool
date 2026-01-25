@@ -156,10 +156,16 @@ class TargetRow:
         return regen if regen is not None else 0
 
     def get_armor(self):
-        """Get armor value"""
+        """Get armor value (converts from reduction if in reduction mode)"""
         variables = self.get_variables() if self.get_variables else None
-        armor = safe_eval(self.armor_var.get(), variables)
-        return armor if armor is not None else 0
+        val = safe_eval(self.armor_var.get(), variables) or 0
+
+        if self.armor_mode:
+            # Value is already armor
+            return val
+        else:
+            # Value is reduction percentage, convert to armor
+            return reduction_to_armor(val)
 
     def get_physical_reduction(self):
         """Get physical damage reduction as decimal"""

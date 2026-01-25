@@ -6,6 +6,7 @@ from tkinter import ttk
 from constants import COLUMN_COLORS, DEFAULT_ATTACK_SPEED, DEFAULT_BAT
 from attack_row import AttackRow
 from modifiers import Modifier
+from utils import armor_to_reduction
 from attack_calculations import (
     calculate_damage_for_n_hits,
     calculate_time_for_n_hits,
@@ -305,7 +306,11 @@ class AttackModeSection:
                 label_text = f"{attack_label} > {target_label}:"
                 ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
-                phys_reduction = target.get_physical_reduction()
+                # Apply armor reduction from modifiers
+                base_armor = target.get_armor()
+                armor_reduction = row.get_total_armor_reduction()
+                effective_armor = base_armor - armor_reduction
+                phys_reduction = armor_to_reduction(effective_armor) / 100
                 magic_reduction = target.get_magic_resistance()
                 evasion = target.get_evasion()
                 true_strike = row.get_combined_true_strike()
@@ -382,7 +387,11 @@ class AttackModeSection:
                 row_frame = ttk.Frame(self.dps_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                phys_reduction = target.get_physical_reduction()
+                # Apply armor reduction from modifiers
+                base_armor = target.get_armor()
+                armor_reduction = row.get_total_armor_reduction()
+                effective_armor = base_armor - armor_reduction
+                phys_reduction = armor_to_reduction(effective_armor) / 100
                 magic_reduction = target.get_magic_resistance()
                 evasion = target.get_evasion()
                 true_strike = row.get_combined_true_strike()

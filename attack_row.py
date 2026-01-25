@@ -414,6 +414,19 @@ class AttackRow:
                     miss_chance *= (1 - ts)
         return 1 - miss_chance
 
+    def get_total_armor_reduction(self):
+        """
+        Calculate total armor reduction from all modifiers.
+
+        Returns:
+            Total armor reduction value
+        """
+        total = 0
+        for mod in self.selected_modifiers:
+            if mod.is_enabled():
+                total += mod.get_armor_reduction()
+        return total
+
     def is_enabled(self):
         """Check if row is enabled"""
         return self.enabled_var.get()

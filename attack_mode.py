@@ -39,10 +39,13 @@ class AttackModeSection:
         # Callback to notify when attack results change
         self.on_attack_results_changed = None
 
-        # Display toggle states
-        self.show_n_hits_range = tk.BooleanVar(value=False)
-        self.show_time_range = tk.BooleanVar(value=False)
-        self.show_dps_range = tk.BooleanVar(value=False)
+        # Callback to get available targets
+        self.get_targets = None
+
+        # Display toggle states (all on by default)
+        self.show_n_hits_range = tk.BooleanVar(value=True)
+        self.show_time_range = tk.BooleanVar(value=True)
+        self.show_dps_range = tk.BooleanVar(value=True)
 
         self._create_widgets()
 
@@ -51,14 +54,7 @@ class AttackModeSection:
 
     def _create_widgets(self):
         """Create all widgets for the Attack Mode section"""
-        # Toggle button (always visible)
-        self.toggle_frame = ttk.Frame(self.parent)
-        self.toggle_button = ttk.Button(self.toggle_frame,
-                                        text="▶ Show Attack Mode Section",
-                                        command=self.toggle_visibility)
-        self.toggle_button.pack(side="left")
-
-        # Main section frame (hidden by default)
+        # Main section frame
         self.section_frame = ttk.Frame(self.parent)
 
         # Separator at top
@@ -96,15 +92,6 @@ class AttackModeSection:
         ttk.Label(calc_header, text="CALCULATIONS",
                   font=('Arial', 10, 'bold')).pack(side="left")
 
-        # Damage per hit display
-        self.dph_frame = ttk.Frame(self.section_frame)
-        self.dph_frame.pack(fill="x", pady=2)
-        ttk.Label(self.dph_frame, text="Damage/hit:").pack(side="left", padx=5)
-        self.dph_labels_frame = ttk.Frame(self.dph_frame)
-        self.dph_labels_frame.pack(side="left")
-        self.dph_vars = []
-        self.dph_labels = []
-
         # Toggle options
         toggle_frame = ttk.Frame(self.section_frame)
         toggle_frame.pack(fill="x", pady=5)
@@ -139,45 +126,16 @@ class AttackModeSection:
         # Bottom separator
         ttk.Separator(self.section_frame, orient='horizontal').pack(fill="x", pady=5)
 
-        # Initialize column displays
-        self._update_column_displays()
-
-    def _update_column_displays(self):
-        """Update displays to match current column count"""
-        num_columns = self.get_num_columns()
-
-        # Clear existing dph labels
-        for label in self.dph_labels:
-            label.destroy()
-        self.dph_vars.clear()
-        self.dph_labels.clear()
-
-        # Create new dph labels
-        for i in range(num_columns):
-            color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-            var = tk.StringVar(value="= 0.00")
-            label = ttk.Label(self.dph_labels_frame, textvariable=var,
-                              foreground=color, font=('Arial', 10, 'bold'))
-            label.pack(side="left", padx=5)
-            self.dph_vars.append(var)
-            self.dph_labels.append(label)
-
     def _on_columns_changed(self, num_columns):
         """Handle column count changes"""
-        self._update_column_displays()
         for row in self.attack_rows:
             row.update_columns(num_columns)
         self.calculate()
 
-    def toggle_visibility(self):
-        """Toggle section visibility"""
-        if self.visible:
-            self.section_frame.pack_forget()
-            self.toggle_button.config(text="▶ Show Attack Mode Section")
-            self.visible = False
-        else:
-            self.section_frame.pack(fill="x", pady=5, after=self.toggle_frame)
-            self.toggle_button.config(text="▼ Hide Attack Mode Section")
+    def pack_content(self):
+        """Pack the section content (called by parent's toggle)"""
+        if not self.visible:
+            self.section_frame.pack(fill="x", pady=5)
             self.visible = True
             # Add initial rows if empty
             if not self.attack_rows:
@@ -213,8 +171,10 @@ class AttackModeSection:
             self.delete_attack_row,
             num_columns=self.get_num_columns(),
             get_variables=self.get_variables,
-            get_modifiers=self.get_modifiers_values
+            get_modifiers=self.get_modifiers_values,
+            get_targets=self.get_targets
         )
+        row.update_target_options()
         row.pack(fill="x", pady=2)
         self.attack_rows.append(row)
         self.calculate()
@@ -248,6 +208,15 @@ class AttackModeSection:
         """Set callback to be called when attack results change"""
         self.on_attack_results_changed = callback
 
+    def set_get_targets(self, callback):
+        """Set callback to get available targets"""
+        self.get_targets = callback
+
+    def update_target_options(self):
+        """Update target dropdown options for all attack rows"""
+        for row in self.attack_rows:
+            row.update_target_options()
+
     def calculate(self):
         """Calculate and update all displays"""
         if not self.visible:
@@ -260,157 +229,152 @@ class AttackModeSection:
         for mod in self.modifiers:
             mod.update_display()
 
-        # Calculate totals per column
-        # Each column gets: total_dph, total_damage, avg_attack_rate
-        column_dph = [0] * num_columns
-        column_total = [0] * num_columns
-        column_attack_rates = [[] for _ in range(num_columns)]
+        # Build list of attack row results with their targets
+        # Each entry: (attack_label, target_label, dph_reduced, attack_rate)
+        attack_results = []
+        total_dph = 0
+        total_damage = 0
 
         for row in self.attack_rows:
             row.update_display()
-            results = row.get_results(flat_mods, pct_mods)
-            for i, (dph, total, attack_rate) in enumerate(results):
-                if i < num_columns:
-                    column_dph[i] += dph
-                    column_total[i] += total
-                    if attack_rate > 0:
-                        column_attack_rates[i].append(attack_rate)
+            dph, total, attack_rate = row.get_results(flat_mods, pct_mods)
+            total_dph += dph
+            total_damage += total
 
-        # Update damage per hit display
-        for i in range(num_columns):
-            if i < len(self.dph_vars):
-                self.dph_vars[i].set(f"= {column_dph[i]:.2f}")
+            # Get all selected targets for this row
+            attack_label = row.get_label()
+            targets = row.get_selected_targets()
+            for target in targets:
+                target_label = target.label_var.get()
+                reduction = target.get_physical_reduction()
+                dph_reduced = dph * (1 - reduction)
+                attack_results.append((attack_label, target_label, dph_reduced, attack_rate))
 
-        # Calculate average attack rate per column (for time calculations)
-        avg_attack_rates = []
-        for rates in column_attack_rates:
+        # Calculate average attack rate
+        avg_attack_rate = 1.0
+        if attack_results:
+            rates = [r[2] for r in attack_results if r[2] > 0]
             if rates:
-                avg_attack_rates.append(sum(rates) / len(rates))
-            else:
-                avg_attack_rates.append(1.0)
+                avg_attack_rate = sum(rates) / len(rates)
 
-        # Update N hits range display
-        self._update_n_hits_display(column_dph, num_columns)
+        # Update displays with per-target results
+        self._update_n_hits_display(attack_results)
+        self._update_time_display(attack_results)
+        self._update_dps_display(attack_results)
 
-        # Update time range display
-        self._update_time_display(column_dph, avg_attack_rates, num_columns)
-
-        # Update DPS range display
-        self._update_dps_display(column_dph, avg_attack_rates, num_columns)
-
-        # Notify target section of updated attack results
+        # Notify target section of updated attack results (raw damage)
         if self.on_attack_results_changed:
-            attack_results = []
-            for i in range(num_columns):
-                dph = column_dph[i]
-                total = column_total[i]
-                rate = avg_attack_rates[i] if i < len(avg_attack_rates) else 1.0
-                attack_results.append((dph, total, rate))
-            self.on_attack_results_changed(attack_results)
+            self.on_attack_results_changed((total_dph, total_damage, avg_attack_rate))
 
-    def _update_n_hits_display(self, column_dph, num_columns):
+    def _update_n_hits_display(self, attack_results):
         """Update the N hits range display (horizontal layout)"""
         # Clear existing
         for child in self.n_hits_container.winfo_children():
             child.destroy()
 
-        if self.show_n_hits_range.get():
+        if self.show_n_hits_range.get() and attack_results:
             self.n_hits_frame.pack(fill="x", pady=2)
 
             # Header row with hit counts 1-10
             header_frame = ttk.Frame(self.n_hits_container)
             header_frame.pack(fill="x")
-            ttk.Label(header_frame, text="Hits:", width=8).pack(side="left", padx=5)
+            ttk.Label(header_frame, text="Hits:", width=20,
+                      font=('Arial', 8, 'bold')).pack(side="left", padx=5)
             for n in range(1, 11):
                 ttk.Label(header_frame, text=f"{n}", width=7,
-                          font=('Arial', 8, 'bold')).pack(side="left")
+                          font=('Arial', 8)).pack(side="left")
 
-            # One row per column showing damage for 1-10 hits
-            for i in range(num_columns):
+            # One row per attack+target combination showing damage for 1-10 hits
+            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.n_hits_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                ttk.Label(row_frame, text=f"Col{i+1}:", width=8,
+                label_text = f"{attack_label} > {target_label}:"
+                ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
                 for n in range(1, 11):
-                    damage = calculate_damage_for_n_hits(column_dph[i], n)
+                    damage = calculate_damage_for_n_hits(dph, n)
                     ttk.Label(row_frame, text=f"{damage:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.n_hits_frame.pack_forget()
 
-    def _update_time_display(self, column_dph, attack_rates, num_columns):
+    def _update_time_display(self, attack_results):
         """Update the time range display (horizontal layout)"""
         # Clear existing
         for child in self.time_container.winfo_children():
             child.destroy()
 
-        if self.show_time_range.get():
+        if self.show_time_range.get() and attack_results:
             self.time_frame.pack(fill="x", pady=2)
 
             # Header row with hit counts 1-10
             header_frame = ttk.Frame(self.time_container)
             header_frame.pack(fill="x")
-            ttk.Label(header_frame, text="Hits:", width=8).pack(side="left", padx=5)
+            ttk.Label(header_frame, text="Time:", width=20,
+                      font=('Arial', 8, 'bold')).pack(side="left", padx=5)
             for n in range(1, 11):
                 ttk.Label(header_frame, text=f"{n}", width=7,
-                          font=('Arial', 8, 'bold')).pack(side="left")
+                          font=('Arial', 8)).pack(side="left")
 
-            # One row per column showing time for 1-10 hits
-            for i in range(num_columns):
+            # One row per attack+target combination showing time for 1-10 hits
+            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.time_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                ttk.Label(row_frame, text=f"Col{i+1}:", width=8,
+                label_text = f"{attack_label} > {target_label}:"
+                ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
-                rate = attack_rates[i] if i < len(attack_rates) else 1.0
                 for n in range(1, 11):
-                    time = calculate_time_for_n_hits(n, rate)
+                    time = calculate_time_for_n_hits(n, attack_rate)
                     ttk.Label(row_frame, text=f"{time:.1f}s", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.time_frame.pack_forget()
 
-    def _update_dps_display(self, column_dph, attack_rates, num_columns):
+    def _update_dps_display(self, attack_results):
         """Update the DPS range display (horizontal layout)"""
         # Clear existing
         for child in self.dps_container.winfo_children():
             child.destroy()
 
-        if self.show_dps_range.get():
+        if self.show_dps_range.get() and attack_results:
             self.dps_frame.pack(fill="x", pady=2)
 
             # Header row with seconds 1-10
             header_frame = ttk.Frame(self.dps_container)
             header_frame.pack(fill="x")
-            ttk.Label(header_frame, text="Sec:", width=8).pack(side="left", padx=5)
+            ttk.Label(header_frame, text="DPS:", width=20,
+                      font=('Arial', 8, 'bold')).pack(side="left", padx=5)
             ttk.Label(header_frame, text="DPS", width=7,
-                      font=('Arial', 8, 'bold')).pack(side="left")
+                      font=('Arial', 8)).pack(side="left")
             for n in range(1, 11):
                 ttk.Label(header_frame, text=f"{n}s", width=7,
-                          font=('Arial', 8, 'bold')).pack(side="left")
+                          font=('Arial', 8)).pack(side="left")
 
-            # One row per column showing DPS and damage over 1-10 seconds
-            for i in range(num_columns):
+            # One row per attack+target combination showing DPS and damage over 1-10 seconds
+            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.dps_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                rate = attack_rates[i] if i < len(attack_rates) else 1.0
-                dps = calculate_dps(column_dph[i], rate)
-                ttk.Label(row_frame, text=f"Col{i+1}:", width=8,
+                dps = calculate_dps(dph, attack_rate)
+                label_text = f"{attack_label} > {target_label}:"
+                ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
                 ttk.Label(row_frame, text=f"{dps:.1f}", width=7,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left")
                 for n in range(1, 11):
-                    damage = calculate_damage_in_time(column_dph[i], rate, n)
+                    damage = calculate_damage_in_time(dph, attack_rate, n)
                     ttk.Label(row_frame, text=f"{damage:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.dps_frame.pack_forget()
 
-    def pack_toggle(self, **kwargs):
-        """Pack just the toggle button frame"""
-        self.toggle_frame.pack(**kwargs)
+    def hide_content(self):
+        """Hide the section content"""
+        if self.visible:
+            self.section_frame.pack_forget()
+            self.visible = False
 
     def clear(self):
         """Clear all attack mode data"""

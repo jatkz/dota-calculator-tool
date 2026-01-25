@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import COLUMN_COLORS, DEFAULT_ATTACK_SPEED, DEFAULT_BAT
+from constants import DEFAULT_ATTACK_SPEED, DEFAULT_BAT
 from utils import safe_eval, is_expression
 from attack_calculations import calculate_attack_rate, calculate_damage_per_hit
 
@@ -12,7 +12,7 @@ class AttackRow:
     """Represents a single attack configuration row"""
 
     def __init__(self, parent, row_num, on_change_callback, on_delete_callback,
-                 num_columns=1, get_variables=None, get_modifiers=None):
+                 num_columns=1, get_variables=None, get_modifiers=None, get_targets=None):
         """
         Initialize an attack row.
 
@@ -24,6 +24,7 @@ class AttackRow:
             num_columns: Number of comparison columns
             get_variables: Callback to get current variables dict
             get_modifiers: Callback to get current modifiers (flat_list, pct_list)
+            get_targets: Callback to get available targets list
         """
         self.parent = parent
         self.row_num = row_num
@@ -32,6 +33,8 @@ class AttackRow:
         self.num_columns = num_columns
         self.get_variables = get_variables
         self.get_modifiers = get_modifiers
+        self.get_targets = get_targets
+        self.selected_targets = []  # List of selected target rows
 
         self.frame = ttk.Frame(parent)
 
@@ -45,8 +48,14 @@ class AttackRow:
         enabled_cb = ttk.Checkbutton(input_frame, variable=self.enabled_var)
         enabled_cb.pack(side="left", padx=(0, 5))
 
+        # Label/name
+        ttk.Label(input_frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value=f"Attack {row_num}")
+        label_entry = ttk.Entry(input_frame, textvariable=self.label_var, width=10)
+        label_entry.pack(side="left", padx=2)
+
         # Base damage
-        ttk.Label(input_frame, text="Base:").pack(side="left")
+        ttk.Label(input_frame, text="Base:").pack(side="left", padx=(5, 0))
         self.base_var = tk.StringVar(value="0")
         self.base_var.trace('w', lambda *args: self.on_change())
         base_entry = ttk.Entry(input_frame, textvariable=self.base_var, width=6)
@@ -83,6 +92,19 @@ class AttackRow:
         bat_entry = ttk.Entry(input_frame, textvariable=self.bat_var, width=4)
         bat_entry.pack(side="left", padx=2)
 
+        # Target dropdown and add button
+        ttk.Label(input_frame, text="Target:").pack(side="left", padx=(10, 0))
+        self.target_var = tk.StringVar(value="")
+        self.target_combo = ttk.Combobox(input_frame, textvariable=self.target_var,
+                                         state="readonly", width=10)
+        self.target_combo['values'] = []
+        self.target_combo.pack(side="left", padx=2)
+
+        # Add target button
+        self.add_target_btn = ttk.Button(input_frame, text="+", width=2,
+                                         command=self._add_selected_target)
+        self.add_target_btn.pack(side="left", padx=2)
+
         # Evaluated base damage display
         self.eval_var = tk.StringVar(value="")
         eval_label = ttk.Label(input_frame, textvariable=self.eval_var,
@@ -94,79 +116,98 @@ class AttackRow:
                                 command=lambda: self.on_delete(self))
         delete_btn.pack(side="right", padx=5)
 
-        # Row 1: Per-column checkboxes and results
-        self.results_frame = ttk.Frame(self.frame)
-        self.results_frame.pack(fill="x", pady=(0, 2), padx=(25, 0))
-
-        # Column-specific widgets
-        self.column_enabled_vars = []
-        self.column_checkboxes = []
-        self.result_vars = []
-        self.result_labels = []
-        self.column_frames = []
-
-        self._create_column_widgets()
-
-    def _create_column_widgets(self):
-        """Create per-column checkboxes and result labels"""
-        # Clear existing
-        for frame in self.column_frames:
-            frame.destroy()
-        self.column_enabled_vars.clear()
-        self.column_checkboxes.clear()
-        self.result_vars.clear()
-        self.result_labels.clear()
-        self.column_frames.clear()
-
-        for i in range(self.num_columns):
-            col_frame = ttk.Frame(self.results_frame)
-            col_frame.pack(side="left", padx=5)
-            self.column_frames.append(col_frame)
-
-            # Per-column checkbox
-            col_enabled_var = tk.BooleanVar(value=True)
-            col_enabled_var.trace('w', lambda *args: self.on_change())
-            col_checkbox = ttk.Checkbutton(col_frame, variable=col_enabled_var)
-            col_checkbox.pack(side="left")
-            self.column_enabled_vars.append(col_enabled_var)
-            self.column_checkboxes.append(col_checkbox)
-
-            # Column label
-            col_label = ttk.Label(col_frame, text=f"Col{i+1}",
-                                  foreground=COLUMN_COLORS[i % len(COLUMN_COLORS)],
-                                  font=('Arial', 8))
-            col_label.pack(side="left")
-
-            # Result label
-            result_var = tk.StringVar(value="= 0.00")
-            result_label = ttk.Label(col_frame, textvariable=result_var,
-                                     font=('Arial', 9, 'bold'),
-                                     foreground=COLUMN_COLORS[i % len(COLUMN_COLORS)],
-                                     width=10)
-            result_label.pack(side="left", padx=(5, 0))
-            self.result_vars.append(result_var)
-            self.result_labels.append(result_label)
+        # Row for displaying selected targets
+        self.targets_frame = ttk.Frame(self.frame)
+        self.targets_frame.pack(fill="x", pady=(0, 2), padx=(25, 0))
+        self.target_widgets = []  # List of (target, frame) for removal
 
     def update_columns(self, num_columns):
         """Update the number of columns"""
-        old_enabled = [var.get() for var in self.column_enabled_vars]
         self.num_columns = num_columns
-        self._create_column_widgets()
 
-        # Restore enabled states
-        for i, enabled in enumerate(old_enabled):
-            if i < len(self.column_enabled_vars):
-                self.column_enabled_vars[i].set(enabled)
+    def update_target_options(self):
+        """Update the target dropdown with available targets"""
+        if not self.get_targets:
+            return
+
+        targets = self.get_targets()
+        options = []
+        for target in targets:
+            # Don't show targets already selected
+            if target not in self.selected_targets:
+                label = target.label_var.get()
+                options.append(label)
+
+        self.target_combo['values'] = options
+        if options:
+            self.target_var.set(options[0])
+        else:
+            self.target_var.set("")
+
+        # Remove any selected targets that no longer exist
+        available_targets = self.get_targets() if self.get_targets else []
+        self.selected_targets = [t for t in self.selected_targets if t in available_targets]
+        self._update_targets_display()
+
+    def _add_selected_target(self):
+        """Add the currently selected target from dropdown"""
+        selected_label = self.target_var.get()
+        if not selected_label:
+            return
+
+        # Find the target with this label
+        if self.get_targets:
+            for target in self.get_targets():
+                if target.label_var.get() == selected_label:
+                    if target not in self.selected_targets:
+                        self.selected_targets.append(target)
+                        self._update_targets_display()
+                        self.update_target_options()  # Refresh dropdown
+                        self.on_change()
+                    break
+
+    def _remove_target(self, target):
+        """Remove a specific target from the selection"""
+        if target in self.selected_targets:
+            self.selected_targets.remove(target)
+            self._update_targets_display()
+            self.update_target_options()  # Refresh dropdown
+            self.on_change()
+
+    def _update_targets_display(self):
+        """Update the display of selected targets"""
+        # Clear existing widgets
+        for _, frame in self.target_widgets:
+            frame.destroy()
+        self.target_widgets.clear()
+
+        # Create widgets for each selected target
+        for target in self.selected_targets:
+            target_frame = ttk.Frame(self.targets_frame)
+            target_frame.pack(side="left", padx=2)
+
+            label = target.label_var.get()
+            ttk.Label(target_frame, text=label, font=('Arial', 8),
+                      foreground='#333').pack(side="left")
+
+            # Remove button for this target
+            remove_btn = ttk.Button(target_frame, text="✕", width=2,
+                                    command=lambda t=target: self._remove_target(t))
+            remove_btn.pack(side="left", padx=1)
+
+            self.target_widgets.append((target, target_frame))
+
+    def get_selected_targets(self):
+        """Get list of currently selected target rows"""
+        return self.selected_targets
 
     def is_enabled(self):
         """Check if row is enabled"""
         return self.enabled_var.get()
 
-    def is_column_enabled(self, col_idx):
-        """Check if specific column is enabled for this row"""
-        if col_idx < len(self.column_enabled_vars):
-            return self.column_enabled_vars[col_idx].get()
-        return True
+    def get_label(self):
+        """Get the attack row label"""
+        return self.label_var.get()
 
     def get_base_damage(self):
         """Get evaluated base damage value"""
@@ -237,15 +278,7 @@ class AttackRow:
         """Update the display with calculated values"""
         if not self.enabled_var.get():
             self.eval_var.set("(disabled)")
-            for i, var in enumerate(self.result_vars):
-                var.set("= (off)")
-                self.result_labels[i].configure(foreground='#999')
             return
-
-        # Get modifiers
-        flat_mods, pct_mods = [], []
-        if self.get_modifiers:
-            flat_mods, pct_mods = self.get_modifiers()
 
         # Calculate base values
         base = self.get_base_damage()
@@ -260,47 +293,23 @@ class AttackRow:
         else:
             self.eval_var.set("")
 
-        # Calculate damage per hit
-        dph = self.calculate_damage_per_hit(flat_mods, pct_mods)
-        hits = self.get_hits()
-        total = dph * hits
-
-        # Update per-column results
-        for i in range(self.num_columns):
-            if i < len(self.column_enabled_vars) and self.column_enabled_vars[i].get():
-                color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                self.result_labels[i].configure(foreground=color)
-                if hits > 1:
-                    self.result_vars[i].set(f"= {total:.2f}")
-                else:
-                    self.result_vars[i].set(f"= {dph:.2f}")
-            else:
-                self.result_labels[i].configure(foreground='#999')
-                self.result_vars[i].set("= (off)")
-
     def get_results(self, flat_mods=None, pct_mods=None):
         """
-        Get calculation results for all columns.
+        Get calculation results.
 
         Returns:
-            List of (damage_per_hit, total_damage, attack_rate) for each column,
-            or (0, 0, 0) for disabled columns
+            Tuple of (damage_per_hit, total_damage, attack_rate),
+            or (0, 0, 0) if disabled
         """
         if not self.enabled_var.get():
-            return [(0, 0, 0)] * self.num_columns
+            return (0, 0, 0)
 
         dph = self.calculate_damage_per_hit(flat_mods, pct_mods)
         hits = self.get_hits()
         total = dph * hits
         attack_rate = self.get_attack_rate()
 
-        results = []
-        for i in range(self.num_columns):
-            if i < len(self.column_enabled_vars) and self.column_enabled_vars[i].get():
-                results.append((dph, total, attack_rate))
-            else:
-                results.append((0, 0, 0))
-        return results
+        return (dph, total, attack_rate)
 
     def pack(self, **kwargs):
         """Pack the frame"""

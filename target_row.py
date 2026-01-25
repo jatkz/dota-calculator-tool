@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import COLUMN_COLORS
 from utils import safe_eval, armor_to_reduction, reduction_to_armor
 from attack_calculations import (
     apply_physical_reduction,
@@ -98,42 +97,18 @@ class TargetRow:
                                 command=lambda: self.on_delete(self))
         delete_btn.pack(side="right", padx=5)
 
-        # Row 1: Results display per column
+        # Results display (single row)
         self.results_frame = ttk.Frame(self.frame)
         self.results_frame.pack(fill="x", pady=(0, 5), padx=(25, 0))
 
-        # Result widgets per column
-        self.result_frames = []
-        self.result_vars = []
-
-        self._create_result_widgets()
-
-    def _create_result_widgets(self):
-        """Create per-column result displays"""
-        # Clear existing
-        for frame in self.result_frames:
-            frame.destroy()
-        self.result_frames.clear()
-        self.result_vars.clear()
-
-        for i in range(self.num_columns):
-            col_frame = ttk.Frame(self.results_frame)
-            col_frame.pack(side="left", padx=10)
-            self.result_frames.append(col_frame)
-
-            color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-
-            # Result string var
-            result_var = tk.StringVar(value="")
-            result_label = ttk.Label(col_frame, textvariable=result_var,
-                                     foreground=color, font=('Arial', 8))
-            result_label.pack(side="left")
-            self.result_vars.append(result_var)
+        self.result_var = tk.StringVar(value="")
+        result_label = ttk.Label(self.results_frame, textvariable=self.result_var,
+                                 foreground='#333', font=('Arial', 9))
+        result_label.pack(side="left")
 
     def update_columns(self, num_columns):
         """Update the number of columns"""
         self.num_columns = num_columns
-        self._create_result_widgets()
 
     def set_armor_mode(self, armor_mode):
         """Set armor input mode and convert current value"""
@@ -211,16 +186,15 @@ class TargetRow:
         magic_reduced = magic_damage * (1 - self.get_magic_resistance())
         return phys_reduced + magic_reduced
 
-    def update_display(self, attack_results_per_column):
+    def update_display(self, attack_results):
         """
         Update the display with calculated results.
 
         Args:
-            attack_results_per_column: List of (damage_per_hit, total_damage, attack_rate) per column
+            attack_results: Tuple of (damage_per_hit, total_damage, attack_rate)
         """
         if not self.enabled_var.get():
-            for var in self.result_vars:
-                var.set("(disabled)")
+            self.result_var.set("(disabled)")
             return
 
         # Update armor/reduction conversion display
@@ -236,41 +210,40 @@ class TargetRow:
             armor = reduction_to_armor(val)
             self.armor_reduction_var.set(f"(={armor:.0f} armor)")
 
+        # Get attack values
+        dph, total, attack_rate = attack_results
+
+        if dph == 0:
+            self.result_var.set("")
+            return
+
         hp = self.get_hp()
         regen = self.get_regen()
         phys_reduction = self.get_physical_reduction()
 
-        for i, (dph, total, attack_rate) in enumerate(attack_results_per_column):
-            if i >= len(self.result_vars):
-                break
+        # Apply physical reduction to damage per hit
+        reduced_dph = dph * (1 - phys_reduction)
+        reduced_total = total * (1 - phys_reduction)
 
-            if dph == 0:
-                self.result_vars[i].set("--")
-                continue
+        parts = [f"Dmg/hit: {reduced_dph:.0f}"]
 
-            # Apply physical reduction to damage per hit
-            reduced_dph = dph * (1 - phys_reduction)
-            reduced_total = total * (1 - phys_reduction)
+        if hp:
+            parts.append(f"Total: {reduced_total:.0f}")
 
-            parts = [f"Dmg/hit: {reduced_dph:.0f}"]
-
-            if hp:
-                parts.append(f"Total: {reduced_total:.0f}")
-
-                # Calculate hits and time to kill
-                hits_to_kill = calculate_hits_to_kill(hp, reduced_dph, regen, attack_rate)
-                if hits_to_kill == float('inf'):
-                    parts.append("Hits: INF")
+            # Calculate hits and time to kill
+            hits_to_kill = calculate_hits_to_kill(hp, reduced_dph, regen, attack_rate)
+            if hits_to_kill == float('inf'):
+                parts.append("Hits: INF")
+                parts.append("Time: INF")
+            else:
+                parts.append(f"Hits: {hits_to_kill}")
+                time_to_kill = calculate_time_to_kill(hp, reduced_dph, attack_rate, regen)
+                if time_to_kill == float('inf'):
                     parts.append("Time: INF")
                 else:
-                    parts.append(f"Hits: {hits_to_kill}")
-                    time_to_kill = calculate_time_to_kill(hp, reduced_dph, attack_rate, regen)
-                    if time_to_kill == float('inf'):
-                        parts.append("Time: INF")
-                    else:
-                        parts.append(f"Time: {time_to_kill:.1f}s")
+                    parts.append(f"Time: {time_to_kill:.1f}s")
 
-            self.result_vars[i].set(" | ".join(parts))
+        self.result_var.set(" | ".join(parts))
 
     def pack(self, **kwargs):
         """Pack the frame"""

@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import COLUMN_COLORS
 from target_row import TargetRow
 
 
@@ -30,7 +29,10 @@ class TargetsSection:
         self.armor_mode = True  # True = armor input, False = reduction input
 
         # Store attack results from attack mode for calculations
-        self.attack_results_per_column = []
+        self.attack_results = None
+
+        # Callback when targets list changes
+        self.on_targets_changed = None
 
         self._create_widgets()
 
@@ -39,14 +41,7 @@ class TargetsSection:
 
     def _create_widgets(self):
         """Create all widgets for the Target section"""
-        # Toggle button (always visible)
-        self.toggle_frame = ttk.Frame(self.parent)
-        self.toggle_button = ttk.Button(self.toggle_frame,
-                                        text="▶ Show Targets Section",
-                                        command=self.toggle_visibility)
-        self.toggle_button.pack(side="left")
-
-        # Main section frame (hidden by default)
+        # Main section frame
         self.section_frame = ttk.Frame(self.parent)
 
         # Separator at top
@@ -100,15 +95,10 @@ class TargetsSection:
             row.set_armor_mode(self.armor_mode)
         self.calculate()
 
-    def toggle_visibility(self):
-        """Toggle section visibility"""
-        if self.visible:
-            self.section_frame.pack_forget()
-            self.toggle_button.config(text="▶ Show Targets Section")
-            self.visible = False
-        else:
-            self.section_frame.pack(fill="x", pady=5, after=self.toggle_frame)
-            self.toggle_button.config(text="▼ Hide Targets Section")
+    def pack_content(self):
+        """Pack the section content (called by parent's toggle)"""
+        if not self.visible:
+            self.section_frame.pack(fill="x", pady=5)
             self.visible = True
             # Add initial row if empty
             if not self.target_rows:
@@ -120,7 +110,7 @@ class TargetsSection:
         row = TargetRow(
             self.targets_container,
             self.target_row_counter,
-            self.calculate,
+            self._on_target_changed,
             self.delete_target_row,
             num_columns=self.get_num_columns(),
             get_variables=self.get_variables,
@@ -128,6 +118,7 @@ class TargetsSection:
         )
         row.pack(fill="x", pady=2)
         self.target_rows.append(row)
+        self._notify_targets_changed()
         self.calculate()
 
     def delete_target_row(self, row):
@@ -135,16 +126,35 @@ class TargetsSection:
         if len(self.target_rows) > 1:
             self.target_rows.remove(row)
             row.destroy()
+            self._notify_targets_changed()
             self.calculate()
 
-    def set_attack_results(self, attack_results_per_column):
+    def _on_target_changed(self):
+        """Called when a target row's values change"""
+        self._notify_targets_changed()
+        self.calculate()
+
+    def _notify_targets_changed(self):
+        """Notify listeners that targets list has changed"""
+        if self.on_targets_changed:
+            self.on_targets_changed()
+
+    def set_on_targets_changed(self, callback):
+        """Set callback for when targets list changes"""
+        self.on_targets_changed = callback
+
+    def get_target_rows(self):
+        """Get list of all target rows"""
+        return self.target_rows
+
+    def set_attack_results(self, attack_results):
         """
         Set the attack results from attack mode for target calculations.
 
         Args:
-            attack_results_per_column: List of (damage_per_hit, total_damage, attack_rate) per column
+            attack_results: Tuple of (damage_per_hit, total_damage, attack_rate)
         """
-        self.attack_results_per_column = attack_results_per_column
+        self.attack_results = attack_results
         self.calculate()
 
     def calculate(self):
@@ -153,18 +163,19 @@ class TargetsSection:
             return
 
         # Use stored attack results or default to zeros
-        num_columns = self.get_num_columns()
-        if not self.attack_results_per_column:
-            attack_results = [(0, 0, 1.0)] * num_columns
+        if not hasattr(self, 'attack_results') or not self.attack_results:
+            attack_results = (0, 0, 1.0)
         else:
-            attack_results = self.attack_results_per_column
+            attack_results = self.attack_results
 
         for target in self.target_rows:
             target.update_display(attack_results)
 
-    def pack_toggle(self, **kwargs):
-        """Pack just the toggle button frame"""
-        self.toggle_frame.pack(**kwargs)
+    def hide_content(self):
+        """Hide the section content"""
+        if self.visible:
+            self.section_frame.pack_forget()
+            self.visible = False
 
     def clear(self):
         """Clear all target data"""
@@ -172,4 +183,4 @@ class TargetsSection:
             row.destroy()
         self.target_rows.clear()
         self.target_row_counter = 0
-        self.attack_results_per_column = []
+        self.attack_results = None

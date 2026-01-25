@@ -15,7 +15,7 @@ class DotaCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Dota 2 Damage Calculator")
-        self.root.geometry("900x950")
+        self.root.geometry("1000x1050")
 
         style = ttk.Style()
         style.theme_use('clam')
@@ -67,22 +67,48 @@ class DotaCalculator:
         self.add_magic_row()
         self.add_pure_row()
 
+    def _bind_mousewheel(self, canvas):
+        """Bind mouse wheel events for scrolling"""
+        def _on_mousewheel(event):
+            # Linux uses Button-4 and Button-5
+            if event.num == 4:
+                canvas.yview_scroll(-1, "units")
+            elif event.num == 5:
+                canvas.yview_scroll(1, "units")
+            else:
+                # Windows/Mac uses event.delta
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        # Bind for Linux
+        canvas.bind_all("<Button-4>", _on_mousewheel)
+        canvas.bind_all("<Button-5>", _on_mousewheel)
+        # Bind for Windows/Mac
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+    def _on_targets_changed(self):
+        """Called when target values or list changes - update attack mode"""
+        self.attack_mode.update_target_options()
+        self.attack_mode.calculate()
+
     def create_widgets(self):
         # Main canvas and scrollbar for scrolling
-        main_canvas = tk.Canvas(self.root, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=main_canvas.yview)
-        scrollable_frame = ttk.Frame(main_canvas)
+        self.main_canvas = tk.Canvas(self.root, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.main_canvas.yview)
+        scrollable_frame = ttk.Frame(self.main_canvas)
 
         scrollable_frame.bind(
             "<Configure>",
-            lambda e: main_canvas.configure(scrollregion=main_canvas.bbox("all"))
+            lambda e: self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
         )
 
-        main_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        main_canvas.configure(yscrollcommand=scrollbar.set)
+        self.main_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        self.main_canvas.configure(yscrollcommand=scrollbar.set)
 
         scrollbar.pack(side="right", fill="y")
-        main_canvas.pack(side="left", fill="both", expand=True)
+        self.main_canvas.pack(side="left", fill="both", expand=True)
+
+        # Bind mouse wheel scrolling
+        self._bind_mousewheel(self.main_canvas)
 
         main_frame = ttk.Frame(scrollable_frame, padding="20")
         main_frame.pack(fill="both", expand=True)
@@ -98,9 +124,39 @@ class DotaCalculator:
                                  font=('Arial', 9), foreground='#555')
         instructions.pack(pady=(0, 10))
 
-        # Column controls
-        column_control_frame = ttk.Frame(main_frame)
-        column_control_frame.pack(fill="x", pady=(0, 15))
+        # Variables Section (always visible)
+        variables_header = ttk.Frame(main_frame)
+        variables_header.pack(fill="x", pady=(10, 5))
+
+        ttk.Label(variables_header, text="Variables",
+                  font=('Arial', 12, 'bold')).pack(side="left")
+
+        ttk.Button(variables_header, text="+ Add Variable",
+                   command=self.add_variable).pack(side="right", padx=5)
+
+        self.variables_container = ttk.Frame(main_frame)
+        self.variables_container.pack(fill="x", pady=5)
+
+        # Separator after variables
+        ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=10)
+
+        # ============ SIMPLE GRID TOGGLE ============
+        self.simple_grid_visible = False
+        self.simple_grid_toggle_frame = ttk.Frame(main_frame)
+        self.simple_grid_toggle_frame.pack(fill="x", pady=(5, 5))
+        self.simple_grid_toggle_btn = ttk.Button(
+            self.simple_grid_toggle_frame,
+            text="▶ Show Simple Grid",
+            command=self.toggle_simple_grid
+        )
+        self.simple_grid_toggle_btn.pack(side="left")
+
+        # Container for Simple Grid content
+        self.simple_grid_container = ttk.Frame(main_frame)
+
+        # Column controls (inside simple grid)
+        column_control_frame = ttk.Frame(self.simple_grid_container)
+        column_control_frame.pack(fill="x", pady=(10, 15))
 
         ttk.Label(column_control_frame, text="Comparison Columns:",
                   font=('Arial', 10, 'bold')).pack(side="left", padx=5)
@@ -115,24 +171,8 @@ class DotaCalculator:
         ttk.Label(column_control_frame, textvariable=self.column_count_var,
                   foreground='#666').pack(side="left", padx=10)
 
-        # Variables Section
-        variables_header = ttk.Frame(main_frame)
-        variables_header.pack(fill="x", pady=(10, 5))
-
-        ttk.Label(variables_header, text="Variables",
-                  font=('Arial', 12, 'bold')).pack(side="left")
-
-        ttk.Button(variables_header, text="+ Add Variable",
-                   command=self.add_variable).pack(side="right", padx=5)
-
-        self.variables_container = ttk.Frame(main_frame)
-        self.variables_container.pack(fill="x", pady=5)
-
-        # Separator
-        ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=10)
-
         # Physical Damage Section
-        physical_header = ttk.Frame(main_frame)
+        physical_header = ttk.Frame(self.simple_grid_container)
         physical_header.pack(fill="x", pady=(10, 5))
 
         ttk.Label(physical_header, text="Physical Damage",
@@ -142,7 +182,7 @@ class DotaCalculator:
                    command=self.add_physical_row).pack(side="right", padx=5)
 
         # Physical reduction/armor toggle section
-        physical_toggle_frame = ttk.Frame(main_frame)
+        physical_toggle_frame = ttk.Frame(self.simple_grid_container)
         physical_toggle_frame.pack(fill="x", pady=5)
 
         self.physical_toggle_button = ttk.Button(physical_toggle_frame,
@@ -159,18 +199,18 @@ class DotaCalculator:
         self.physical_inputs_frame.pack(side="left", fill="x")
 
         # Physical rows container
-        self.physical_container = ttk.Frame(main_frame)
+        self.physical_container = ttk.Frame(self.simple_grid_container)
         self.physical_container.pack(fill="x", pady=5)
 
         # Physical total frame
-        self.physical_total_frame = ttk.Frame(main_frame)
+        self.physical_total_frame = ttk.Frame(self.simple_grid_container)
         self.physical_total_frame.pack(fill="x", pady=(5, 10))
 
         # Separator
-        ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=15)
+        ttk.Separator(self.simple_grid_container, orient='horizontal').pack(fill="x", pady=15)
 
         # Magic Damage Section
-        magic_header = ttk.Frame(main_frame)
+        magic_header = ttk.Frame(self.simple_grid_container)
         magic_header.pack(fill="x", pady=(10, 5))
 
         ttk.Label(magic_header, text="Magic Damage",
@@ -180,7 +220,7 @@ class DotaCalculator:
                    command=self.add_magic_row).pack(side="right", padx=5)
 
         # Magic reduction frame
-        magic_reduction_frame = ttk.Frame(main_frame)
+        magic_reduction_frame = ttk.Frame(self.simple_grid_container)
         magic_reduction_frame.pack(fill="x", pady=5)
 
         ttk.Label(magic_reduction_frame, text="Magic Reduction (%):").pack(side="left", padx=5)
@@ -190,18 +230,18 @@ class DotaCalculator:
         self.magic_inputs_frame.pack(side="left", fill="x")
 
         # Magic rows container
-        self.magic_container = ttk.Frame(main_frame)
+        self.magic_container = ttk.Frame(self.simple_grid_container)
         self.magic_container.pack(fill="x", pady=5)
 
         # Magic total frame
-        self.magic_total_frame = ttk.Frame(main_frame)
+        self.magic_total_frame = ttk.Frame(self.simple_grid_container)
         self.magic_total_frame.pack(fill="x", pady=(5, 10))
 
         # Separator
-        ttk.Separator(main_frame, orient='horizontal').pack(fill="x", pady=15)
+        ttk.Separator(self.simple_grid_container, orient='horizontal').pack(fill="x", pady=15)
 
         # Pure Damage Toggle Button
-        pure_toggle_frame = ttk.Frame(main_frame)
+        pure_toggle_frame = ttk.Frame(self.simple_grid_container)
         pure_toggle_frame.pack(fill="x", pady=(5, 5))
 
         self.pure_toggle_button = ttk.Button(pure_toggle_frame,
@@ -209,8 +249,8 @@ class DotaCalculator:
                                              command=self.toggle_pure_section)
         self.pure_toggle_button.pack(side="left")
 
-        # Pure Damage Section (collapsible)
-        self.pure_section_frame = ttk.Frame(main_frame)
+        # Pure Damage Section (collapsible within simple grid)
+        self.pure_section_frame = ttk.Frame(self.simple_grid_container)
 
         pure_header = ttk.Frame(self.pure_section_frame)
         pure_header.pack(fill="x", pady=(10, 5))
@@ -233,36 +273,13 @@ class DotaCalculator:
         ttk.Label(pure_total_frame, textvariable=self.pure_total_var,
                   font=('Arial', 10, 'bold'), foreground='#e69500').pack(side="left", padx=5)
 
-        self.pure_separator = ttk.Separator(main_frame, orient='horizontal')
+        self.pure_separator = ttk.Separator(self.simple_grid_container, orient='horizontal')
 
-        # Targets Section (above Attack Mode)
-        self.targets_section = TargetsSection(
-            main_frame,
-            get_variables=self.get_variables,
-            get_num_columns=lambda: self.num_columns,
-            on_columns_change_subscribe=self.subscribe_to_column_changes
-        )
-        self.targets_section.pack_toggle(fill="x", pady=(5, 5))
-
-        # Attack Mode Section
-        self.attack_mode = AttackModeSection(
-            main_frame,
-            get_variables=self.get_variables,
-            get_num_columns=lambda: self.num_columns,
-            on_columns_change_subscribe=self.subscribe_to_column_changes
-        )
-        self.attack_mode.pack_toggle(fill="x", pady=(5, 5))
-
-        # Connect attack mode results to target section
-        self.attack_mode.set_on_attack_results_changed(self.targets_section.set_attack_results)
-
-        self.attack_mode_separator = ttk.Separator(main_frame, orient='horizontal')
-
-        # Grand Total Section
-        self.total_separator = ttk.Separator(main_frame, orient='horizontal')
+        # Grand Total Section (inside simple grid)
+        self.total_separator = ttk.Separator(self.simple_grid_container, orient='horizontal')
         self.total_separator.pack(fill="x", pady=15)
 
-        self.total_frame = ttk.Frame(main_frame, relief='solid', borderwidth=2, padding="10")
+        self.total_frame = ttk.Frame(self.simple_grid_container, relief='solid', borderwidth=2, padding="10")
         self.total_frame.pack(fill="x", pady=10)
 
         self.grand_totals_container = ttk.Frame(self.total_frame)
@@ -282,9 +299,51 @@ class DotaCalculator:
         self.delta_display_frame = ttk.Frame(delta_row)
         self.delta_display_frame.pack(side="left")
 
-        # Clear button
-        ttk.Button(main_frame, text="Clear All",
-                   command=self.clear_all).pack(pady=10)
+        # Separator at end of simple grid
+        self.simple_grid_separator = ttk.Separator(main_frame, orient='horizontal')
+
+        # ============ ATTACK > TARGET SECTION TOGGLE ============
+        self.attack_target_visible = False
+        self.attack_target_toggle_frame = ttk.Frame(main_frame)
+        self.attack_target_toggle_frame.pack(fill="x", pady=(5, 5))
+        self.attack_target_toggle_btn = ttk.Button(
+            self.attack_target_toggle_frame,
+            text="▶ Show Attack > Target Section",
+            command=self.toggle_attack_target_section
+        )
+        self.attack_target_toggle_btn.pack(side="left")
+
+        # Container for both sections
+        self.attack_target_container = ttk.Frame(main_frame)
+
+        # Targets Section
+        self.targets_section = TargetsSection(
+            self.attack_target_container,
+            get_variables=self.get_variables,
+            get_num_columns=lambda: self.num_columns,
+            on_columns_change_subscribe=self.subscribe_to_column_changes
+        )
+
+        # Attack Mode Section
+        self.attack_mode = AttackModeSection(
+            self.attack_target_container,
+            get_variables=self.get_variables,
+            get_num_columns=lambda: self.num_columns,
+            on_columns_change_subscribe=self.subscribe_to_column_changes
+        )
+
+        # Connect attack mode results to target section
+        self.attack_mode.set_on_attack_results_changed(self.targets_section.set_attack_results)
+
+        # Connect targets to attack mode for target selection dropdown
+        self.attack_mode.set_get_targets(self.targets_section.get_target_rows)
+        self.targets_section.set_on_targets_changed(self._on_targets_changed)
+
+        self.attack_mode_separator = ttk.Separator(main_frame, orient='horizontal')
+
+        # Clear button (always visible at bottom)
+        self.clear_button = ttk.Button(main_frame, text="Clear All", command=self.clear_all)
+        self.clear_button.pack(pady=10)
 
     def _add_column_inputs(self):
         """Add input fields for a new column"""
@@ -456,6 +515,20 @@ class DotaCalculator:
             row.update_columns(self.num_columns)
         # Pure rows stay at 1 column
 
+    def toggle_simple_grid(self):
+        """Toggle the visibility of the Simple Grid section"""
+        if self.simple_grid_visible:
+            self.simple_grid_container.pack_forget()
+            self.simple_grid_separator.pack_forget()
+            self.simple_grid_toggle_btn.config(text="▶ Show Simple Grid")
+            self.simple_grid_visible = False
+        else:
+            self.simple_grid_container.pack(fill="x", pady=5, after=self.simple_grid_toggle_frame)
+            self.simple_grid_separator.pack(fill="x", pady=15, after=self.simple_grid_container)
+            self.simple_grid_toggle_btn.config(text="▼ Hide Simple Grid")
+            self.simple_grid_visible = True
+            self.calculate_all()
+
     def toggle_pure_section(self):
         """Toggle the visibility of the pure damage section"""
         if self.pure_section_visible:
@@ -468,6 +541,23 @@ class DotaCalculator:
             self.pure_separator.pack(fill="x", pady=15, before=self.total_separator)
             self.pure_toggle_button.config(text="▼ Hide Pure Damage Section")
             self.pure_section_visible = True
+
+    def toggle_attack_target_section(self):
+        """Toggle the visibility of the combined Attack > Target section"""
+        if self.attack_target_visible:
+            self.attack_target_container.pack_forget()
+            self.attack_mode_separator.pack_forget()
+            self.attack_target_toggle_btn.config(text="▶ Show Attack > Target Section")
+            self.attack_target_visible = False
+        else:
+            self.attack_target_container.pack(fill="x", pady=5, after=self.attack_target_toggle_frame)
+            self.attack_mode_separator.pack(fill="x", pady=15, after=self.attack_target_container)
+            self.attack_target_toggle_btn.config(text="▼ Hide Attack > Target Section")
+            self.attack_target_visible = True
+            # Pack section contents if not already packed
+            self.targets_section.pack_content()
+            self.attack_mode.pack_content()
+            self.calculate_all()
 
     def toggle_armor_mode(self):
         """Toggle between Armor and Physical Reduction mode"""

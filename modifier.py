@@ -32,8 +32,8 @@ class Modifier:
         enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
         enabled_cb.pack(side="left", padx=(0, 5))
 
-        # Name input
-        ttk.Label(self.frame, text="Name:").pack(side="left")
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
         self.name_var = tk.StringVar(value="")
         name_entry = ttk.Entry(self.frame, textvariable=self.name_var, width=12)
         name_entry.pack(side="left", padx=2)

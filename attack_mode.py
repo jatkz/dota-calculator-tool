@@ -141,25 +141,14 @@ class AttackModeSection:
             if not self.attack_rows:
                 self.add_attack_row()
 
-    def get_modifiers_values(self):
+    def get_modifiers_list(self):
         """
-        Get current modifier values.
+        Get list of modifier objects.
 
         Returns:
-            (flat_mods, pct_mods) - Lists of flat and percentage modifier values
+            List of Modifier objects
         """
-        flat_mods = []
-        pct_mods = []
-
-        for mod in self.modifiers:
-            if mod.is_enabled():
-                value = mod.get_value()
-                if mod.get_type() == "flat":
-                    flat_mods.append(value)
-                else:
-                    pct_mods.append(value)
-
-        return flat_mods, pct_mods
+        return self.modifiers
 
     def add_attack_row(self):
         """Add a new attack row"""
@@ -171,10 +160,11 @@ class AttackModeSection:
             self.delete_attack_row,
             num_columns=self.get_num_columns(),
             get_variables=self.get_variables,
-            get_modifiers=self.get_modifiers_values,
+            get_modifiers=self.get_modifiers_list,
             get_targets=self.get_targets
         )
         row.update_target_options()
+        row.update_modifier_options()
         row.pack(fill="x", pady=2)
         self.attack_rows.append(row)
         self.calculate()
@@ -190,19 +180,31 @@ class AttackModeSection:
         """Add a new modifier"""
         mod = Modifier(
             self.modifiers_container,
-            self.calculate,
+            self._on_modifier_changed,
             self.delete_modifier,
             get_variables=self.get_variables
         )
         mod.pack(fill="x", pady=2)
         self.modifiers.append(mod)
+        self.update_modifier_options()
         self.calculate()
 
     def delete_modifier(self, mod):
         """Delete a modifier"""
         self.modifiers.remove(mod)
         mod.destroy()
+        self.update_modifier_options()
         self.calculate()
+
+    def _on_modifier_changed(self):
+        """Called when a modifier's values change"""
+        self.update_modifier_options()
+        self.calculate()
+
+    def update_modifier_options(self):
+        """Update modifier dropdown options for all attack rows"""
+        for row in self.attack_rows:
+            row.update_modifier_options()
 
     def set_on_attack_results_changed(self, callback):
         """Set callback to be called when attack results change"""
@@ -222,9 +224,6 @@ class AttackModeSection:
         if not self.visible:
             return
 
-        num_columns = self.get_num_columns()
-        flat_mods, pct_mods = self.get_modifiers_values()
-
         # Update modifier displays
         for mod in self.modifiers:
             mod.update_display()
@@ -237,7 +236,7 @@ class AttackModeSection:
 
         for row in self.attack_rows:
             row.update_display()
-            dph, total, attack_rate = row.get_results(flat_mods, pct_mods)
+            dph, total, attack_rate = row.get_results()
             total_dph += dph
             total_damage += total
 

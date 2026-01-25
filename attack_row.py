@@ -35,6 +35,7 @@ class AttackRow:
         self.get_modifiers = get_modifiers
         self.get_targets = get_targets
         self.selected_targets = []  # List of selected target rows
+        self.selected_modifiers = []  # List of selected modifiers
 
         self.frame = ttk.Frame(parent)
 
@@ -92,34 +93,56 @@ class AttackRow:
         bat_entry = ttk.Entry(input_frame, textvariable=self.bat_var, width=4)
         bat_entry.pack(side="left", padx=2)
 
-        # Target dropdown and add button
-        ttk.Label(input_frame, text="Target:").pack(side="left", padx=(10, 0))
-        self.target_var = tk.StringVar(value="")
-        self.target_combo = ttk.Combobox(input_frame, textvariable=self.target_var,
-                                         state="readonly", width=10)
-        self.target_combo['values'] = []
-        self.target_combo.pack(side="left", padx=2)
-
-        # Add target button
-        self.add_target_btn = ttk.Button(input_frame, text="+", width=2,
-                                         command=self._add_selected_target)
-        self.add_target_btn.pack(side="left", padx=2)
+        # Delete button (pack first so it's on right)
+        delete_btn = ttk.Button(input_frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
 
         # Evaluated base damage display
         self.eval_var = tk.StringVar(value="")
         eval_label = ttk.Label(input_frame, textvariable=self.eval_var,
                                foreground='#666', font=('Arial', 8))
-        eval_label.pack(side="left", padx=5)
+        eval_label.pack(side="right", padx=5)
 
-        # Delete button
-        delete_btn = ttk.Button(input_frame, text="X", width=2,
-                                command=lambda: self.on_delete(self))
-        delete_btn.pack(side="right", padx=5)
+        # Row for target and modifier dropdowns
+        selection_frame = ttk.Frame(self.frame)
+        selection_frame.pack(fill="x", pady=(2, 0), padx=(25, 0))
+
+        # Target dropdown and add button
+        ttk.Label(selection_frame, text="Target:").pack(side="left")
+        self.target_var = tk.StringVar(value="")
+        self.target_combo = ttk.Combobox(selection_frame, textvariable=self.target_var,
+                                         state="readonly", width=10)
+        self.target_combo['values'] = []
+        self.target_combo.pack(side="left", padx=2)
+
+        # Add target button
+        self.add_target_btn = ttk.Button(selection_frame, text="+", width=2,
+                                         command=self._add_selected_target)
+        self.add_target_btn.pack(side="left", padx=(0, 10))
+
+        # Modifier dropdown and add button
+        ttk.Label(selection_frame, text="Modifier:").pack(side="left")
+        self.modifier_var = tk.StringVar(value="")
+        self.modifier_combo = ttk.Combobox(selection_frame, textvariable=self.modifier_var,
+                                           state="readonly", width=10)
+        self.modifier_combo['values'] = []
+        self.modifier_combo.pack(side="left", padx=2)
+
+        # Add modifier button
+        self.add_modifier_btn = ttk.Button(selection_frame, text="+", width=2,
+                                           command=self._add_selected_modifier)
+        self.add_modifier_btn.pack(side="left")
 
         # Row for displaying selected targets
         self.targets_frame = ttk.Frame(self.frame)
-        self.targets_frame.pack(fill="x", pady=(0, 2), padx=(25, 0))
+        self.targets_frame.pack(fill="x", pady=(2, 0), padx=(25, 0))
         self.target_widgets = []  # List of (target, frame) for removal
+
+        # Row for displaying selected modifiers
+        self.modifiers_frame = ttk.Frame(self.frame)
+        self.modifiers_frame.pack(fill="x", pady=(2, 2), padx=(25, 0))
+        self.modifier_widgets = []  # List of (modifier, frame) for removal
 
     def update_columns(self, num_columns):
         """Update the number of columns"""
@@ -200,6 +223,102 @@ class AttackRow:
     def get_selected_targets(self):
         """Get list of currently selected target rows"""
         return self.selected_targets
+
+    def update_modifier_options(self):
+        """Update the modifier dropdown with available modifiers"""
+        if not self.get_modifiers:
+            return
+
+        modifiers = self.get_modifiers()
+        options = []
+        for mod in modifiers:
+            # Don't show modifiers already selected
+            if mod not in self.selected_modifiers:
+                name = mod.get_name()
+                options.append(name)
+
+        self.modifier_combo['values'] = options
+        if options:
+            self.modifier_var.set(options[0])
+        else:
+            self.modifier_var.set("")
+
+        # Remove any selected modifiers that no longer exist
+        available_modifiers = self.get_modifiers() if self.get_modifiers else []
+        self.selected_modifiers = [m for m in self.selected_modifiers if m in available_modifiers]
+        self._update_modifiers_display()
+
+    def _add_selected_modifier(self):
+        """Add the currently selected modifier from dropdown"""
+        selected_name = self.modifier_var.get()
+        if not selected_name:
+            return
+
+        # Find the modifier with this name
+        if self.get_modifiers:
+            for mod in self.get_modifiers():
+                if mod.get_name() == selected_name:
+                    if mod not in self.selected_modifiers:
+                        self.selected_modifiers.append(mod)
+                        self._update_modifiers_display()
+                        self.update_modifier_options()  # Refresh dropdown
+                        self.on_change()
+                    break
+
+    def _remove_modifier(self, mod):
+        """Remove a specific modifier from the selection"""
+        if mod in self.selected_modifiers:
+            self.selected_modifiers.remove(mod)
+            self._update_modifiers_display()
+            self.update_modifier_options()  # Refresh dropdown
+            self.on_change()
+
+    def _update_modifiers_display(self):
+        """Update the display of selected modifiers"""
+        # Clear existing widgets
+        for _, frame in self.modifier_widgets:
+            frame.destroy()
+        self.modifier_widgets.clear()
+
+        # Create widgets for each selected modifier
+        for mod in self.selected_modifiers:
+            mod_frame = ttk.Frame(self.modifiers_frame)
+            mod_frame.pack(side="left", padx=2)
+
+            name = mod.get_name()
+            mod_type = mod.get_type()
+            value = mod.get_value()
+            if mod_type == "flat":
+                display = f"{name}: +{value:.0f}"
+            else:
+                display = f"{name}: {value:.0f}%"
+
+            ttk.Label(mod_frame, text=display, font=('Arial', 8),
+                      foreground='#555').pack(side="left")
+
+            # Remove button for this modifier
+            remove_btn = ttk.Button(mod_frame, text="✕", width=2,
+                                    command=lambda m=mod: self._remove_modifier(m))
+            remove_btn.pack(side="left", padx=1)
+
+            self.modifier_widgets.append((mod, mod_frame))
+
+    def get_selected_modifiers(self):
+        """Get list of currently selected modifiers"""
+        return self.selected_modifiers
+
+    def get_selected_modifier_values(self):
+        """Get flat and percentage modifier values from selected modifiers"""
+        flat_mods = []
+        pct_mods = []
+        for mod in self.selected_modifiers:
+            if mod.is_enabled():
+                value = mod.get_value()
+                if mod.get_type() == "flat":
+                    flat_mods.append(value)
+                else:
+                    pct_mods.append(value)
+        return flat_mods, pct_mods
 
     def is_enabled(self):
         """Check if row is enabled"""
@@ -293,9 +412,9 @@ class AttackRow:
         else:
             self.eval_var.set("")
 
-    def get_results(self, flat_mods=None, pct_mods=None):
+    def get_results(self):
         """
-        Get calculation results.
+        Get calculation results using selected modifiers.
 
         Returns:
             Tuple of (damage_per_hit, total_damage, attack_rate),
@@ -304,6 +423,7 @@ class AttackRow:
         if not self.enabled_var.get():
             return (0, 0, 0)
 
+        flat_mods, pct_mods = self.get_selected_modifier_values()
         dph = self.calculate_damage_per_hit(flat_mods, pct_mods)
         hits = self.get_hits()
         total = dph * hits

@@ -70,9 +70,6 @@ class TargetsSection:
         self.targets_container = ttk.Frame(self.section_frame)
         self.targets_container.pack(fill="x", pady=5)
 
-        # Bottom separator
-        ttk.Separator(self.section_frame, orient='horizontal').pack(fill="x", pady=5)
-
     def _on_columns_changed(self, num_columns):
         """Handle column count changes"""
         for row in self.target_rows:

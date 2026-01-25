@@ -79,26 +79,28 @@ class Modifier(ABC):
         """
         pass
 
-    def get_magic_damage_for_hit(self, hit_number):
+    def get_magic_damage_for_hit(self, hit_number, physical_damage=0):
         """
         Calculate magic damage for a specific hit (reduced by magic resistance).
         Override in modifiers that deal magic damage.
 
         Args:
             hit_number: The hit number (1-indexed)
+            physical_damage: The physical damage for this hit (for % based magic)
 
         Returns:
             Magic damage for this hit (default: 0)
         """
         return 0
 
-    def get_total_magic_damage_for_hits(self, num_hits):
+    def get_total_magic_damage_for_hits(self, num_hits, total_physical_damage=0):
         """
         Calculate total magic damage across multiple hits.
         Override in modifiers that deal magic damage.
 
         Args:
             num_hits: Number of hits
+            total_physical_damage: Total physical damage across hits (for % based magic)
 
         Returns:
             Total magic damage across all hits (default: 0)
@@ -502,12 +504,13 @@ class MagicDamageOnHitModifier(Modifier):
         """
         return base_dph * num_hits
 
-    def get_magic_damage_for_hit(self, hit_number):
+    def get_magic_damage_for_hit(self, hit_number, physical_damage=0):
         """
         Calculate average magic damage for a specific hit.
 
         Args:
             hit_number: The hit number
+            physical_damage: Not used (flat magic damage)
 
         Returns:
             Average magic damage for this hit
@@ -519,12 +522,13 @@ class MagicDamageOnHitModifier(Modifier):
         damage = self._get_magic_damage()
         return chance * damage
 
-    def get_total_magic_damage_for_hits(self, num_hits):
+    def get_total_magic_damage_for_hits(self, num_hits, total_physical_damage=0):
         """
         Calculate total average magic damage across multiple hits.
 
         Args:
             num_hits: Number of hits
+            total_physical_damage: Not used (flat magic damage)
 
         Returns:
             Total average magic damage
@@ -836,6 +840,147 @@ class TrueStrikeModifier(Modifier):
     def get_total_damage_for_hits(self, num_hits, base_dph):
         """True strike doesn't modify damage directly"""
         return base_dph * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@Modifier.register
+class PhantomCritModifier(Modifier):
+    """
+    Phantom Crit: Chance to deal bonus magic damage based on physical damage.
+    On crit, deals a percentage of physical damage as additional magic damage.
+
+    Example: 30% crit chance, 80% bonus magic
+    Average magic damage per hit = physical_damage * 0.30 * 0.80
+    """
+
+    TYPE_NAME = "Phantom Crit"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Phantom Crit",
+                  font=('Arial', 9, 'bold'), foreground='#9400D3').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Phantom Crit")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=12)
+        label_entry.pack(side="left", padx=2)
+
+        # Crit chance input
+        ttk.Label(self.frame, text="Crit:").pack(side="left", padx=(10, 0))
+        self.crit_chance_var = tk.StringVar(value="30")
+        self.crit_chance_var.trace('w', lambda *args: self.on_change())
+        crit_entry = ttk.Entry(self.frame, textvariable=self.crit_chance_var, width=4)
+        crit_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Bonus magic damage input
+        ttk.Label(self.frame, text="Bonus Magic:").pack(side="left", padx=(10, 0))
+        self.bonus_magic_var = tk.StringVar(value="80")
+        self.bonus_magic_var.trace('w', lambda *args: self.on_change())
+        bonus_entry = ttk.Entry(self.frame, textvariable=self.bonus_magic_var, width=4)
+        bonus_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        crit = self._get_crit_chance()
+        bonus = self._get_bonus_magic()
+        if crit > 0 and bonus > 0:
+            avg_bonus = crit * bonus * 100
+            self.info_var.set(f"Avg: +{avg_bonus:.0f}% magic")
+        else:
+            self.info_var.set("")
+
+    def _get_crit_chance(self):
+        """Get crit chance as decimal (0-1)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.crit_chance_var.get(), variables)
+        if value is None:
+            return 0
+        return min(100, max(0, value)) / 100
+
+    def _get_bonus_magic(self):
+        """Get bonus magic damage as decimal (e.g., 80% -> 0.80)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.bonus_magic_var.get(), variables)
+        if value is None:
+            return 0
+        return max(0, value) / 100
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """Physical damage unchanged - magic damage is separate"""
+        return base_dph
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """Physical damage unchanged - magic damage is separate"""
+        return base_dph * num_hits
+
+    def get_magic_damage_for_hit(self, hit_number, physical_damage=0):
+        """
+        Calculate average magic damage for a specific hit.
+        Magic damage = physical_damage * crit_chance * bonus_magic
+
+        Args:
+            hit_number: The hit number
+            physical_damage: Physical damage for this hit
+
+        Returns:
+            Average magic damage for this hit
+        """
+        if not self.is_enabled():
+            return 0
+
+        crit = self._get_crit_chance()
+        bonus = self._get_bonus_magic()
+        return physical_damage * crit * bonus
+
+    def get_total_magic_damage_for_hits(self, num_hits, total_physical_damage=0):
+        """
+        Calculate total average magic damage across multiple hits.
+
+        Args:
+            num_hits: Number of hits
+            total_physical_damage: Total physical damage across all hits
+
+        Returns:
+            Total average magic damage
+        """
+        if not self.is_enabled():
+            return 0
+
+        crit = self._get_crit_chance()
+        bonus = self._get_bonus_magic()
+        return total_physical_damage * crit * bonus
 
     def update_display(self):
         """Update the display"""

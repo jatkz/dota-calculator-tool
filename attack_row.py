@@ -369,10 +369,13 @@ class AttackRow:
         Returns:
             Magic damage for this hit
         """
+        # Get physical damage for this hit (needed for % based magic damage)
+        physical_damage = self.get_damage_for_hit(hit_number)
+
         total_magic = 0
         for mod in self.selected_modifiers:
             if mod.is_enabled():
-                total_magic += mod.get_magic_damage_for_hit(hit_number)
+                total_magic += mod.get_magic_damage_for_hit(hit_number, physical_damage)
         return total_magic
 
     def get_total_magic_damage_for_hits(self, num_hits):
@@ -385,10 +388,13 @@ class AttackRow:
         Returns:
             Total magic damage across all hits
         """
+        # Get total physical damage (needed for % based magic damage)
+        total_physical = self.get_total_damage_for_hits(num_hits)
+
         total_magic = 0
         for mod in self.selected_modifiers:
             if mod.is_enabled():
-                total_magic += mod.get_total_magic_damage_for_hits(num_hits)
+                total_magic += mod.get_total_magic_damage_for_hits(num_hits, total_physical)
         return total_magic
 
     def get_combined_true_strike(self):

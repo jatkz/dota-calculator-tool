@@ -208,3 +208,139 @@ class FurySwipesModifier(ComplexModifier):
     def update_display(self):
         """Update the display"""
         self._update_info()
+
+
+@ComplexModifier.register
+class CritModifier(ComplexModifier):
+    """
+    Critical Strike: Chance to deal bonus damage on hit.
+    Average damage = base * (1 + crit_chance * (crit_multiplier - 1))
+
+    Example: 30% crit chance, 150% crit multiplier
+    Average = base * (1 + 0.3 * 0.5) = base * 1.15
+    """
+
+    TYPE_NAME = "Critical Strike"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Crit",
+                  font=('Arial', 9, 'bold'), foreground='#DC143C').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Crit")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=10)
+        label_entry.pack(side="left", padx=2)
+
+        # Crit chance input
+        ttk.Label(self.frame, text="Chance:").pack(side="left", padx=(10, 0))
+        self.chance_var = tk.StringVar(value="30")
+        self.chance_var.trace('w', lambda *args: self.on_change())
+        chance_entry = ttk.Entry(self.frame, textvariable=self.chance_var, width=4)
+        chance_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Crit multiplier input
+        ttk.Label(self.frame, text="Mult:").pack(side="left", padx=(10, 0))
+        self.mult_var = tk.StringVar(value="150")
+        self.mult_var.trace('w', lambda *args: self.on_change())
+        mult_entry = ttk.Entry(self.frame, textvariable=self.mult_var, width=4)
+        mult_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        chance = self._get_crit_chance()
+        mult = self._get_crit_multiplier()
+        if chance > 0 and mult > 1:
+            # Show average multiplier
+            avg_mult = 1 + chance * (mult - 1)
+            self.info_var.set(f"Avg: {avg_mult:.2f}x")
+        else:
+            self.info_var.set("")
+
+    def _get_crit_chance(self):
+        """Get crit chance as decimal (0-1)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.chance_var.get(), variables)
+        if value is None:
+            return 0
+        return min(100, max(0, value)) / 100  # Clamp 0-100, convert to decimal
+
+    def _get_crit_multiplier(self):
+        """Get crit multiplier as decimal (e.g., 150% -> 1.5)"""
+        if not self.enabled_var.get():
+            return 1
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.mult_var.get(), variables)
+        if value is None:
+            return 1
+        return max(100, value) / 100  # Min 100%, convert to decimal
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """
+        Calculate average damage for a hit with crit.
+
+        Args:
+            hit_number: The hit number (not used for crit, same every hit)
+            base_dph: Base damage per hit
+
+        Returns:
+            Average damage for this hit
+        """
+        if not self.is_enabled():
+            return base_dph
+
+        chance = self._get_crit_chance()
+        mult = self._get_crit_multiplier()
+        # Average damage = base * (1 + chance * (mult - 1))
+        avg_multiplier = 1 + chance * (mult - 1)
+        return base_dph * avg_multiplier
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """
+        Calculate total average damage across multiple hits with crit.
+
+        Args:
+            num_hits: Number of hits
+            base_dph: Base damage per hit
+
+        Returns:
+            Total average damage across all hits
+        """
+        if not self.is_enabled():
+            return base_dph * num_hits
+
+        chance = self._get_crit_chance()
+        mult = self._get_crit_multiplier()
+        avg_multiplier = 1 + chance * (mult - 1)
+        return base_dph * avg_multiplier * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()

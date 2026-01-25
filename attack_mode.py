@@ -6,6 +6,7 @@ from tkinter import ttk
 from constants import COLUMN_COLORS, DEFAULT_ATTACK_SPEED, DEFAULT_BAT
 from attack_row import AttackRow
 from modifier import Modifier
+from complex_modifiers import ComplexModifier
 from attack_calculations import (
     calculate_damage_for_n_hits,
     calculate_time_for_n_hits,
@@ -34,6 +35,7 @@ class AttackModeSection:
         self.visible = False
         self.attack_rows = []
         self.modifiers = []
+        self.complex_modifiers = []
         self.attack_row_counter = 0
 
         # Callback to notify when attack results change
@@ -78,8 +80,22 @@ class AttackModeSection:
         modifier_header.pack(fill="x", pady=(5, 5))
         ttk.Label(modifier_header, text="MODIFIERS",
                   font=('Arial', 10, 'bold')).pack(side="left")
-        ttk.Button(modifier_header, text="+ Add",
+        ttk.Button(modifier_header, text="+ Add Simple",
                    command=self.add_modifier).pack(side="right", padx=5)
+
+        # Complex modifier dropdown
+        complex_frame = ttk.Frame(self.section_frame)
+        complex_frame.pack(fill="x", pady=(0, 5))
+        ttk.Label(complex_frame, text="Add Complex:").pack(side="left", padx=5)
+        self.complex_type_var = tk.StringVar(value="")
+        self.complex_combo = ttk.Combobox(complex_frame, textvariable=self.complex_type_var,
+                                          state="readonly", width=15)
+        self.complex_combo['values'] = ComplexModifier.get_available_types()
+        if self.complex_combo['values']:
+            self.complex_type_var.set(self.complex_combo['values'][0])
+        self.complex_combo.pack(side="left", padx=2)
+        ttk.Button(complex_frame, text="+", width=2,
+                   command=self.add_complex_modifier).pack(side="left", padx=2)
 
         self.modifiers_container = ttk.Frame(self.section_frame)
         self.modifiers_container.pack(fill="x", pady=5)
@@ -143,12 +159,21 @@ class AttackModeSection:
 
     def get_modifiers_list(self):
         """
-        Get list of modifier objects.
+        Get list of simple modifier objects.
 
         Returns:
             List of Modifier objects
         """
         return self.modifiers
+
+    def get_complex_modifiers_list(self):
+        """
+        Get list of complex modifier objects.
+
+        Returns:
+            List of ComplexModifier objects
+        """
+        return self.complex_modifiers
 
     def add_attack_row(self):
         """Add a new attack row"""
@@ -161,10 +186,12 @@ class AttackModeSection:
             num_columns=self.get_num_columns(),
             get_variables=self.get_variables,
             get_modifiers=self.get_modifiers_list,
+            get_complex_modifiers=self.get_complex_modifiers_list,
             get_targets=self.get_targets
         )
         row.update_target_options()
         row.update_modifier_options()
+        row.update_complex_modifier_options()
         row.pack(fill="x", pady=2)
         self.attack_rows.append(row)
         self.calculate()
@@ -196,10 +223,46 @@ class AttackModeSection:
         self.update_modifier_options()
         self.calculate()
 
+    def add_complex_modifier(self):
+        """Add a new complex modifier from dropdown selection"""
+        type_name = self.complex_type_var.get()
+        if not type_name:
+            return
+
+        mod = ComplexModifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_complex_modifier_changed,
+            self.delete_complex_modifier,
+            get_variables=self.get_variables
+        )
+        if mod:
+            mod.pack(fill="x", pady=2)
+            self.complex_modifiers.append(mod)
+            self.update_complex_modifier_options()
+            self.calculate()
+
+    def delete_complex_modifier(self, mod):
+        """Delete a complex modifier"""
+        self.complex_modifiers.remove(mod)
+        mod.destroy()
+        self.update_complex_modifier_options()
+        self.calculate()
+
     def _on_modifier_changed(self):
-        """Called when a modifier's values change"""
+        """Called when a simple modifier's values change"""
         self.update_modifier_options()
         self.calculate()
+
+    def _on_complex_modifier_changed(self):
+        """Called when a complex modifier's values change"""
+        self.update_complex_modifier_options()
+        self.calculate()
+
+    def update_complex_modifier_options(self):
+        """Update complex modifier dropdown options for all attack rows"""
+        for row in self.attack_rows:
+            row.update_complex_modifier_options()
 
     def update_modifier_options(self):
         """Update modifier dropdown options for all attack rows"""
@@ -228,8 +291,13 @@ class AttackModeSection:
         for mod in self.modifiers:
             mod.update_display()
 
+        # Update complex modifier displays
+        for mod in self.complex_modifiers:
+            mod.update_display()
+
         # Build list of attack row results with their targets
-        # Each entry: (attack_label, target_label, dph_reduced, attack_rate)
+        # Each entry: (attack_label, target_label, row, target, attack_rate)
+        # We pass the row object so complex modifiers can calculate per-hit damage
         attack_results = []
         total_dph = 0
         total_damage = 0
@@ -245,14 +313,12 @@ class AttackModeSection:
             targets = row.get_selected_targets()
             for target in targets:
                 target_label = target.label_var.get()
-                reduction = target.get_physical_reduction()
-                dph_reduced = dph * (1 - reduction)
-                attack_results.append((attack_label, target_label, dph_reduced, attack_rate))
+                attack_results.append((attack_label, target_label, row, target, attack_rate))
 
         # Calculate average attack rate
         avg_attack_rate = 1.0
         if attack_results:
-            rates = [r[2] for r in attack_results if r[2] > 0]
+            rates = [r[4] for r in attack_results if r[4] > 0]
             if rates:
                 avg_attack_rate = sum(rates) / len(rates)
 
@@ -284,16 +350,19 @@ class AttackModeSection:
                           font=('Arial', 8)).pack(side="left")
 
             # One row per attack+target combination showing damage for 1-10 hits
-            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
+            for i, (attack_label, target_label, row, target, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.n_hits_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
                 label_text = f"{attack_label} > {target_label}:"
                 ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
+                reduction = target.get_physical_reduction()
                 for n in range(1, 11):
-                    damage = calculate_damage_for_n_hits(dph, n)
-                    ttk.Label(row_frame, text=f"{damage:.0f}", width=7,
+                    # Use row's method to calculate total damage for N hits (handles complex mods)
+                    total_damage = row.get_total_damage_for_hits(n)
+                    damage_reduced = total_damage * (1 - reduction)
+                    ttk.Label(row_frame, text=f"{damage_reduced:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
             self.n_hits_frame.pack_forget()
@@ -317,7 +386,7 @@ class AttackModeSection:
                           font=('Arial', 8)).pack(side="left")
 
             # One row per attack+target combination showing time for 1-10 hits
-            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
+            for i, (attack_label, target_label, row, target, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.time_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
@@ -352,18 +421,33 @@ class AttackModeSection:
                           font=('Arial', 8)).pack(side="left")
 
             # One row per attack+target combination showing DPS and damage over 1-10 seconds
-            for i, (attack_label, target_label, dph, attack_rate) in enumerate(attack_results):
+            for i, (attack_label, target_label, row, target, attack_rate) in enumerate(attack_results):
                 row_frame = ttk.Frame(self.dps_container)
                 row_frame.pack(fill="x")
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
-                dps = calculate_dps(dph, attack_rate)
+                reduction = target.get_physical_reduction()
+
+                # For DPS with complex modifiers, calculate damage over 10 seconds and divide
+                hits_in_10s = int(attack_rate * 10)
+                if hits_in_10s > 0:
+                    total_10s = row.get_total_damage_for_hits(hits_in_10s) * (1 - reduction)
+                    dps = total_10s / 10
+                else:
+                    dps = 0
+
                 label_text = f"{attack_label} > {target_label}:"
                 ttk.Label(row_frame, text=label_text, width=20,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
                 ttk.Label(row_frame, text=f"{dps:.1f}", width=7,
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left")
-                for n in range(1, 11):
-                    damage = calculate_damage_in_time(dph, attack_rate, n)
+
+                for seconds in range(1, 11):
+                    # Calculate hits in this time period
+                    hits = int(attack_rate * seconds)
+                    if hits > 0:
+                        damage = row.get_total_damage_for_hits(hits) * (1 - reduction)
+                    else:
+                        damage = 0
                     ttk.Label(row_frame, text=f"{damage:.0f}", width=7,
                               foreground=color, font=('Arial', 8)).pack(side="left")
         else:
@@ -385,6 +469,10 @@ class AttackModeSection:
         for mod in self.modifiers[:]:
             mod.destroy()
         self.modifiers.clear()
+
+        for mod in self.complex_modifiers[:]:
+            mod.destroy()
+        self.complex_modifiers.clear()
 
         self.show_n_hits_range.set(False)
         self.show_time_range.set(False)

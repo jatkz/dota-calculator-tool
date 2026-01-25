@@ -92,6 +92,14 @@ class TargetRow:
         mr_entry.pack(side="left", padx=2)
         ttk.Label(input_frame, text="%").pack(side="left")
 
+        # Evasion
+        ttk.Label(input_frame, text="Evasion:").pack(side="left", padx=(10, 0))
+        self.evasion_var = tk.StringVar(value="0")
+        self.evasion_var.trace('w', lambda *args: self.on_change())
+        evasion_entry = ttk.Entry(input_frame, textvariable=self.evasion_var, width=4)
+        evasion_entry.pack(side="left", padx=2)
+        ttk.Label(input_frame, text="%").pack(side="left")
+
         # Delete button
         delete_btn = ttk.Button(input_frame, text="X", width=2,
                                 command=lambda: self.on_delete(self))
@@ -171,9 +179,15 @@ class TargetRow:
         mr = safe_eval(self.mr_var.get(), variables)
         return (mr / 100) if mr is not None else 0.25
 
+    def get_evasion(self):
+        """Get evasion as decimal"""
+        variables = self.get_variables() if self.get_variables else None
+        evasion = safe_eval(self.evasion_var.get(), variables)
+        return (evasion / 100) if evasion is not None else 0
+
     def apply_reductions(self, physical_damage, magic_damage=0):
         """
-        Apply armor and magic resistance reductions.
+        Apply armor, magic resistance, and evasion reductions.
 
         Args:
             physical_damage: Raw physical damage
@@ -182,8 +196,12 @@ class TargetRow:
         Returns:
             Total reduced damage (physical + magic after reductions)
         """
-        phys_reduced = physical_damage * (1 - self.get_physical_reduction())
-        magic_reduced = magic_damage * (1 - self.get_magic_resistance())
+        evasion = self.get_evasion()
+        # Evasion affects both physical and on-hit magic damage (attack misses = no damage)
+        phys_after_evasion = physical_damage * (1 - evasion)
+        magic_after_evasion = magic_damage * (1 - evasion)
+        phys_reduced = phys_after_evasion * (1 - self.get_physical_reduction())
+        magic_reduced = magic_after_evasion * (1 - self.get_magic_resistance())
         return phys_reduced + magic_reduced
 
     def update_display(self, attack_results):
@@ -220,10 +238,11 @@ class TargetRow:
         hp = self.get_hp()
         regen = self.get_regen()
         phys_reduction = self.get_physical_reduction()
+        evasion = self.get_evasion()
 
-        # Apply physical reduction to damage per hit
-        reduced_dph = dph * (1 - phys_reduction)
-        reduced_total = total * (1 - phys_reduction)
+        # Apply evasion and physical reduction to damage per hit
+        reduced_dph = dph * (1 - evasion) * (1 - phys_reduction)
+        reduced_total = total * (1 - evasion) * (1 - phys_reduction)
 
         parts = [f"Dmg/hit: {reduced_dph:.0f}"]
 

@@ -307,13 +307,16 @@ class AttackModeSection:
                           foreground=color, font=('Arial', 8, 'bold')).pack(side="left", padx=5)
                 phys_reduction = target.get_physical_reduction()
                 magic_reduction = target.get_magic_resistance()
+                evasion = target.get_evasion()
+                true_strike = row.get_combined_true_strike()
+                effective_evasion = evasion * (1 - true_strike)
                 for n in range(1, 11):
-                    # Physical damage reduced by armor
+                    # Physical damage reduced by effective evasion and armor
                     phys_damage = row.get_total_damage_for_hits(n)
-                    phys_reduced = phys_damage * (1 - phys_reduction)
-                    # Magic damage reduced by magic resistance
+                    phys_reduced = phys_damage * (1 - effective_evasion) * (1 - phys_reduction)
+                    # Magic damage from hits reduced by effective evasion and magic resistance
                     magic_damage = row.get_total_magic_damage_for_hits(n)
-                    magic_reduced = magic_damage * (1 - magic_reduction)
+                    magic_reduced = magic_damage * (1 - effective_evasion) * (1 - magic_reduction)
                     # Total damage
                     total = phys_reduced + magic_reduced
                     ttk.Label(row_frame, text=f"{total:.0f}", width=7,
@@ -381,12 +384,15 @@ class AttackModeSection:
                 color = COLUMN_COLORS[i % len(COLUMN_COLORS)]
                 phys_reduction = target.get_physical_reduction()
                 magic_reduction = target.get_magic_resistance()
+                evasion = target.get_evasion()
+                true_strike = row.get_combined_true_strike()
+                effective_evasion = evasion * (1 - true_strike)
 
-                # For DPS with complex modifiers, calculate damage over 10 seconds and divide
+                # For DPS with modifiers, calculate damage over 10 seconds and divide
                 hits_in_10s = int(attack_rate * 10)
                 if hits_in_10s > 0:
-                    phys_10s = row.get_total_damage_for_hits(hits_in_10s) * (1 - phys_reduction)
-                    magic_10s = row.get_total_magic_damage_for_hits(hits_in_10s) * (1 - magic_reduction)
+                    phys_10s = row.get_total_damage_for_hits(hits_in_10s) * (1 - effective_evasion) * (1 - phys_reduction)
+                    magic_10s = row.get_total_magic_damage_for_hits(hits_in_10s) * (1 - effective_evasion) * (1 - magic_reduction)
                     dps = (phys_10s + magic_10s) / 10
                 else:
                     dps = 0
@@ -401,8 +407,8 @@ class AttackModeSection:
                     # Calculate hits in this time period
                     hits = int(attack_rate * seconds)
                     if hits > 0:
-                        phys_damage = row.get_total_damage_for_hits(hits) * (1 - phys_reduction)
-                        magic_damage = row.get_total_magic_damage_for_hits(hits) * (1 - magic_reduction)
+                        phys_damage = row.get_total_damage_for_hits(hits) * (1 - effective_evasion) * (1 - phys_reduction)
+                        magic_damage = row.get_total_magic_damage_for_hits(hits) * (1 - effective_evasion) * (1 - magic_reduction)
                         total = phys_damage + magic_damage
                     else:
                         total = 0

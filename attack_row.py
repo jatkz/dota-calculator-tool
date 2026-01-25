@@ -391,6 +391,23 @@ class AttackRow:
                 total_magic += mod.get_total_magic_damage_for_hits(num_hits)
         return total_magic
 
+    def get_combined_true_strike(self):
+        """
+        Calculate combined true strike chance from all modifiers.
+        Multiple sources stack multiplicatively:
+        combined = 1 - (1 - ts1) * (1 - ts2) * ...
+
+        Returns:
+            Combined true strike chance as decimal (0-1)
+        """
+        miss_chance = 1.0
+        for mod in self.selected_modifiers:
+            if mod.is_enabled():
+                ts = mod.get_true_strike_chance()
+                if ts > 0:
+                    miss_chance *= (1 - ts)
+        return 1 - miss_chance
+
     def is_enabled(self):
         """Check if row is enabled"""
         return self.enabled_var.get()

@@ -105,6 +105,16 @@ class Modifier(ABC):
         """
         return 0
 
+    def get_true_strike_chance(self):
+        """
+        Get the true strike chance (pierce evasion) as decimal.
+        Override in modifiers that grant true strike.
+
+        Returns:
+            True strike chance as decimal (0-1), default: 0
+        """
+        return 0
+
     def is_enabled(self):
         """Check if modifier is enabled"""
         return self.enabled_var.get()
@@ -415,6 +425,12 @@ class MagicDamageOnHitModifier(Modifier):
         damage_entry = ttk.Entry(self.frame, textvariable=self.damage_var, width=5)
         damage_entry.pack(side="left", padx=2)
 
+        # True Strike toggle
+        self.true_strike_var = tk.BooleanVar(value=True)
+        self.true_strike_var.trace('w', lambda *args: self.on_change())
+        ttk.Checkbutton(self.frame, text="True Strike",
+                        variable=self.true_strike_var).pack(side="left", padx=(10, 0))
+
         # Info display
         self.info_var = tk.StringVar(value="")
         info_label = ttk.Label(self.frame, textvariable=self.info_var,
@@ -519,6 +535,12 @@ class MagicDamageOnHitModifier(Modifier):
         chance = self._get_proc_chance()
         damage = self._get_magic_damage()
         return chance * damage * num_hits
+
+    def get_true_strike_chance(self):
+        """Return proc chance as true strike if checkbox is enabled"""
+        if self.is_enabled() and self.true_strike_var.get():
+            return self._get_proc_chance()  # Use the proc chance %
+        return 0
 
     def update_display(self):
         """Update the display"""
@@ -726,6 +748,94 @@ class PercentageDamageModifier(Modifier):
         if not self.is_enabled():
             return base_dph * num_hits
         return base_dph * (1 + self._get_percentage()) * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@Modifier.register
+class TrueStrikeModifier(Modifier):
+    """
+    True Strike: Chance to pierce evasion on attacks.
+    Multiple true strike sources stack multiplicatively.
+
+    Example: 30% true strike + 50% true strike
+    Combined = 1 - (1 - 0.3) * (1 - 0.5) = 1 - 0.35 = 65%
+    """
+
+    TYPE_NAME = "True Strike"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="True Strike",
+                  font=('Arial', 9, 'bold'), foreground='#FFD700').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="True Strike")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=12)
+        label_entry.pack(side="left", padx=2)
+
+        # Pierce chance input
+        ttk.Label(self.frame, text="Pierce:").pack(side="left", padx=(10, 0))
+        self.chance_var = tk.StringVar(value="100")
+        self.chance_var.trace('w', lambda *args: self.on_change())
+        chance_entry = ttk.Entry(self.frame, textvariable=self.chance_var, width=4)
+        chance_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        chance = self._get_pierce_chance()
+        if chance > 0:
+            self.info_var.set(f"= {chance*100:.0f}% pierce")
+        else:
+            self.info_var.set("")
+
+    def _get_pierce_chance(self):
+        """Get pierce chance as decimal (0-1)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.chance_var.get(), variables)
+        if value is None:
+            return 0
+        return min(100, max(0, value)) / 100  # Clamp 0-100, convert to decimal
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_true_strike_chance(self):
+        """Get the true strike chance to pierce evasion"""
+        return self._get_pierce_chance()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """True strike doesn't modify damage directly"""
+        return base_dph
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """True strike doesn't modify damage directly"""
+        return base_dph * num_hits
 
     def update_display(self):
         """Update the display"""

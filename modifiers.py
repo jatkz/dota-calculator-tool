@@ -1,4 +1,4 @@
-"""Complex modifiers with special stacking or conditional behavior"""
+"""modifiers with simple, special stacking or conditional behavior"""
 
 import tkinter as tk
 from tkinter import ttk
@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from utils import safe_eval
 
 
-class ComplexModifier(ABC):
+class Modifier(ABC):
     """Base class for complex modifiers with special behavior"""
 
     # Class-level registry of available complex modifier types
@@ -118,8 +118,8 @@ class ComplexModifier(ABC):
         self.frame.destroy()
 
 
-@ComplexModifier.register
-class FurySwipesModifier(ComplexModifier):
+@Modifier.register
+class FurySwipesModifier(Modifier):
     """
     Fury Swipes: Each attack adds stacking bonus damage.
     Hit 1: +N damage
@@ -236,8 +236,8 @@ class FurySwipesModifier(ComplexModifier):
         self._update_info()
 
 
-@ComplexModifier.register
-class CritModifier(ComplexModifier):
+@Modifier.register
+class CritModifier(Modifier):
     """
     Critical Strike: Chance to deal bonus damage on hit.
     Average damage = base * (1 + crit_chance * (crit_multiplier - 1))
@@ -372,8 +372,8 @@ class CritModifier(ComplexModifier):
         self._update_info()
 
 
-@ComplexModifier.register
-class MagicDamageOnHitModifier(ComplexModifier):
+@Modifier.register
+class MagicDamageOnHitModifier(Modifier):
     """
     Magic Damage on Hit: Chance to deal bonus magic damage on each attack.
     Average bonus damage per hit = proc_chance * magic_damage
@@ -519,6 +519,213 @@ class MagicDamageOnHitModifier(ComplexModifier):
         chance = self._get_proc_chance()
         damage = self._get_magic_damage()
         return chance * damage * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@Modifier.register
+class FlatDamageModifier(Modifier):
+    """
+    Flat Damage: Adds a flat amount to damage per hit.
+    Same functionality as simple Flat + modifier.
+    """
+
+    TYPE_NAME = "Flat Damage"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Flat +",
+                  font=('Arial', 9, 'bold'), foreground='#228B22').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Flat Damage")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=12)
+        label_entry.pack(side="left", padx=2)
+
+        # Damage value input
+        ttk.Label(self.frame, text="Value:").pack(side="left", padx=(10, 0))
+        self.value_var = tk.StringVar(value="0")
+        self.value_var.trace('w', lambda *args: self.on_change())
+        value_entry = ttk.Entry(self.frame, textvariable=self.value_var, width=6)
+        value_entry.pack(side="left", padx=2)
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        value = self._get_flat_value()
+        if value != 0:
+            self.info_var.set(f"= +{value:.1f}")
+        else:
+            self.info_var.set("")
+
+    def _get_flat_value(self):
+        """Get the flat damage value"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.value_var.get(), variables)
+        return value if value is not None else 0
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """
+        Add flat damage to base damage.
+
+        Args:
+            hit_number: The hit number (not used for flat)
+            base_dph: Base damage per hit
+
+        Returns:
+            Base damage plus flat bonus
+        """
+        if not self.is_enabled():
+            return base_dph
+        return base_dph + self._get_flat_value()
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """
+        Calculate total damage with flat bonus across multiple hits.
+
+        Args:
+            num_hits: Number of hits
+            base_dph: Base damage per hit
+
+        Returns:
+            Total damage across all hits
+        """
+        if not self.is_enabled():
+            return base_dph * num_hits
+        return (base_dph + self._get_flat_value()) * num_hits
+
+    def update_display(self):
+        """Update the display"""
+        self._update_info()
+
+
+@Modifier.register
+class PercentageDamageModifier(Modifier):
+    """
+    Percentage Damage: Multiplies damage by a percentage.
+    Same functionality as simple Percent % modifier.
+
+    Example: 25% bonus damage
+    Damage = base * 1.25
+    """
+
+    TYPE_NAME = "Percentage Damage"
+
+    def _create_widgets(self):
+        # Enabled checkbox
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        enabled_cb = ttk.Checkbutton(self.frame, variable=self.enabled_var)
+        enabled_cb.pack(side="left", padx=(0, 5))
+
+        # Type label
+        ttk.Label(self.frame, text="Percent %",
+                  font=('Arial', 9, 'bold'), foreground='#9932CC').pack(side="left", padx=(0, 10))
+
+        # Label input
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value="Percent Bonus")
+        label_entry = ttk.Entry(self.frame, textvariable=self.label_var, width=12)
+        label_entry.pack(side="left", padx=2)
+
+        # Percentage value input
+        ttk.Label(self.frame, text="Value:").pack(side="left", padx=(10, 0))
+        self.value_var = tk.StringVar(value="0")
+        self.value_var.trace('w', lambda *args: self.on_change())
+        value_entry = ttk.Entry(self.frame, textvariable=self.value_var, width=6)
+        value_entry.pack(side="left", padx=2)
+        ttk.Label(self.frame, text="%").pack(side="left")
+
+        # Info display
+        self.info_var = tk.StringVar(value="")
+        info_label = ttk.Label(self.frame, textvariable=self.info_var,
+                               foreground='#666', font=('Arial', 8))
+        info_label.pack(side="left", padx=5)
+
+        # Delete button
+        delete_btn = ttk.Button(self.frame, text="X", width=2,
+                                command=lambda: self.on_delete(self))
+        delete_btn.pack(side="right", padx=5)
+
+        self._update_info()
+
+    def _update_info(self):
+        """Update the info display"""
+        pct = self._get_percentage()
+        if pct != 0:
+            multiplier = 1 + pct
+            self.info_var.set(f"= {multiplier:.2f}x")
+        else:
+            self.info_var.set("")
+
+    def _get_percentage(self):
+        """Get the percentage as decimal (e.g., 25% -> 0.25)"""
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.value_var.get(), variables)
+        if value is None:
+            return 0
+        return value / 100  # Convert percentage to decimal
+
+    def get_label(self):
+        """Get the display label"""
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        """
+        Multiply base damage by percentage bonus.
+
+        Args:
+            hit_number: The hit number (not used for percentage)
+            base_dph: Base damage per hit
+
+        Returns:
+            Base damage multiplied by (1 + percentage)
+        """
+        if not self.is_enabled():
+            return base_dph
+        return base_dph * (1 + self._get_percentage())
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        """
+        Calculate total damage with percentage bonus across multiple hits.
+
+        Args:
+            num_hits: Number of hits
+            base_dph: Base damage per hit
+
+        Returns:
+            Total damage across all hits
+        """
+        if not self.is_enabled():
+            return base_dph * num_hits
+        return base_dph * (1 + self._get_percentage()) * num_hits
 
     def update_display(self):
         """Update the display"""

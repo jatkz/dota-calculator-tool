@@ -12,8 +12,7 @@ class AttackRow:
     """Represents a single attack configuration row"""
 
     def __init__(self, parent, row_num, on_change_callback, on_delete_callback,
-                 num_columns=1, get_variables=None, get_modifiers=None,
-                 get_complex_modifiers=None, get_targets=None):
+                 num_columns=1, get_variables=None, get_modifiers=None, get_targets=None):
         """
         Initialize an attack row.
 
@@ -24,8 +23,7 @@ class AttackRow:
             on_delete_callback: Called when delete button is clicked
             num_columns: Number of comparison columns
             get_variables: Callback to get current variables dict
-            get_modifiers: Callback to get simple modifiers list
-            get_complex_modifiers: Callback to get complex modifiers list
+            get_modifiers: Callback to get modifiers list
             get_targets: Callback to get available targets list
         """
         self.parent = parent
@@ -35,11 +33,9 @@ class AttackRow:
         self.num_columns = num_columns
         self.get_variables = get_variables
         self.get_modifiers = get_modifiers
-        self.get_complex_modifiers = get_complex_modifiers
         self.get_targets = get_targets
         self.selected_targets = []  # List of selected target rows
-        self.selected_modifiers = []  # List of selected simple modifiers
-        self.selected_complex_modifiers = []  # List of selected complex modifiers
+        self.selected_modifiers = []  # List of selected modifiers
 
         self.frame = ttk.Frame(parent)
 
@@ -129,38 +125,24 @@ class AttackRow:
         ttk.Label(selection_frame, text="Modifier:").pack(side="left")
         self.modifier_var = tk.StringVar(value="")
         self.modifier_combo = ttk.Combobox(selection_frame, textvariable=self.modifier_var,
-                                           state="readonly", width=10)
+                                           state="readonly", width=14)
         self.modifier_combo['values'] = []
         self.modifier_combo.pack(side="left", padx=2)
 
         # Add modifier button
         self.add_modifier_btn = ttk.Button(selection_frame, text="+", width=2,
                                            command=self._add_selected_modifier)
-        self.add_modifier_btn.pack(side="left", padx=(0, 10))
-
-        # Complex modifier dropdown and add button
-        ttk.Label(selection_frame, text="Complex:").pack(side="left")
-        self.complex_mod_var = tk.StringVar(value="")
-        self.complex_mod_combo = ttk.Combobox(selection_frame, textvariable=self.complex_mod_var,
-                                              state="readonly", width=12)
-        self.complex_mod_combo['values'] = []
-        self.complex_mod_combo.pack(side="left", padx=2)
-
-        # Add complex modifier button
-        self.add_complex_mod_btn = ttk.Button(selection_frame, text="+", width=2,
-                                              command=self._add_selected_complex_modifier)
-        self.add_complex_mod_btn.pack(side="left")
+        self.add_modifier_btn.pack(side="left")
 
         # Row for displaying selected targets
         self.targets_frame = ttk.Frame(self.frame)
         self.targets_frame.pack(fill="x", pady=(2, 0), padx=(25, 0))
         self.target_widgets = []  # List of (target, frame) for removal
 
-        # Row for displaying selected modifiers (simple + complex)
+        # Row for displaying selected modifiers
         self.modifiers_frame = ttk.Frame(self.frame)
         self.modifiers_frame.pack(fill="x", pady=(2, 2), padx=(25, 0))
         self.modifier_widgets = []  # List of (modifier, frame) for removal
-        self.complex_modifier_widgets = []  # List of (complex_mod, frame) for removal
 
     def update_columns(self, num_columns):
         """Update the number of columns"""
@@ -252,8 +234,8 @@ class AttackRow:
         for mod in modifiers:
             # Don't show modifiers already selected
             if mod not in self.selected_modifiers:
-                name = mod.get_name()
-                options.append(name)
+                label = mod.get_label()
+                options.append(label)
 
         self.modifier_combo['values'] = options
         if options:
@@ -268,14 +250,14 @@ class AttackRow:
 
     def _add_selected_modifier(self):
         """Add the currently selected modifier from dropdown"""
-        selected_name = self.modifier_var.get()
-        if not selected_name:
+        selected_label = self.modifier_var.get()
+        if not selected_label:
             return
 
-        # Find the modifier with this name
+        # Find the modifier with this label
         if self.get_modifiers:
             for mod in self.get_modifiers():
-                if mod.get_name() == selected_name:
+                if mod.get_label() == selected_label:
                     if mod not in self.selected_modifiers:
                         self.selected_modifiers.append(mod)
                         self._update_modifiers_display()
@@ -303,16 +285,9 @@ class AttackRow:
             mod_frame = ttk.Frame(self.modifiers_frame)
             mod_frame.pack(side="left", padx=2)
 
-            name = mod.get_name()
-            mod_type = mod.get_type()
-            value = mod.get_value()
-            if mod_type == "flat":
-                display = f"{name}: +{value:.0f}"
-            else:
-                display = f"{name}: {value:.0f}%"
-
-            ttk.Label(mod_frame, text=display, font=('Arial', 8),
-                      foreground='#555').pack(side="left")
+            label = mod.get_label()
+            ttk.Label(mod_frame, text=label, font=('Arial', 8, 'bold'),
+                      foreground='#8B4513').pack(side="left")
 
             # Remove button for this modifier
             remove_btn = ttk.Button(mod_frame, text="✕", width=2,
@@ -325,98 +300,9 @@ class AttackRow:
         """Get list of currently selected modifiers"""
         return self.selected_modifiers
 
-    def get_selected_modifier_values(self):
-        """Get flat and percentage modifier values from selected modifiers"""
-        flat_mods = []
-        pct_mods = []
-        for mod in self.selected_modifiers:
-            if mod.is_enabled():
-                value = mod.get_value()
-                if mod.get_type() == "flat":
-                    flat_mods.append(value)
-                else:
-                    pct_mods.append(value)
-        return flat_mods, pct_mods
-
-    def update_complex_modifier_options(self):
-        """Update the complex modifier dropdown with available complex modifiers"""
-        if not self.get_complex_modifiers:
-            return
-
-        complex_mods = self.get_complex_modifiers()
-        options = []
-        for mod in complex_mods:
-            # Don't show complex modifiers already selected
-            if mod not in self.selected_complex_modifiers:
-                label = mod.get_label()
-                options.append(label)
-
-        self.complex_mod_combo['values'] = options
-        if options:
-            self.complex_mod_var.set(options[0])
-        else:
-            self.complex_mod_var.set("")
-
-        # Remove any selected complex modifiers that no longer exist
-        available = self.get_complex_modifiers() if self.get_complex_modifiers else []
-        self.selected_complex_modifiers = [m for m in self.selected_complex_modifiers if m in available]
-        self._update_complex_modifiers_display()
-
-    def _add_selected_complex_modifier(self):
-        """Add the currently selected complex modifier from dropdown"""
-        selected_label = self.complex_mod_var.get()
-        if not selected_label:
-            return
-
-        # Find the complex modifier with this label
-        if self.get_complex_modifiers:
-            for mod in self.get_complex_modifiers():
-                if mod.get_label() == selected_label:
-                    if mod not in self.selected_complex_modifiers:
-                        self.selected_complex_modifiers.append(mod)
-                        self._update_complex_modifiers_display()
-                        self.update_complex_modifier_options()  # Refresh dropdown
-                        self.on_change()
-                    break
-
-    def _remove_complex_modifier(self, mod):
-        """Remove a specific complex modifier from the selection"""
-        if mod in self.selected_complex_modifiers:
-            self.selected_complex_modifiers.remove(mod)
-            self._update_complex_modifiers_display()
-            self.update_complex_modifier_options()  # Refresh dropdown
-            self.on_change()
-
-    def _update_complex_modifiers_display(self):
-        """Update the display of selected complex modifiers"""
-        # Clear existing widgets
-        for _, frame in self.complex_modifier_widgets:
-            frame.destroy()
-        self.complex_modifier_widgets.clear()
-
-        # Create widgets for each selected complex modifier
-        for mod in self.selected_complex_modifiers:
-            mod_frame = ttk.Frame(self.modifiers_frame)
-            mod_frame.pack(side="left", padx=2)
-
-            label = mod.get_label()
-            ttk.Label(mod_frame, text=label, font=('Arial', 8, 'bold'),
-                      foreground='#8B4513').pack(side="left")
-
-            # Remove button for this complex modifier
-            remove_btn = ttk.Button(mod_frame, text="✕", width=2,
-                                    command=lambda m=mod: self._remove_complex_modifier(m))
-            remove_btn.pack(side="left", padx=1)
-
-            self.complex_modifier_widgets.append((mod, mod_frame))
-
-    def get_selected_complex_modifiers(self):
-        """Get list of currently selected complex modifiers"""
-        return self.selected_complex_modifiers
-
     def get_damage_for_hit(self, hit_number):
         """
-        Calculate damage for a specific hit number, accounting for complex modifiers.
+        Calculate damage for a specific hit number, accounting for modifiers.
 
         Args:
             hit_number: The hit number (1-indexed)
@@ -424,17 +310,17 @@ class AttackRow:
         Returns:
             Damage for this specific hit
         """
-        flat_mods, pct_mods = self.get_selected_modifier_values()
+        # Base damage is base + bonus
         base_dph = calculate_damage_per_hit(
             self.get_base_damage(),
             self.get_bonus_damage(),
-            flat_mods,
-            pct_mods
+            [],  # No flat mods - handled by modifiers
+            []   # No pct mods - handled by modifiers
         )
 
-        # Apply complex modifiers
+        # Apply modifiers
         damage = base_dph
-        for mod in self.selected_complex_modifiers:
+        for mod in self.selected_modifiers:
             if mod.is_enabled():
                 damage = mod.get_damage_for_hit(hit_number, damage)
 
@@ -442,7 +328,7 @@ class AttackRow:
 
     def get_total_damage_for_hits(self, num_hits):
         """
-        Calculate total damage for N hits, accounting for complex modifiers.
+        Calculate total damage for N hits, accounting for modifiers.
 
         Args:
             num_hits: Number of hits
@@ -450,24 +336,24 @@ class AttackRow:
         Returns:
             Total damage across all hits
         """
-        flat_mods, pct_mods = self.get_selected_modifier_values()
+        # Base damage is base + bonus
         base_dph = calculate_damage_per_hit(
             self.get_base_damage(),
             self.get_bonus_damage(),
-            flat_mods,
-            pct_mods
+            [],  # No flat mods - handled by modifiers
+            []   # No pct mods - handled by modifiers
         )
 
-        # If no complex modifiers, simple multiplication
-        if not self.selected_complex_modifiers:
+        # If no modifiers, simple multiplication
+        if not self.selected_modifiers:
             return base_dph * num_hits
 
-        # Apply complex modifiers - they may change damage per hit
+        # Apply modifiers - they may change damage per hit
         total = 0
         current_dph = base_dph
         for hit in range(1, num_hits + 1):
             hit_damage = current_dph
-            for mod in self.selected_complex_modifiers:
+            for mod in self.selected_modifiers:
                 if mod.is_enabled():
                     hit_damage = mod.get_damage_for_hit(hit, current_dph)
             total += hit_damage
@@ -475,7 +361,7 @@ class AttackRow:
 
     def get_magic_damage_for_hit(self, hit_number):
         """
-        Calculate magic damage for a specific hit from complex modifiers.
+        Calculate magic damage for a specific hit from modifiers.
 
         Args:
             hit_number: The hit number (1-indexed)
@@ -484,14 +370,14 @@ class AttackRow:
             Magic damage for this hit
         """
         total_magic = 0
-        for mod in self.selected_complex_modifiers:
+        for mod in self.selected_modifiers:
             if mod.is_enabled():
                 total_magic += mod.get_magic_damage_for_hit(hit_number)
         return total_magic
 
     def get_total_magic_damage_for_hits(self, num_hits):
         """
-        Calculate total magic damage for N hits from complex modifiers.
+        Calculate total magic damage for N hits from modifiers.
 
         Args:
             num_hits: Number of hits
@@ -500,7 +386,7 @@ class AttackRow:
             Total magic damage across all hits
         """
         total_magic = 0
-        for mod in self.selected_complex_modifiers:
+        for mod in self.selected_modifiers:
             if mod.is_enabled():
                 total_magic += mod.get_total_magic_damage_for_hits(num_hits)
         return total_magic
@@ -599,7 +485,7 @@ class AttackRow:
 
     def get_results(self):
         """
-        Get calculation results using selected modifiers.
+        Get calculation results.
 
         Returns:
             Tuple of (damage_per_hit, total_damage, attack_rate),
@@ -608,10 +494,10 @@ class AttackRow:
         if not self.enabled_var.get():
             return (0, 0, 0)
 
-        flat_mods, pct_mods = self.get_selected_modifier_values()
-        dph = self.calculate_damage_per_hit(flat_mods, pct_mods)
+        # Use the first hit's damage as base DPH (modifiers applied)
+        dph = self.get_damage_for_hit(1)
         hits = self.get_hits()
-        total = dph * hits
+        total = self.get_total_damage_for_hits(hits)
         attack_rate = self.get_attack_rate()
 
         return (dph, total, attack_rate)

@@ -90,7 +90,7 @@ class TargetsSection:
         # Update all target rows with new mode
         for row in self.target_rows:
             row.set_armor_mode(self.armor_mode)
-        self.calculate()
+        self._on_target_changed()
 
     def pack_content(self):
         """Pack the section content (called by parent's toggle)"""

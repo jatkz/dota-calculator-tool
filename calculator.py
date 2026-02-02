@@ -9,6 +9,7 @@ from utils import (
 from damage_row import DamageRow
 from targets_section import TargetsSection
 from attack_mode import AttackModeSection
+from spells_section import SpellsSection
 
 
 class DotaCalculator:
@@ -86,9 +87,11 @@ class DotaCalculator:
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
     def _on_targets_changed(self):
-        """Called when target values or list changes - update attack mode"""
+        """Called when target values or list changes - update attack mode and spells"""
         self.attack_mode.update_target_options()
         self.attack_mode.calculate()
+        self.spells_section.update_target_options()
+        self.spells_section.calculate()
 
     def create_widgets(self):
         # Main canvas and scrollbar for scrolling
@@ -341,6 +344,33 @@ class DotaCalculator:
 
         self.attack_mode_separator = ttk.Separator(main_frame, orient='horizontal')
 
+        # ============ SPELLS SECTION TOGGLE ============
+        self.spells_visible = False
+        self.spells_toggle_frame = ttk.Frame(main_frame)
+        self.spells_toggle_frame.pack(fill="x", pady=(5, 5))
+        self.spells_toggle_btn = ttk.Button(
+            self.spells_toggle_frame,
+            text="▶ Show Spells Section",
+            command=self.toggle_spells_section
+        )
+        self.spells_toggle_btn.pack(side="left")
+
+        # Container for Spells section
+        self.spells_container = ttk.Frame(main_frame)
+
+        # Spells Section
+        self.spells_section = SpellsSection(
+            self.spells_container,
+            get_variables=self.get_variables,
+            get_num_columns=lambda: self.num_columns,
+            on_columns_change_subscribe=self.subscribe_to_column_changes
+        )
+
+        # Connect targets to spells section for target selection dropdown
+        self.spells_section.set_get_targets(self.targets_section.get_target_rows)
+
+        self.spells_separator = ttk.Separator(main_frame, orient='horizontal')
+
         # Clear button (always visible at bottom)
         self.clear_button = ttk.Button(main_frame, text="Clear All", command=self.clear_all)
         self.clear_button.pack(pady=10)
@@ -557,6 +587,22 @@ class DotaCalculator:
             # Pack section contents if not already packed
             self.targets_section.pack_content()
             self.attack_mode.pack_content()
+            self.calculate_all()
+
+    def toggle_spells_section(self):
+        """Toggle the visibility of the Spells section"""
+        if self.spells_visible:
+            self.spells_container.pack_forget()
+            self.spells_separator.pack_forget()
+            self.spells_toggle_btn.config(text="▶ Show Spells Section")
+            self.spells_visible = False
+        else:
+            self.spells_container.pack(fill="x", pady=5, after=self.spells_toggle_frame)
+            self.spells_separator.pack(fill="x", pady=15, after=self.spells_container)
+            self.spells_toggle_btn.config(text="▼ Hide Spells Section")
+            self.spells_visible = True
+            # Pack section content if not already packed
+            self.spells_section.pack_content()
             self.calculate_all()
 
     def toggle_armor_mode(self):
@@ -844,6 +890,9 @@ class DotaCalculator:
             # Update target mode calculations
             self.targets_section.calculate()
 
+            # Update spells section calculations
+            self.spells_section.calculate()
+
         except ValueError:
             pass
 
@@ -877,9 +926,10 @@ class DotaCalculator:
             var_row['frame'].destroy()
         self.variable_rows.clear()
 
-        # Clear attack mode and target mode
+        # Clear attack mode, target mode, and spells
         self.attack_mode.clear()
         self.targets_section.clear()
+        self.spells_section.clear()
 
         self.add_physical_row()
         self.add_magic_row()

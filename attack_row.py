@@ -322,7 +322,7 @@ class AttackRow:
         damage = base_dph
         for mod in self.selected_modifiers:
             if mod.is_enabled():
-                damage = mod.get_damage_for_hit(hit_number, damage)
+                damage = mod.apply_damage_for_hit(hit_number, damage, base_dph)
 
         return damage
 
@@ -350,12 +350,11 @@ class AttackRow:
 
         # Apply modifiers - they may change damage per hit
         total = 0
-        current_dph = base_dph
         for hit in range(1, num_hits + 1):
-            hit_damage = current_dph
+            hit_damage = base_dph
             for mod in self.selected_modifiers:
                 if mod.is_enabled():
-                    hit_damage = mod.get_damage_for_hit(hit, current_dph)
+                    hit_damage = mod.apply_damage_for_hit(hit, hit_damage, base_dph)
             total += hit_damage
         return total
 

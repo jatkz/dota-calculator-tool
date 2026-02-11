@@ -107,6 +107,21 @@ class Modifier(ABC):
         """
         return 0
 
+    def apply_damage_for_hit(self, hit_number, current_dph, base_dph=None):
+        """
+        Apply this modifier to current hit damage.
+        Override when modifier behavior depends on original base damage.
+
+        Args:
+            hit_number: The hit number (1-indexed)
+            current_dph: Running damage value after previous modifiers
+            base_dph: Original base damage before any modifiers (optional)
+
+        Returns:
+            Updated running damage value
+        """
+        return self.get_damage_for_hit(hit_number, current_dph)
+
     def get_true_strike_chance(self):
         """
         Get the true strike chance (pierce evasion) as decimal.
@@ -697,6 +712,15 @@ class PercentageDamageModifier(Modifier):
         value_entry.pack(side="left", padx=2)
         ttk.Label(self.frame, text="%").pack(side="left")
 
+        # Toggle between applying to total running damage vs base-only damage
+        self.apply_to_total_var = tk.BooleanVar(value=True)
+        self.apply_to_total_var.trace('w', lambda *args: self.on_change())
+        ttk.Checkbutton(
+            self.frame,
+            text="Total",
+            variable=self.apply_to_total_var
+        ).pack(side="left", padx=(8, 0))
+
         # Info display
         self.info_var = tk.StringVar(value="")
         info_label = ttk.Label(self.frame, textvariable=self.info_var,
@@ -713,9 +737,10 @@ class PercentageDamageModifier(Modifier):
     def _update_info(self):
         """Update the info display"""
         pct = self._get_percentage()
+        mode = "total" if self.apply_to_total_var.get() else "base"
         if pct != 0:
             multiplier = 1 + pct
-            self.info_var.set(f"= {multiplier:.2f}x")
+            self.info_var.set(f"= {multiplier:.2f}x ({mode})")
         else:
             self.info_var.set("")
 
@@ -746,7 +771,28 @@ class PercentageDamageModifier(Modifier):
         """
         if not self.is_enabled():
             return base_dph
-        return base_dph * (1 + self._get_percentage())
+        # Fallback path when only a single value is provided.
+        return self.apply_damage_for_hit(hit_number, base_dph, base_dph)
+
+    def apply_damage_for_hit(self, hit_number, current_dph, base_dph=None):
+        """
+        Apply percentage either to current total or to base-only damage.
+
+        Args:
+            hit_number: The hit number (not used)
+            current_dph: Running damage value
+            base_dph: Original base damage before modifiers
+
+        Returns:
+            Updated running damage
+        """
+        if not self.is_enabled():
+            return current_dph
+
+        pct = self._get_percentage()
+        if self.apply_to_total_var.get() or base_dph is None:
+            return current_dph * (1 + pct)
+        return current_dph + (base_dph * pct)
 
     def get_total_damage_for_hits(self, num_hits, base_dph):
         """
@@ -761,7 +807,10 @@ class PercentageDamageModifier(Modifier):
         """
         if not self.is_enabled():
             return base_dph * num_hits
-        return base_dph * (1 + self._get_percentage()) * num_hits
+        if self.apply_to_total_var.get():
+            return base_dph * (1 + self._get_percentage()) * num_hits
+        # Base-only with no additional context behaves as adding % of base per hit.
+        return (base_dph + (base_dph * self._get_percentage())) * num_hits
 
     def update_display(self):
         """Update the display"""

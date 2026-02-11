@@ -10,6 +10,7 @@ from damage_row import DamageRow
 from targets_section import TargetsSection
 from attack_mode import AttackModeSection
 from spells_section import SpellsSection
+from hero_lab_section import HeroLabSection
 
 
 class DotaCalculator:
@@ -370,6 +371,24 @@ class DotaCalculator:
         # Connect targets to spells section for target selection dropdown
         self.spells_section.set_get_targets(self.targets_section.get_target_rows)
 
+        # ============ HERO LAB SECTION TOGGLE ============
+        self.hero_lab_visible = False
+        self.hero_lab_toggle_frame = ttk.Frame(main_frame)
+        self.hero_lab_toggle_frame.pack(fill="x", pady=(5, 5))
+        self.hero_lab_toggle_btn = ttk.Button(
+            self.hero_lab_toggle_frame,
+            text="▶ Show Hero Lab Section",
+            command=self.toggle_hero_lab_section
+        )
+        self.hero_lab_toggle_btn.pack(side="left")
+
+        self.hero_lab_container = ttk.Frame(main_frame)
+        self.hero_lab_section = HeroLabSection(
+            self.hero_lab_container,
+            get_variables=self.get_variables
+        )
+        self.hero_lab_separator = ttk.Separator(main_frame, orient='horizontal')
+
         # Clear button (always visible at bottom)
         self.clear_button = ttk.Button(main_frame, text="Clear All", command=self.clear_all)
         self.clear_button.pack(pady=10)
@@ -601,6 +620,20 @@ class DotaCalculator:
             # Pack section content if not already packed
             self.spells_section.pack_content()
             self.calculate_all()
+
+    def toggle_hero_lab_section(self):
+        """Toggle the visibility of the Hero Lab section"""
+        if self.hero_lab_visible:
+            self.hero_lab_container.pack_forget()
+            self.hero_lab_separator.pack_forget()
+            self.hero_lab_toggle_btn.config(text="▶ Show Hero Lab Section")
+            self.hero_lab_visible = False
+        else:
+            self.hero_lab_container.pack(fill="x", pady=5, after=self.hero_lab_toggle_frame)
+            self.hero_lab_separator.pack(fill="x", pady=15, after=self.hero_lab_container)
+            self.hero_lab_toggle_btn.config(text="▼ Hide Hero Lab Section")
+            self.hero_lab_visible = True
+            self.hero_lab_section.pack_content()
 
     def toggle_armor_mode(self):
         """Toggle between Armor and Physical Reduction mode"""
@@ -927,6 +960,7 @@ class DotaCalculator:
         self.attack_mode.clear()
         self.targets_section.clear()
         self.spells_section.clear()
+        self.hero_lab_section.clear()
 
         self.add_physical_row()
         self.add_magic_row()

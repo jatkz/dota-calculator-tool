@@ -390,7 +390,7 @@ class SpellRow:
         for mod in self.selected_modifiers:
             if mod.is_enabled():
                 # Use modifier's damage calculation (treating spell damage like a hit)
-                damage = mod.get_damage_for_hit(1, damage)
+                damage = mod.apply_damage_for_hit(1, damage, base_damage)
 
         return damage * instances
 

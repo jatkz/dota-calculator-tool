@@ -344,9 +344,10 @@ class DotaCalculator:
 
         self.attack_mode_separator = ttk.Separator(main_frame, orient='horizontal')
 
-        # ============ SPELLS SECTION TOGGLE ============
+        # ============ SPELLS SECTION TOGGLE (inside Attack > Target) ============
         self.spells_visible = False
-        self.spells_toggle_frame = ttk.Frame(main_frame)
+        ttk.Separator(self.attack_target_container, orient='horizontal').pack(fill="x", pady=10)
+        self.spells_toggle_frame = ttk.Frame(self.attack_target_container)
         self.spells_toggle_frame.pack(fill="x", pady=(5, 5))
         self.spells_toggle_btn = ttk.Button(
             self.spells_toggle_frame,
@@ -356,7 +357,7 @@ class DotaCalculator:
         self.spells_toggle_btn.pack(side="left")
 
         # Container for Spells section
-        self.spells_container = ttk.Frame(main_frame)
+        self.spells_container = ttk.Frame(self.attack_target_container)
 
         # Spells Section
         self.spells_section = SpellsSection(
@@ -368,8 +369,6 @@ class DotaCalculator:
 
         # Connect targets to spells section for target selection dropdown
         self.spells_section.set_get_targets(self.targets_section.get_target_rows)
-
-        self.spells_separator = ttk.Separator(main_frame, orient='horizontal')
 
         # Clear button (always visible at bottom)
         self.clear_button = ttk.Button(main_frame, text="Clear All", command=self.clear_all)
@@ -593,12 +592,10 @@ class DotaCalculator:
         """Toggle the visibility of the Spells section"""
         if self.spells_visible:
             self.spells_container.pack_forget()
-            self.spells_separator.pack_forget()
             self.spells_toggle_btn.config(text="▶ Show Spells Section")
             self.spells_visible = False
         else:
             self.spells_container.pack(fill="x", pady=5, after=self.spells_toggle_frame)
-            self.spells_separator.pack(fill="x", pady=15, after=self.spells_container)
             self.spells_toggle_btn.config(text="▼ Hide Spells Section")
             self.spells_visible = True
             # Pack section content if not already packed

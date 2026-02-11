@@ -1,7 +1,9 @@
 """HeroLabSection class - orchestrates Hero Lab section"""
 
+import json
+import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 from modifiers import Modifier
 from utils import safe_eval, armor_to_reduction
@@ -74,6 +76,32 @@ class HeroSpellRow:
         """Destroy spell row widget."""
         self.frame.destroy()
 
+    def to_dict(self):
+        """Serialize spell row to dictionary."""
+        return {
+            "name": self.name_var.get(),
+            "damage": self.damage_var.get(),
+            "damage_type": self.damage_type_var.get(),
+            "hits": self.hits_var.get(),
+            "cast": self.cast_var.get(),
+            "stun": self.stun_var.get(),
+            "mana": self.mana_var.get(),
+            "cooldown": self.cooldown_var.get(),
+        }
+
+    def load_from_dict(self, data):
+        """Load spell row values from dictionary."""
+        self.name_var.set(str(data.get("name", self.name_var.get())))
+        self.damage_var.set(str(data.get("damage", self.damage_var.get())))
+        damage_type = str(data.get("damage_type", self.damage_type_var.get()))
+        if damage_type in self.DAMAGE_TYPES:
+            self.damage_type_var.set(damage_type)
+        self.hits_var.set(str(data.get("hits", self.hits_var.get())))
+        self.cast_var.set(str(data.get("cast", self.cast_var.get())))
+        self.stun_var.set(str(data.get("stun", self.stun_var.get())))
+        self.mana_var.set(str(data.get("mana", self.mana_var.get())))
+        self.cooldown_var.set(str(data.get("cooldown", self.cooldown_var.get())))
+
 
 class HeroRow:
     """Single hero row with base stats, modifiers, and item placeholder."""
@@ -102,13 +130,15 @@ class HeroRow:
         ("turn_rate", "Turn Rate", "0.6"),
     ]
 
-    def __init__(self, parent, hero_id, on_delete, get_variables):
+    def __init__(self, parent, hero_id, on_delete, on_save, get_variables):
         self.parent = parent
         self.hero_id = hero_id
         self.on_delete = on_delete
+        self.on_save = on_save
         self.get_variables = get_variables
         self.modifiers = []
         self.spell_rows = []
+        self.items = []  # Placeholder until items UI is implemented
         self.field_vars = {}
         self.field_entries = {}
         self.total_vars = {}
@@ -119,6 +149,8 @@ class HeroRow:
     def _create_widgets(self):
         header = ttk.Frame(self.frame)
         header.pack(fill="x", pady=(0, 6))
+        ttk.Button(header, text="Save", width=8,
+                   command=lambda: self.on_save(self)).pack(side="right", padx=(0, 4))
         ttk.Button(header, text="Delete", width=8,
                    command=lambda: self.on_delete(self)).pack(side="right")
 
@@ -458,9 +490,11 @@ class HeroRow:
             mod.update_display()
         self.update_totals()
 
-    def add_spell(self):
+    def add_spell(self, spell_data=None):
         """Add a spell attached to this hero."""
         spell_row = HeroSpellRow(self.spells_container, self.delete_spell)
+        if spell_data:
+            spell_row.load_from_dict(spell_data)
         spell_row.pack(fill="x", pady=2)
         self.spell_rows.append(spell_row)
 
@@ -468,6 +502,76 @@ class HeroRow:
         """Delete a spell attached to this hero."""
         self.spell_rows.remove(spell_row)
         spell_row.destroy()
+
+    def _serialize_modifier(self, mod):
+        """Serialize modifier to dictionary."""
+        values = {}
+        for key, value in mod.__dict__.items():
+            if key.endswith("_var") and hasattr(value, "get"):
+                values[key] = value.get()
+        return {
+            "type": getattr(mod, "TYPE_NAME", ""),
+            "values": values
+        }
+
+    def _load_modifier(self, modifier_data):
+        """Instantiate and load a modifier from dictionary."""
+        type_name = modifier_data.get("type")
+        if not type_name:
+            return
+
+        mod = Modifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_modifier_changed,
+            self.delete_modifier,
+            get_variables=self.get_variables
+        )
+        if not mod:
+            return
+
+        for key, value in modifier_data.get("values", {}).items():
+            var = getattr(mod, key, None)
+            if hasattr(var, "set"):
+                var.set(value)
+
+        mod.pack(fill="x", pady=2)
+        self.modifiers.append(mod)
+        mod.update_display()
+
+    def to_dict(self):
+        """Serialize hero row including fields, modifiers, spells, and items."""
+        return {
+            "hero_id": self.hero_id,
+            "fields": {key: var.get() for key, var in self.field_vars.items()},
+            "modifiers": [self._serialize_modifier(mod) for mod in self.modifiers],
+            "spells": [spell_row.to_dict() for spell_row in self.spell_rows],
+            "items": self.items[:],
+        }
+
+    def load_from_dict(self, data):
+        """Load hero row data including fields, modifiers, spells, and items."""
+        for key, value in data.get("fields", {}).items():
+            if key in self.field_vars:
+                self.field_vars[key].set(str(value))
+
+        for mod in self.modifiers[:]:
+            mod.destroy()
+        self.modifiers.clear()
+
+        for spell_row in self.spell_rows[:]:
+            spell_row.destroy()
+        self.spell_rows.clear()
+
+        for modifier_data in data.get("modifiers", []):
+            self._load_modifier(modifier_data)
+
+        for spell_data in data.get("spells", []):
+            self.add_spell(spell_data=spell_data)
+
+        items = data.get("items", [])
+        self.items = items if isinstance(items, list) else []
+        self.update_totals()
 
     def pack(self, **kwargs):
         """Pack row widget."""
@@ -486,6 +590,8 @@ class HeroRow:
 
 class HeroLabSection:
     """Orchestrates the Hero Lab section"""
+
+    HERO_LIBRARY_FILENAME = "hero_library.json"
 
     def __init__(self, parent, get_variables):
         """
@@ -511,6 +617,8 @@ class HeroLabSection:
         header = ttk.Frame(self.section_frame)
         header.pack(fill="x", pady=(5, 5))
         ttk.Label(header, text="HERO LAB", font=('Arial', 10, 'bold')).pack(side="left")
+        ttk.Button(header, text="Load Heroes",
+                   command=self.load_heroes).pack(side="right", padx=5)
         ttk.Button(header, text="+ Add Hero",
                    command=self.add_hero).pack(side="right", padx=5)
 
@@ -527,25 +635,32 @@ class HeroLabSection:
             if not self.hero_rows:
                 self.add_hero()
 
-    def add_hero(self):
+    def add_hero(self, hero_data=None):
         """Add a new hero row."""
-        hero_id = self.next_hero_id
-        self.next_hero_id += 1
+        if hero_data and isinstance(hero_data.get("hero_id"), int):
+            hero_id = hero_data["hero_id"]
+            self.next_hero_id = max(self.next_hero_id, hero_id + 1)
+        else:
+            hero_id = self.next_hero_id
+            self.next_hero_id += 1
+
         hero_row = HeroRow(
             self.heroes_container,
             hero_id,
             self.delete_hero,
+            self.save_hero,
             self.get_variables
         )
+        if hero_data:
+            hero_row.load_from_dict(hero_data)
         hero_row.pack(fill="x", pady=4)
         self.hero_rows.append(hero_row)
 
     def delete_hero(self, hero_row):
         """Delete an existing hero row."""
-        if len(self.hero_rows) <= 1:
-            return
-        self.hero_rows.remove(hero_row)
-        hero_row.destroy()
+        if hero_row in self.hero_rows:
+            self.hero_rows.remove(hero_row)
+            hero_row.destroy()
 
     def clear(self):
         """Clear all hero rows."""
@@ -553,3 +668,309 @@ class HeroLabSection:
             hero_row.destroy()
         self.hero_rows.clear()
         self.next_hero_id = 1
+
+    def _get_heroes_payload(self):
+        """Build save payload for all heroes."""
+        return {
+            "version": 1,
+            "heroes": [hero_row.to_dict() for hero_row in self.hero_rows],
+        }
+
+    def _get_library_path(self):
+        """Get canonical path for hero library file."""
+        return os.path.join(os.path.dirname(__file__), self.HERO_LIBRARY_FILENAME)
+
+    def _read_library_heroes(self):
+        """Read hero library and return list of hero dictionaries."""
+        file_path = self._get_library_path()
+        if not os.path.exists(file_path):
+            return []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (OSError, json.JSONDecodeError) as exc:
+            messagebox.showerror("Library Error", f"Could not read hero library:\n{exc}")
+            return None
+
+        heroes = payload.get("heroes", [])
+        if not isinstance(heroes, list):
+            messagebox.showerror("Library Error", "Invalid hero library format.")
+            return None
+        return [hero for hero in heroes if isinstance(hero, dict)]
+
+    def _write_library_heroes(self, heroes):
+        """Write list of hero dictionaries to hero library file."""
+        file_path = self._get_library_path()
+        payload = {"version": 1, "heroes": heroes}
+        with open(file_path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+
+    def _normalize_name(self, name):
+        """Normalize hero name for duplicate checks."""
+        return str(name).strip().lower()
+
+    def _hero_name_from_data(self, hero_data, fallback_index=None):
+        """Extract displayable hero name from serialized hero data."""
+        hero_name = hero_data.get("fields", {}).get("name", "").strip()
+        if hero_name:
+            return hero_name
+        if fallback_index is not None:
+            return f"Hero {fallback_index + 1}"
+        return "Hero"
+
+    def _generate_version_name(self, base_name, existing_heroes):
+        """Generate non-duplicate version name based on base hero name."""
+        normalized_existing = {
+            self._normalize_name(self._hero_name_from_data(hero, idx))
+            for idx, hero in enumerate(existing_heroes)
+        }
+        root = base_name.strip() if base_name.strip() else "Hero"
+        version = 2
+        while True:
+            candidate = f"{root} v{version}"
+            if self._normalize_name(candidate) not in normalized_existing:
+                return candidate
+            version += 1
+
+    def save_hero(self, hero_row):
+        """Open save menu for a single hero."""
+        hero_data = hero_row.to_dict()
+        current_name = hero_data.get("fields", {}).get("name", "").strip()
+        if not current_name:
+            messagebox.showerror("Save Failed", "Hero must have a non-empty Name.")
+            return
+
+        existing_heroes = self._read_library_heroes()
+        if existing_heroes is None:
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Save Hero")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+
+        ttk.Label(content, text=f"Hero: {current_name}",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 8))
+        ttk.Label(content, text="Choose save mode:",
+                  font=('Arial', 8)).pack(anchor="w", pady=(0, 6))
+
+        existing_names = [
+            self._hero_name_from_data(hero, idx)
+            for idx, hero in enumerate(existing_heroes)
+        ]
+
+        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        update_combo = ttk.Combobox(
+            content,
+            textvariable=update_name_var,
+            values=existing_names,
+            state="readonly",
+            width=32
+        )
+        update_combo.pack(fill="x", pady=(0, 10))
+        if not existing_names:
+            update_combo.configure(state="disabled")
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _save_new():
+            normalized_target = self._normalize_name(current_name)
+            normalized_existing = {
+                self._normalize_name(name) for name in existing_names
+            }
+            if normalized_target in normalized_existing:
+                messagebox.showerror(
+                    "Duplicate Name",
+                    "A saved hero with this name already exists. Use Update Existing or Save New Version."
+                )
+                return
+            existing_heroes.append(hero_data)
+            try:
+                self._write_library_heroes(existing_heroes)
+            except OSError as exc:
+                messagebox.showerror("Save Failed", f"Could not save hero:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Hero Saved", f"Saved new hero '{current_name}'.")
+
+        def _update_existing():
+            if not existing_names:
+                messagebox.showerror("Update Failed", "No saved heroes to update.")
+                return
+
+            selected_name = update_combo.get().strip()
+            if not selected_name:
+                return
+
+            selected_index = next(
+                (idx for idx, name in enumerate(existing_names) if name == selected_name),
+                None
+            )
+            if selected_index is None:
+                return
+
+            normalized_target = self._normalize_name(current_name)
+            for idx, name in enumerate(existing_names):
+                if idx != selected_index and self._normalize_name(name) == normalized_target:
+                    messagebox.showerror(
+                        "Duplicate Name",
+                        "Another saved hero already uses this name. Rename current hero first."
+                    )
+                    return
+
+            existing_heroes[selected_index] = hero_data
+            try:
+                self._write_library_heroes(existing_heroes)
+            except OSError as exc:
+                messagebox.showerror("Update Failed", f"Could not update hero:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Hero Updated", f"Updated saved hero '{selected_name}'.")
+
+        def _save_new_version():
+            version_name = self._generate_version_name(current_name, existing_heroes)
+            version_data = hero_row.to_dict()
+            version_data.setdefault("fields", {})
+            version_data["fields"]["name"] = version_name
+            existing_heroes.append(version_data)
+            try:
+                self._write_library_heroes(existing_heroes)
+            except OSError as exc:
+                messagebox.showerror("Save Failed", f"Could not save hero version:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Hero Version Saved", f"Saved as '{version_name}'.")
+
+        ttk.Button(buttons, text="Save New",
+                   command=_save_new).pack(side="left")
+        ttk.Button(buttons, text="Update Existing",
+                   command=_update_existing).pack(side="left", padx=5)
+        ttk.Button(buttons, text="Save New Version",
+                   command=_save_new_version).pack(side="left")
+        ttk.Button(buttons, text="Cancel",
+                   command=menu.destroy).pack(side="right")
+
+    def load_heroes(self):
+        """Open top-level load menu for selecting heroes from canonical file."""
+        heroes_data = self._read_library_heroes()
+        if heroes_data is None:
+            return
+        if not heroes_data:
+            messagebox.showinfo("No Hero Library", f"No saved heroes in:\n{self._get_library_path()}")
+            return
+
+        self._open_load_menu(heroes_data)
+
+    def _open_load_menu(self, heroes_data):
+        """Open a top-level menu to load selected hero(s)."""
+        valid_heroes = [hero for hero in heroes_data if isinstance(hero, dict)]
+        if not valid_heroes:
+            messagebox.showinfo("No Heroes", "Hero library is empty.")
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Load Heroes")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+
+        ttk.Label(content, text="Select hero from library:",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 6))
+
+        def _build_display_names():
+            names = []
+            for idx, hero in enumerate(valid_heroes):
+                hero_name = hero.get("fields", {}).get("name", "").strip()
+                if not hero_name:
+                    hero_name = f"Hero {idx + 1}"
+                names.append(hero_name)
+            return names
+
+        display_names = _build_display_names()
+
+        selected_name = tk.StringVar(value=display_names[0])
+        combo = ttk.Combobox(
+            content,
+            textvariable=selected_name,
+            values=display_names,
+            state="readonly",
+            width=32
+        )
+        combo.pack(fill="x", pady=(0, 10))
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _save_library():
+            self._write_library_heroes(valid_heroes)
+
+        def _refresh_combo():
+            names = _build_display_names()
+            combo["values"] = names
+            if names:
+                combo.current(0)
+            else:
+                menu.destroy()
+                messagebox.showinfo("Library Updated", "All saved heroes were deleted.")
+
+        def _load_selected_replace():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            self.clear()
+            self.add_hero(hero_data=valid_heroes[selected_index])
+            menu.destroy()
+
+        def _load_selected_append():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            self.add_hero(hero_data=valid_heroes[selected_index])
+            menu.destroy()
+
+        def _load_all_replace():
+            self.clear()
+            for hero in valid_heroes:
+                self.add_hero(hero_data=hero)
+            if not self.hero_rows:
+                self.add_hero()
+            menu.destroy()
+
+        def _delete_selected_saved():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            selected_name_local = combo.get() or f"Hero {selected_index + 1}"
+            should_delete = messagebox.askyesno(
+                "Delete Saved Hero",
+                f"Delete saved hero '{selected_name_local}' from library?"
+            )
+            if not should_delete:
+                return
+            valid_heroes.pop(selected_index)
+            try:
+                _save_library()
+            except OSError as exc:
+                messagebox.showerror("Delete Failed", f"Could not update library:\n{exc}")
+                return
+            _refresh_combo()
+
+        ttk.Button(buttons, text="Load Selected",
+                   command=_load_selected_replace).pack(side="left")
+        ttk.Button(buttons, text="Append Selected",
+                   command=_load_selected_append).pack(side="left", padx=5)
+        ttk.Button(buttons, text="Load All",
+                   command=_load_all_replace).pack(side="left")
+        ttk.Button(buttons, text="Delete Selected",
+                   command=_delete_selected_saved).pack(side="left", padx=(5, 0))
+        ttk.Button(buttons, text="Cancel",
+                   command=menu.destroy).pack(side="right")

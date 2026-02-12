@@ -404,9 +404,11 @@ class HeroRow:
 
     def update_totals(self):
         """Recalculate and refresh all totals for this hero."""
+        all_modifiers = self.modifiers + self.item_modifiers
+
         base_hp = self._get_numeric_field("base_hp")
         base_hp_regen = self._get_numeric_field("base_hp_regen")
-        movespeed = self._get_numeric_field("movespeed")
+        base_movespeed = self._get_numeric_field("movespeed")
         attack_speed = self._get_numeric_field("attack_speed")
         bat = self._get_numeric_field("bat")
         base_damage = self._get_numeric_field("base_damage")
@@ -421,29 +423,44 @@ class HeroRow:
         agility_per_level = self._get_numeric_field("agility_per_level")
         intelligence_per_level = self._get_numeric_field("intelligence_per_level")
 
-        level_factor = max(0.0, level - 1.0)
-        strength = base_strength + (strength_per_level * level_factor)
-        agility = base_agility + (agility_per_level * level_factor)
-        intelligence = base_intelligence + (intelligence_per_level * level_factor)
+        bonus_strength = sum(mod.get_strength_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_agility = sum(mod.get_agility_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_intelligence = sum(mod.get_intelligence_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_movespeed_flat = sum(mod.get_movespeed_flat_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_movespeed_pct = sum(mod.get_movespeed_pct_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_armor = sum(mod.get_armor_bonus() for mod in all_modifiers if mod.is_enabled())
+        magic_resistance_bonus_sources = [
+            mod.get_magic_resistance_bonus() for mod in all_modifiers if mod.is_enabled()
+        ]
+        bonus_attack_speed = sum(mod.get_attack_speed_bonus() for mod in all_modifiers if mod.is_enabled())
+        total_bat_reduction_pct = sum(mod.get_bat_reduction_pct() for mod in all_modifiers if mod.is_enabled())
+        bonus_mana = sum(mod.get_mana_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_hp = sum(mod.get_hp_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_mana_regen = sum(mod.get_mana_regen_flat_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_hp_regen = sum(mod.get_hp_regen_flat_bonus() for mod in all_modifiers if mod.is_enabled())
 
-        total_hp = max(0.0, base_hp + (strength * 22.0))
-        total_health_regen = base_hp_regen + (strength * 0.1)
-        total_mana = max(0.0, 75.0 + (intelligence * 12.0))
-        total_mana_regen = intelligence * 0.05
+        level_factor = max(0.0, level - 1.0)
+        strength = base_strength + (strength_per_level * level_factor) + bonus_strength
+        agility = base_agility + (agility_per_level * level_factor) + bonus_agility
+        intelligence = base_intelligence + (intelligence_per_level * level_factor) + bonus_intelligence
+
+        total_hp = max(0.0, base_hp + (strength * 22.0) + bonus_hp)
+        total_health_regen = base_hp_regen + (strength * 0.1) + bonus_hp_regen
+        total_mana = max(0.0, 75.0 + (intelligence * 12.0) + bonus_mana)
+        total_mana_regen = (intelligence * 0.05) + bonus_mana_regen
         total_item_gold = self._get_total_enabled_item_gold()
 
-        effective_attack_speed = max(0.0, attack_speed + agility)
+        effective_attack_speed = max(0.0, attack_speed + agility + bonus_attack_speed)
+        effective_bat = max(0.01, bat * (1 - max(0.0, min(0.95, total_bat_reduction_pct))))
         attacks_per_second = 0.0
-        if bat > 0:
-            attacks_per_second = effective_attack_speed / (100 * bat)
+        if effective_bat > 0:
+            attacks_per_second = effective_attack_speed / (100 * effective_bat)
         seconds_between_attack = 0.0
         if attacks_per_second > 0:
             seconds_between_attack = 1.0 / attacks_per_second
 
         attribute_damage = self._get_primary_attribute_bonus(strength, agility, intelligence)
         raw_base_damage = base_damage + attribute_damage
-
-        all_modifiers = self.modifiers + self.item_modifiers
 
         total_bonus_damage = 0.0
         for mod in all_modifiers:
@@ -472,9 +489,15 @@ class HeroRow:
         total_estimated_attack_damage = estimated_physical_damage + estimated_magic_damage
         estimated_dps = total_estimated_attack_damage * attacks_per_second
 
-        armor = base_armor + (agility / 6.0)
+        total_movespeed = (base_movespeed + bonus_movespeed_flat) * (1 + bonus_movespeed_pct)
+        armor = base_armor + (agility / 6.0) + bonus_armor
         physical_reduction = armor_to_reduction(armor)
-        magic_resistance = self._clamp(base_magic_resist + (intelligence * 0.1), 0, 100)
+        base_magic_resistance_total = self._clamp(base_magic_resist + (intelligence * 0.1), 0, 100)
+        remaining_magic_damage = 1 - (base_magic_resistance_total / 100.0)
+        for bonus in magic_resistance_bonus_sources:
+            bonus_fraction = self._clamp(bonus, 0, 100) / 100.0
+            remaining_magic_damage *= (1 - bonus_fraction)
+        magic_resistance = self._clamp((1 - remaining_magic_damage) * 100.0, 0, 100)
         evasion = base_evasion
 
         physical_reduction_fraction = physical_reduction / 100.0
@@ -505,7 +528,7 @@ class HeroRow:
         self.total_vars["total_auto_attack_damage"].set(self._format_value(total_auto_attack_damage))
         self.total_vars["total_estimated_attack_damage"].set(self._format_value(total_estimated_attack_damage))
         self.total_vars["estimated_dps"].set(self._format_value(estimated_dps))
-        self.total_vars["total_movespeed"].set(self._format_value(movespeed))
+        self.total_vars["total_movespeed"].set(self._format_value(total_movespeed))
         self.total_vars["armor"].set(self._format_value(armor))
         self.total_vars["physical_reduction"].set(self._format_value(physical_reduction, "%"))
         self.total_vars["magic_resistance"].set(self._format_value(magic_resistance, "%"))

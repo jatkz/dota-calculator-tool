@@ -142,6 +142,58 @@ class Modifier(ABC):
         """
         return 0
 
+    def get_strength_bonus(self):
+        """Get flat strength bonus (default: 0)."""
+        return 0
+
+    def get_agility_bonus(self):
+        """Get flat agility bonus (default: 0)."""
+        return 0
+
+    def get_intelligence_bonus(self):
+        """Get flat intelligence bonus (default: 0)."""
+        return 0
+
+    def get_movespeed_flat_bonus(self):
+        """Get flat movespeed bonus (default: 0)."""
+        return 0
+
+    def get_movespeed_pct_bonus(self):
+        """Get movespeed percent bonus as decimal (default: 0)."""
+        return 0
+
+    def get_armor_bonus(self):
+        """Get flat armor bonus (default: 0)."""
+        return 0
+
+    def get_magic_resistance_bonus(self):
+        """Get magic resistance bonus in percentage points (default: 0)."""
+        return 0
+
+    def get_attack_speed_bonus(self):
+        """Get flat attack speed bonus (default: 0)."""
+        return 0
+
+    def get_bat_reduction_pct(self):
+        """Get BAT reduction as decimal (default: 0)."""
+        return 0
+
+    def get_mana_bonus(self):
+        """Get flat mana bonus (default: 0)."""
+        return 0
+
+    def get_hp_bonus(self):
+        """Get flat hp bonus (default: 0)."""
+        return 0
+
+    def get_mana_regen_flat_bonus(self):
+        """Get flat mana regen bonus (default: 0)."""
+        return 0
+
+    def get_hp_regen_flat_bonus(self):
+        """Get flat hp regen bonus (default: 0)."""
+        return 0
+
     def is_enabled(self):
         """Check if modifier is enabled"""
         return self.enabled_var.get()
@@ -1128,3 +1180,221 @@ class CorruptionModifier(Modifier):
     def update_display(self):
         """Update the display"""
         self._update_info()
+
+
+class _StatValueModifier(Modifier):
+    """Generic no-damage modifier that contributes a single stat value."""
+
+    TYPE_NAME = ""
+    DISPLAY_NAME = ""
+    DEFAULT_LABEL = ""
+    VALUE_LABEL = "Value"
+    DEFAULT_VALUE = "0"
+    VALUE_SUFFIX = ""
+    INFO_PREFIX = "+"
+    INFO_SUFFIX = ""
+    INFO_DECIMALS = 1
+
+    def _create_widgets(self):
+        self.enabled_var.trace('w', lambda *args: self.on_change())
+        ttk.Checkbutton(self.frame, variable=self.enabled_var).pack(side="left", padx=(0, 5))
+
+        ttk.Label(self.frame, text=self.DISPLAY_NAME,
+                  font=('Arial', 9, 'bold'), foreground='#2E8B57').pack(side="left", padx=(0, 10))
+
+        ttk.Label(self.frame, text="Label:").pack(side="left")
+        self.label_var = tk.StringVar(value=self.DEFAULT_LABEL or self.TYPE_NAME)
+        ttk.Entry(self.frame, textvariable=self.label_var, width=12).pack(side="left", padx=2)
+
+        ttk.Label(self.frame, text=f"{self.VALUE_LABEL}:").pack(side="left", padx=(10, 0))
+        self.value_var = tk.StringVar(value=self.DEFAULT_VALUE)
+        self.value_var.trace('w', lambda *args: self.on_change())
+        ttk.Entry(self.frame, textvariable=self.value_var, width=6).pack(side="left", padx=2)
+        if self.VALUE_SUFFIX:
+            ttk.Label(self.frame, text=self.VALUE_SUFFIX).pack(side="left")
+
+        self.info_var = tk.StringVar(value="")
+        ttk.Label(self.frame, textvariable=self.info_var,
+                  foreground='#666', font=('Arial', 8)).pack(side="left", padx=5)
+
+        ttk.Button(self.frame, text="X", width=2,
+                   command=lambda: self.on_delete(self)).pack(side="right", padx=5)
+        self._update_info()
+
+    def _get_value(self):
+        if not self.enabled_var.get():
+            return 0
+        variables = self.get_variables() if self.get_variables else None
+        value = safe_eval(self.value_var.get(), variables)
+        return value if value is not None else 0
+
+    def _update_info(self):
+        value = self._get_value()
+        if value != 0:
+            self.info_var.set(
+                f"= {self.INFO_PREFIX}{value:.{self.INFO_DECIMALS}f}{self.INFO_SUFFIX}"
+            )
+        else:
+            self.info_var.set("")
+
+    def get_label(self):
+        return self.label_var.get()
+
+    def get_damage_for_hit(self, hit_number, base_dph):
+        return base_dph
+
+    def get_total_damage_for_hits(self, num_hits, base_dph):
+        return base_dph * num_hits
+
+    def update_display(self):
+        self._update_info()
+
+
+@Modifier.register
+class StrengthModifier(_StatValueModifier):
+    TYPE_NAME = "Strength"
+    DISPLAY_NAME = "Strength"
+    DEFAULT_LABEL = "Strength"
+    VALUE_LABEL = "Amount"
+
+    def get_strength_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class AgilityModifier(_StatValueModifier):
+    TYPE_NAME = "Agility"
+    DISPLAY_NAME = "Agility"
+    DEFAULT_LABEL = "Agility"
+    VALUE_LABEL = "Amount"
+
+    def get_agility_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class IntelligenceModifier(_StatValueModifier):
+    TYPE_NAME = "Intelligence"
+    DISPLAY_NAME = "Intelligence"
+    DEFAULT_LABEL = "Intelligence"
+    VALUE_LABEL = "Amount"
+
+    def get_intelligence_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class MovespeedFlatModifier(_StatValueModifier):
+    TYPE_NAME = "Movespeed Flat"
+    DISPLAY_NAME = "Movespeed +"
+    DEFAULT_LABEL = "Movespeed Flat"
+    VALUE_LABEL = "Amount"
+
+    def get_movespeed_flat_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class MovespeedPercentModifier(_StatValueModifier):
+    TYPE_NAME = "Movespeed Percent"
+    DISPLAY_NAME = "Movespeed %"
+    DEFAULT_LABEL = "Movespeed Percent"
+    VALUE_LABEL = "Percent"
+    VALUE_SUFFIX = "%"
+    INFO_SUFFIX = "%"
+
+    def get_movespeed_pct_bonus(self):
+        return self._get_value() / 100.0
+
+
+@Modifier.register
+class ArmorBonusModifier(_StatValueModifier):
+    TYPE_NAME = "Armor"
+    DISPLAY_NAME = "Armor +"
+    DEFAULT_LABEL = "Armor"
+    VALUE_LABEL = "Amount"
+
+    def get_armor_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class MagicResistanceBonusModifier(_StatValueModifier):
+    TYPE_NAME = "Magic Resistance"
+    DISPLAY_NAME = "Magic Res +"
+    DEFAULT_LABEL = "Magic Resistance"
+    VALUE_LABEL = "Amount"
+    VALUE_SUFFIX = "%"
+    INFO_SUFFIX = "%"
+
+    def get_magic_resistance_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class AttackSpeedBonusModifier(_StatValueModifier):
+    TYPE_NAME = "Attack Speed"
+    DISPLAY_NAME = "Attack Speed +"
+    DEFAULT_LABEL = "Attack Speed"
+    VALUE_LABEL = "Amount"
+
+    def get_attack_speed_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class BatReductionModifier(_StatValueModifier):
+    TYPE_NAME = "BAT Reduction %"
+    DISPLAY_NAME = "BAT Reduction"
+    DEFAULT_LABEL = "BAT Reduction"
+    VALUE_LABEL = "Percent"
+    VALUE_SUFFIX = "%"
+    INFO_PREFIX = "-"
+    INFO_SUFFIX = "%"
+
+    def get_bat_reduction_pct(self):
+        return self._get_value() / 100.0
+
+
+@Modifier.register
+class ManaBonusModifier(_StatValueModifier):
+    TYPE_NAME = "Mana"
+    DISPLAY_NAME = "Mana +"
+    DEFAULT_LABEL = "Mana"
+    VALUE_LABEL = "Amount"
+
+    def get_mana_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class HPBonusModifier(_StatValueModifier):
+    TYPE_NAME = "HP"
+    DISPLAY_NAME = "HP +"
+    DEFAULT_LABEL = "HP"
+    VALUE_LABEL = "Amount"
+
+    def get_hp_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class ManaRegenFlatModifier(_StatValueModifier):
+    TYPE_NAME = "Mana Regen Flat"
+    DISPLAY_NAME = "Mana Regen +"
+    DEFAULT_LABEL = "Mana Regen Flat"
+    VALUE_LABEL = "Amount"
+
+    def get_mana_regen_flat_bonus(self):
+        return self._get_value()
+
+
+@Modifier.register
+class HPRegenFlatModifier(_StatValueModifier):
+    TYPE_NAME = "HP Regen Flat"
+    DISPLAY_NAME = "HP Regen +"
+    DEFAULT_LABEL = "HP Regen Flat"
+    VALUE_LABEL = "Amount"
+
+    def get_hp_regen_flat_bonus(self):
+        return self._get_value()

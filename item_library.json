@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "item_id": 1,
+      "fields": {
+        "name": "sacred relic",
+        "gold_amount": "3400"
+      },
+      "notes": "",
+      "modifiers": [
+        {
+          "type": "Flat Damage",
+          "values": {
+            "enabled_var": true,
+            "label_var": "Flat Damage",
+            "value_var": "60",
+            "info_var": "= +60.0"
+          }
+        }
+      ]
+    }
+  ]
+}

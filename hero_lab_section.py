@@ -130,15 +130,18 @@ class HeroRow:
         ("turn_rate", "Turn Rate", "0.6"),
     ]
 
-    def __init__(self, parent, hero_id, on_delete, on_save, get_variables):
+    def __init__(self, parent, hero_id, on_delete, on_save, get_variables, get_item_library_items):
         self.parent = parent
         self.hero_id = hero_id
         self.on_delete = on_delete
         self.on_save = on_save
         self.get_variables = get_variables
+        self.get_item_library_items = get_item_library_items
         self.modifiers = []
         self.spell_rows = []
-        self.items = []  # Placeholder until items UI is implemented
+        self.items = []
+        self.item_widgets = []
+        self.item_modifiers = []
         self.field_vars = {}
         self.field_entries = {}
         self.total_vars = {}
@@ -190,17 +193,17 @@ class HeroRow:
         self.modifiers_container = ttk.Frame(self.frame)
         self.modifiers_container.pack(fill="x")
 
-        # Items block (placeholder)
+        # Items block
         ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
         items_header = ttk.Frame(self.frame)
         items_header.pack(fill="x", pady=(0, 2))
         ttk.Label(items_header, text="Items",
                   font=('Arial', 9, 'bold')).pack(side="left")
-        ttk.Button(items_header, text="+ Add Item (Soon)",
-                   state='disabled').pack(side="right")
-        ttk.Label(self.frame,
-                  text="Items attachment is not implemented yet.",
-                  foreground="#666", font=('Arial', 8)).pack(anchor="w")
+        ttk.Button(items_header, text="+ Add Item From Library",
+                   command=self.open_add_item_menu).pack(side="right")
+
+        self.items_container = ttk.Frame(self.frame)
+        self.items_container.pack(fill="x")
 
         # Spells block
         ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
@@ -223,6 +226,8 @@ class HeroRow:
 
         self.totals_container = ttk.Frame(self.frame)
         self.totals_container.pack(fill="x")
+        # Hidden container for item-derived modifier instances used in totals math.
+        self.item_modifiers_eval_container = ttk.Frame(self.frame)
         self._create_totals_widgets()
         self.update_totals()
 
@@ -256,6 +261,7 @@ class HeroRow:
             ("total_strength", "Total Strength"),
             ("total_agility", "Total Agility"),
             ("total_intelligence", "Total Intelligence"),
+            ("total_item_gold", "Total Item Gold"),
             ("total_hp", "Total HP"),
             ("total_health_regen", "Total Health Regen"),
             ("total_mana", "Total Mana"),
@@ -348,6 +354,54 @@ class HeroRow:
         """Check whether modifier is a percentage damage modifier."""
         return getattr(mod, "TYPE_NAME", "") == "Percentage Damage"
 
+    def _get_total_enabled_item_gold(self):
+        """Get total gold from enabled attached items."""
+        variables = self.get_variables() if self.get_variables else None
+        total = 0.0
+        for item in self.items:
+            if not isinstance(item, dict) or not item.get("enabled", True):
+                continue
+            fields = item.get("fields", {})
+            gold_expr = str(fields.get("gold_amount", "0"))
+            gold_value = safe_eval(gold_expr, variables)
+            if gold_value is not None:
+                total += max(0.0, gold_value)
+        return total
+
+    def _destroy_item_modifiers(self):
+        """Destroy cached item-derived modifier instances."""
+        for mod in self.item_modifiers[:]:
+            mod.destroy()
+        self.item_modifiers.clear()
+
+    def _rebuild_item_modifiers(self):
+        """Build modifier instances from attached item data for calculations."""
+        self._destroy_item_modifiers()
+        for item in self.items:
+            if not item.get("enabled", True):
+                continue
+            modifiers_data = item.get("modifiers", [])
+            if not isinstance(modifiers_data, list):
+                continue
+            for modifier_data in modifiers_data:
+                type_name = modifier_data.get("type")
+                if not type_name:
+                    continue
+                mod = Modifier.create(
+                    type_name,
+                    self.item_modifiers_eval_container,
+                    lambda: None,
+                    lambda _: None,
+                    get_variables=self.get_variables
+                )
+                if not mod:
+                    continue
+                for key, value in modifier_data.get("values", {}).items():
+                    var = getattr(mod, key, None)
+                    if hasattr(var, "set"):
+                        var.set(value)
+                self.item_modifiers.append(mod)
+
     def update_totals(self):
         """Recalculate and refresh all totals for this hero."""
         base_hp = self._get_numeric_field("base_hp")
@@ -376,6 +430,7 @@ class HeroRow:
         total_health_regen = base_hp_regen + (strength * 0.1)
         total_mana = max(0.0, 75.0 + (intelligence * 12.0))
         total_mana_regen = intelligence * 0.05
+        total_item_gold = self._get_total_enabled_item_gold()
 
         effective_attack_speed = max(0.0, attack_speed + agility)
         attacks_per_second = 0.0
@@ -388,27 +443,29 @@ class HeroRow:
         attribute_damage = self._get_primary_attribute_bonus(strength, agility, intelligence)
         raw_base_damage = base_damage + attribute_damage
 
+        all_modifiers = self.modifiers + self.item_modifiers
+
         total_bonus_damage = 0.0
-        for mod in self.modifiers:
+        for mod in all_modifiers:
             if mod.is_enabled() and self._is_flat_damage_modifier(mod):
                 total_bonus_damage += mod.get_damage_for_hit(1, 0.0)
 
         total_base_damage = raw_base_damage
         total_auto_attack_damage = raw_base_damage + total_bonus_damage
-        for mod in self.modifiers:
+        for mod in all_modifiers:
             if mod.is_enabled() and self._is_percentage_damage_modifier(mod):
                 total_base_damage = mod.apply_damage_for_hit(1, total_base_damage, raw_base_damage)
                 total_auto_attack_damage = mod.apply_damage_for_hit(1, total_auto_attack_damage, raw_base_damage)
 
         estimated_physical_damage = total_auto_attack_damage
-        for mod in self.modifiers:
+        for mod in all_modifiers:
             if mod.is_enabled() and not self._is_flat_damage_modifier(mod) and not self._is_percentage_damage_modifier(mod):
                 estimated_physical_damage = mod.apply_damage_for_hit(
                     1, estimated_physical_damage, raw_base_damage
                 )
 
         estimated_magic_damage = 0.0
-        for mod in self.modifiers:
+        for mod in all_modifiers:
             if mod.is_enabled():
                 estimated_magic_damage += mod.get_magic_damage_for_hit(1, estimated_physical_damage)
 
@@ -436,6 +493,7 @@ class HeroRow:
         self.total_vars["total_strength"].set(self._format_value(strength))
         self.total_vars["total_agility"].set(self._format_value(agility))
         self.total_vars["total_intelligence"].set(self._format_value(intelligence))
+        self.total_vars["total_item_gold"].set(self._format_value(total_item_gold))
         self.total_vars["total_hp"].set(self._format_value(total_hp))
         self.total_vars["total_health_regen"].set(self._format_value(total_health_regen))
         self.total_vars["total_mana"].set(self._format_value(total_mana))
@@ -502,6 +560,103 @@ class HeroRow:
         """Delete a spell attached to this hero."""
         self.spell_rows.remove(spell_row)
         spell_row.destroy()
+
+    def _item_display_name(self, item_data, fallback_index=None):
+        """Get display name for attached item."""
+        item_name = item_data.get("fields", {}).get("name", "").strip()
+        if item_name:
+            return item_name
+        if fallback_index is not None:
+            return f"Item {fallback_index + 1}"
+        return "Item"
+
+    def _refresh_items_display(self):
+        """Refresh attached items UI."""
+        for _, frame in self.item_widgets:
+            frame.destroy()
+        self.item_widgets.clear()
+
+        for idx, item_data in enumerate(self.items):
+            row = ttk.Frame(self.items_container)
+            row.pack(fill="x", pady=1)
+
+            enabled_var = tk.BooleanVar(value=item_data.get("enabled", True))
+            enabled_var.trace('w', lambda *args, i=idx, v=enabled_var: self._toggle_item_enabled(i, v))
+            ttk.Checkbutton(row, variable=enabled_var).pack(side="left", padx=(0, 4))
+
+            name = self._item_display_name(item_data, idx)
+            ttk.Label(row, text=name, font=('Arial', 8, 'bold'),
+                      foreground='#3d5a80').pack(side="left")
+
+            remove_btn = ttk.Button(
+                row, text="✕", width=2, command=lambda i=idx: self._remove_item(i)
+            )
+            remove_btn.pack(side="left", padx=4)
+            self.item_widgets.append((item_data, row, enabled_var))
+
+    def _toggle_item_enabled(self, index, enabled_var):
+        """Enable/disable an attached item and refresh totals."""
+        if 0 <= index < len(self.items):
+            self.items[index]["enabled"] = bool(enabled_var.get())
+            self._rebuild_item_modifiers()
+            self.update_totals()
+
+    def _remove_item(self, index):
+        """Remove attached item by index."""
+        if 0 <= index < len(self.items):
+            self.items.pop(index)
+            self._refresh_items_display()
+            self._rebuild_item_modifiers()
+            self.update_totals()
+
+    def open_add_item_menu(self):
+        """Open a menu to attach an item from item library."""
+        library_items = self.get_item_library_items() if self.get_item_library_items else []
+        if not library_items:
+            messagebox.showinfo("No Item Library", "No saved items found in item library.")
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Add Item")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+        ttk.Label(content, text="Select item from library:",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 6))
+
+        display_names = [self._item_display_name(item, idx) for idx, item in enumerate(library_items)]
+        selected_name = tk.StringVar(value=display_names[0])
+        combo = ttk.Combobox(
+            content,
+            textvariable=selected_name,
+            values=display_names,
+            state="readonly",
+            width=32
+        )
+        combo.pack(fill="x", pady=(0, 10))
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _add_selected():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            selected_item = library_items[selected_index]
+            # Deep copy to keep hero-attached item stable if library changes later.
+            copied_item = json.loads(json.dumps(selected_item))
+            copied_item.setdefault("enabled", True)
+            self.items.append(copied_item)
+            self._refresh_items_display()
+            self._rebuild_item_modifiers()
+            self.update_totals()
+            menu.destroy()
+
+        ttk.Button(buttons, text="Add Selected", command=_add_selected).pack(side="left")
+        ttk.Button(buttons, text="Cancel", command=menu.destroy).pack(side="right")
 
     def _serialize_modifier(self, mod):
         """Serialize modifier to dictionary."""
@@ -571,6 +726,11 @@ class HeroRow:
 
         items = data.get("items", [])
         self.items = items if isinstance(items, list) else []
+        for item in self.items:
+            if isinstance(item, dict):
+                item.setdefault("enabled", True)
+        self._refresh_items_display()
+        self._rebuild_item_modifiers()
         self.update_totals()
 
     def pack(self, **kwargs):
@@ -585,6 +745,165 @@ class HeroRow:
         for spell_row in self.spell_rows[:]:
             spell_row.destroy()
         self.spell_rows.clear()
+        self._destroy_item_modifiers()
+        self.frame.destroy()
+
+
+class ItemWorkbenchRow:
+    """Single item row for creating and persisting reusable items."""
+
+    def __init__(self, parent, item_id, on_delete, on_save, get_variables):
+        self.parent = parent
+        self.item_id = item_id
+        self.on_delete = on_delete
+        self.on_save = on_save
+        self.get_variables = get_variables
+        self.field_vars = {}
+        self.notes_var = tk.StringVar(value="")
+        self.modifiers = []
+
+        self.frame = ttk.Frame(parent, relief='solid', borderwidth=1, padding="8")
+        self._create_widgets()
+
+    def _create_widgets(self):
+        header = ttk.Frame(self.frame)
+        header.pack(fill="x", pady=(0, 6))
+        ttk.Button(header, text="Save", width=8,
+                   command=lambda: self.on_save(self)).pack(side="right", padx=(0, 4))
+        ttk.Button(header, text="Delete", width=8,
+                   command=lambda: self.on_delete(self)).pack(side="right")
+
+        fields_row = ttk.Frame(self.frame)
+        fields_row.pack(fill="x", pady=(0, 4))
+        ttk.Label(fields_row, text="Name:", font=('Arial', 8)).pack(side="left", padx=(0, 4))
+        self.field_vars["name"] = tk.StringVar(value="Item")
+        ttk.Entry(fields_row, textvariable=self.field_vars["name"], width=30).pack(side="left")
+
+        notes_row = ttk.Frame(self.frame)
+        notes_row.pack(fill="x", pady=(0, 4))
+        ttk.Label(notes_row, text="Notes:", font=('Arial', 8)).pack(side="left", padx=(0, 4))
+        ttk.Entry(notes_row, textvariable=self.notes_var, width=80).pack(side="left", fill="x", expand=True)
+
+        ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
+        mod_header = ttk.Frame(self.frame)
+        mod_header.pack(fill="x", pady=(0, 5))
+        ttk.Label(mod_header, text="Modifiers",
+                  font=('Arial', 9, 'bold')).pack(side="left")
+
+        self.modifier_type_var = tk.StringVar(value="")
+        self.modifier_combo = ttk.Combobox(
+            mod_header,
+            textvariable=self.modifier_type_var,
+            state="readonly",
+            width=20
+        )
+        self.modifier_combo['values'] = Modifier.get_available_types()
+        if self.modifier_combo['values']:
+            self.modifier_type_var.set(self.modifier_combo['values'][0])
+        self.modifier_combo.pack(side="right", padx=2)
+
+        ttk.Button(mod_header, text="+ Add Modifier",
+                   command=self.add_modifier).pack(side="right", padx=5)
+
+        self.modifiers_container = ttk.Frame(self.frame)
+        self.modifiers_container.pack(fill="x")
+
+    def add_modifier(self):
+        """Add a modifier attached to this item."""
+        type_name = self.modifier_type_var.get()
+        if not type_name:
+            return
+
+        mod = Modifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_modifier_changed,
+            self.delete_modifier,
+            get_variables=self.get_variables
+        )
+        if mod:
+            mod.pack(fill="x", pady=2)
+            self.modifiers.append(mod)
+            self._on_modifier_changed()
+
+    def delete_modifier(self, mod):
+        """Delete an item modifier."""
+        self.modifiers.remove(mod)
+        mod.destroy()
+        self._on_modifier_changed()
+
+    def _on_modifier_changed(self):
+        """Update modifier displays after changes."""
+        for mod in self.modifiers:
+            mod.update_display()
+
+    def _serialize_modifier(self, mod):
+        """Serialize modifier to dictionary."""
+        values = {}
+        for key, value in mod.__dict__.items():
+            if key.endswith("_var") and hasattr(value, "get"):
+                values[key] = value.get()
+        return {
+            "type": getattr(mod, "TYPE_NAME", ""),
+            "values": values
+        }
+
+    def _load_modifier(self, modifier_data):
+        """Instantiate and load a modifier from dictionary."""
+        type_name = modifier_data.get("type")
+        if not type_name:
+            return
+
+        mod = Modifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_modifier_changed,
+            self.delete_modifier,
+            get_variables=self.get_variables
+        )
+        if not mod:
+            return
+
+        for key, value in modifier_data.get("values", {}).items():
+            var = getattr(mod, key, None)
+            if hasattr(var, "set"):
+                var.set(value)
+
+        mod.pack(fill="x", pady=2)
+        self.modifiers.append(mod)
+        mod.update_display()
+
+    def to_dict(self):
+        """Serialize item row to dictionary."""
+        return {
+            "item_id": self.item_id,
+            "fields": {key: var.get() for key, var in self.field_vars.items()},
+            "notes": self.notes_var.get(),
+            "modifiers": [self._serialize_modifier(mod) for mod in self.modifiers],
+        }
+
+    def load_from_dict(self, data):
+        """Load item row values from dictionary."""
+        for key, value in data.get("fields", {}).items():
+            if key in self.field_vars:
+                self.field_vars[key].set(str(value))
+        self.notes_var.set(str(data.get("notes", "")))
+
+        for mod in self.modifiers[:]:
+            mod.destroy()
+        self.modifiers.clear()
+        for modifier_data in data.get("modifiers", []):
+            self._load_modifier(modifier_data)
+
+    def pack(self, **kwargs):
+        """Pack row widget."""
+        self.frame.pack(**kwargs)
+
+    def destroy(self):
+        """Destroy row widget."""
+        for mod in self.modifiers[:]:
+            mod.destroy()
+        self.modifiers.clear()
         self.frame.destroy()
 
 
@@ -592,6 +911,7 @@ class HeroLabSection:
     """Orchestrates the Hero Lab section"""
 
     HERO_LIBRARY_FILENAME = "hero_library.json"
+    ITEM_LIBRARY_FILENAME = "item_library.json"
 
     def __init__(self, parent, get_variables):
         """
@@ -605,7 +925,9 @@ class HeroLabSection:
         self.get_variables = get_variables
         self.visible = False
         self.hero_rows = []
+        self.item_rows = []
         self.next_hero_id = 1
+        self.next_item_id = 1
         self._create_widgets()
 
     def _create_widgets(self):
@@ -624,6 +946,8 @@ class HeroLabSection:
 
         self.heroes_container = ttk.Frame(self.section_frame)
         self.heroes_container.pack(fill="x", pady=5)
+
+        ttk.Separator(self.section_frame, orient='horizontal').pack(fill="x", pady=5)
 
         ttk.Separator(self.section_frame, orient='horizontal').pack(fill="x", pady=5)
 
@@ -649,7 +973,8 @@ class HeroLabSection:
             hero_id,
             self.delete_hero,
             self.save_hero,
-            self.get_variables
+            self.get_variables,
+            self.get_item_library_items
         )
         if hero_data:
             hero_row.load_from_dict(hero_data)
@@ -662,12 +987,51 @@ class HeroLabSection:
             self.hero_rows.remove(hero_row)
             hero_row.destroy()
 
-    def clear(self):
+    def clear_heroes(self):
         """Clear all hero rows."""
         for hero_row in self.hero_rows[:]:
             hero_row.destroy()
         self.hero_rows.clear()
         self.next_hero_id = 1
+
+    def add_item(self, item_data=None):
+        """Add a new item workbench row."""
+        if item_data and isinstance(item_data.get("item_id"), int):
+            item_id = item_data["item_id"]
+            self.next_item_id = max(self.next_item_id, item_id + 1)
+        else:
+            item_id = self.next_item_id
+            self.next_item_id += 1
+
+        item_row = ItemWorkbenchRow(
+            self.items_container,
+            item_id,
+            self.delete_item,
+            self.save_item,
+            self.get_variables
+        )
+        if item_data:
+            item_row.load_from_dict(item_data)
+        item_row.pack(fill="x", pady=4)
+        self.item_rows.append(item_row)
+
+    def delete_item(self, item_row):
+        """Delete an existing item row."""
+        if item_row in self.item_rows:
+            self.item_rows.remove(item_row)
+            item_row.destroy()
+
+    def clear_items(self):
+        """Clear all item rows."""
+        for item_row in self.item_rows[:]:
+            item_row.destroy()
+        self.item_rows.clear()
+        self.next_item_id = 1
+
+    def clear(self):
+        """Clear all hero and item rows."""
+        self.clear_heroes()
+        self.clear_items()
 
     def _get_heroes_payload(self):
         """Build save payload for all heroes."""
@@ -679,6 +1043,10 @@ class HeroLabSection:
     def _get_library_path(self):
         """Get canonical path for hero library file."""
         return os.path.join(os.path.dirname(__file__), self.HERO_LIBRARY_FILENAME)
+
+    def _get_item_library_path(self):
+        """Get canonical path for item library file."""
+        return os.path.join(os.path.dirname(__file__), self.ITEM_LIBRARY_FILENAME)
 
     def _read_library_heroes(self):
         """Read hero library and return list of hero dictionaries."""
@@ -706,6 +1074,37 @@ class HeroLabSection:
         with open(file_path, "w", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2)
 
+    def _read_library_items(self):
+        """Read item library and return list of item dictionaries."""
+        file_path = self._get_item_library_path()
+        if not os.path.exists(file_path):
+            return []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (OSError, json.JSONDecodeError) as exc:
+            messagebox.showerror("Library Error", f"Could not read item library:\n{exc}")
+            return None
+
+        items = payload.get("items", [])
+        if not isinstance(items, list):
+            messagebox.showerror("Library Error", "Invalid item library format.")
+            return None
+        return [item for item in items if isinstance(item, dict)]
+
+    def get_item_library_items(self):
+        """Get item library list for attaching items to heroes."""
+        items = self._read_library_items()
+        return items if items is not None else []
+
+    def _write_library_items(self, items):
+        """Write list of item dictionaries to item library file."""
+        file_path = self._get_item_library_path()
+        payload = {"version": 1, "items": items}
+        with open(file_path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+
     def _normalize_name(self, name):
         """Normalize hero name for duplicate checks."""
         return str(name).strip().lower()
@@ -726,6 +1125,29 @@ class HeroLabSection:
             for idx, hero in enumerate(existing_heroes)
         }
         root = base_name.strip() if base_name.strip() else "Hero"
+        version = 2
+        while True:
+            candidate = f"{root} v{version}"
+            if self._normalize_name(candidate) not in normalized_existing:
+                return candidate
+            version += 1
+
+    def _item_name_from_data(self, item_data, fallback_index=None):
+        """Extract displayable item name from serialized item data."""
+        item_name = item_data.get("fields", {}).get("name", "").strip()
+        if item_name:
+            return item_name
+        if fallback_index is not None:
+            return f"Item {fallback_index + 1}"
+        return "Item"
+
+    def _generate_item_version_name(self, base_name, existing_items):
+        """Generate non-duplicate version name based on base item name."""
+        normalized_existing = {
+            self._normalize_name(self._item_name_from_data(item, idx))
+            for idx, item in enumerate(existing_items)
+        }
+        root = base_name.strip() if base_name.strip() else "Item"
         version = 2
         while True:
             candidate = f"{root} v{version}"
@@ -856,6 +1278,129 @@ class HeroLabSection:
         ttk.Button(buttons, text="Cancel",
                    command=menu.destroy).pack(side="right")
 
+    def save_item(self, item_row):
+        """Open save menu for a single item."""
+        item_data = item_row.to_dict()
+        current_name = item_data.get("fields", {}).get("name", "").strip()
+        if not current_name:
+            messagebox.showerror("Save Failed", "Item must have a non-empty Name.")
+            return
+
+        existing_items = self._read_library_items()
+        if existing_items is None:
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Save Item")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+
+        ttk.Label(content, text=f"Item: {current_name}",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 8))
+        ttk.Label(content, text="Choose save mode:",
+                  font=('Arial', 8)).pack(anchor="w", pady=(0, 6))
+
+        existing_names = [
+            self._item_name_from_data(item, idx)
+            for idx, item in enumerate(existing_items)
+        ]
+
+        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        update_combo = ttk.Combobox(
+            content,
+            textvariable=update_name_var,
+            values=existing_names,
+            state="readonly",
+            width=32
+        )
+        update_combo.pack(fill="x", pady=(0, 10))
+        if not existing_names:
+            update_combo.configure(state="disabled")
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _save_new():
+            normalized_target = self._normalize_name(current_name)
+            normalized_existing = {
+                self._normalize_name(name) for name in existing_names
+            }
+            if normalized_target in normalized_existing:
+                messagebox.showerror(
+                    "Duplicate Name",
+                    "A saved item with this name already exists. Use Update Existing or Save New Version."
+                )
+                return
+            existing_items.append(item_data)
+            try:
+                self._write_library_items(existing_items)
+            except OSError as exc:
+                messagebox.showerror("Save Failed", f"Could not save item:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Item Saved", f"Saved new item '{current_name}'.")
+
+        def _update_existing():
+            if not existing_names:
+                messagebox.showerror("Update Failed", "No saved items to update.")
+                return
+
+            selected_name = update_combo.get().strip()
+            if not selected_name:
+                return
+
+            selected_index = next(
+                (idx for idx, name in enumerate(existing_names) if name == selected_name),
+                None
+            )
+            if selected_index is None:
+                return
+
+            normalized_target = self._normalize_name(current_name)
+            for idx, name in enumerate(existing_names):
+                if idx != selected_index and self._normalize_name(name) == normalized_target:
+                    messagebox.showerror(
+                        "Duplicate Name",
+                        "Another saved item already uses this name. Rename current item first."
+                    )
+                    return
+
+            existing_items[selected_index] = item_data
+            try:
+                self._write_library_items(existing_items)
+            except OSError as exc:
+                messagebox.showerror("Update Failed", f"Could not update item:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Item Updated", f"Updated saved item '{selected_name}'.")
+
+        def _save_new_version():
+            version_name = self._generate_item_version_name(current_name, existing_items)
+            version_data = item_row.to_dict()
+            version_data.setdefault("fields", {})
+            version_data["fields"]["name"] = version_name
+            existing_items.append(version_data)
+            try:
+                self._write_library_items(existing_items)
+            except OSError as exc:
+                messagebox.showerror("Save Failed", f"Could not save item version:\n{exc}")
+                return
+            menu.destroy()
+            messagebox.showinfo("Item Version Saved", f"Saved as '{version_name}'.")
+
+        ttk.Button(buttons, text="Save New",
+                   command=_save_new).pack(side="left")
+        ttk.Button(buttons, text="Update Existing",
+                   command=_update_existing).pack(side="left", padx=5)
+        ttk.Button(buttons, text="Save New Version",
+                   command=_save_new_version).pack(side="left")
+        ttk.Button(buttons, text="Cancel",
+                   command=menu.destroy).pack(side="right")
+
     def load_heroes(self):
         """Open top-level load menu for selecting heroes from canonical file."""
         heroes_data = self._read_library_heroes()
@@ -926,7 +1471,7 @@ class HeroLabSection:
             selected_index = combo.current()
             if selected_index < 0:
                 return
-            self.clear()
+            self.clear_heroes()
             self.add_hero(hero_data=valid_heroes[selected_index])
             menu.destroy()
 
@@ -938,7 +1483,7 @@ class HeroLabSection:
             menu.destroy()
 
         def _load_all_replace():
-            self.clear()
+            self.clear_heroes()
             for hero in valid_heroes:
                 self.add_hero(hero_data=hero)
             if not self.hero_rows:
@@ -957,6 +1502,122 @@ class HeroLabSection:
             if not should_delete:
                 return
             valid_heroes.pop(selected_index)
+            try:
+                _save_library()
+            except OSError as exc:
+                messagebox.showerror("Delete Failed", f"Could not update library:\n{exc}")
+                return
+            _refresh_combo()
+
+        ttk.Button(buttons, text="Load Selected",
+                   command=_load_selected_replace).pack(side="left")
+        ttk.Button(buttons, text="Append Selected",
+                   command=_load_selected_append).pack(side="left", padx=5)
+        ttk.Button(buttons, text="Load All",
+                   command=_load_all_replace).pack(side="left")
+        ttk.Button(buttons, text="Delete Selected",
+                   command=_delete_selected_saved).pack(side="left", padx=(5, 0))
+        ttk.Button(buttons, text="Cancel",
+                   command=menu.destroy).pack(side="right")
+
+    def load_items(self):
+        """Open top-level load menu for selecting items from item library."""
+        items_data = self._read_library_items()
+        if items_data is None:
+            return
+        if not items_data:
+            messagebox.showinfo("No Item Library", f"No saved items in:\n{self._get_item_library_path()}")
+            return
+
+        self._open_item_load_menu(items_data)
+
+    def _open_item_load_menu(self, items_data):
+        """Open a top-level menu to load selected item(s)."""
+        valid_items = [item for item in items_data if isinstance(item, dict)]
+        if not valid_items:
+            messagebox.showinfo("No Items", "Item library is empty.")
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Load Items")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+
+        ttk.Label(content, text="Select item from library:",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 6))
+
+        def _build_display_names():
+            names = []
+            for idx, item in enumerate(valid_items):
+                item_name = item.get("fields", {}).get("name", "").strip()
+                if not item_name:
+                    item_name = f"Item {idx + 1}"
+                names.append(item_name)
+            return names
+
+        display_names = _build_display_names()
+        selected_name = tk.StringVar(value=display_names[0])
+        combo = ttk.Combobox(
+            content,
+            textvariable=selected_name,
+            values=display_names,
+            state="readonly",
+            width=32
+        )
+        combo.pack(fill="x", pady=(0, 10))
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _save_library():
+            self._write_library_items(valid_items)
+
+        def _refresh_combo():
+            names = _build_display_names()
+            combo["values"] = names
+            if names:
+                combo.current(0)
+            else:
+                menu.destroy()
+                messagebox.showinfo("Library Updated", "All saved items were deleted.")
+
+        def _load_selected_replace():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            self.clear_items()
+            self.add_item(item_data=valid_items[selected_index])
+            menu.destroy()
+
+        def _load_selected_append():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            self.add_item(item_data=valid_items[selected_index])
+            menu.destroy()
+
+        def _load_all_replace():
+            self.clear_items()
+            for item in valid_items:
+                self.add_item(item_data=item)
+            menu.destroy()
+
+        def _delete_selected_saved():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            selected_name_local = combo.get() or f"Item {selected_index + 1}"
+            should_delete = messagebox.askyesno(
+                "Delete Saved Item",
+                f"Delete saved item '{selected_name_local}' from library?"
+            )
+            if not should_delete:
+                return
+            valid_items.pop(selected_index)
             try:
                 _save_library()
             except OSError as exc:

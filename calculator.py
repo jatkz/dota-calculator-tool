@@ -12,6 +12,7 @@ from attack_mode import AttackModeSection
 from spells_section import SpellsSection
 from hero_lab_section import HeroLabSection
 from item_workbench_section import ItemWorkbenchSection
+from spell_workbench_section import SpellWorkbenchSection
 
 
 class DotaCalculator:
@@ -408,6 +409,23 @@ class DotaCalculator:
         )
         self.item_workbench_separator = ttk.Separator(main_frame, orient='horizontal')
 
+        # ============ SPELL WORKBENCH SECTION TOGGLE ============
+        self.spell_workbench_visible = False
+        self.spell_workbench_toggle_frame = ttk.Frame(main_frame)
+        self.spell_workbench_toggle_frame.pack(fill="x", pady=(5, 5))
+        self.spell_workbench_toggle_btn = ttk.Button(
+            self.spell_workbench_toggle_frame,
+            text="▶ Show Spell Workbench Section",
+            command=self.toggle_spell_workbench_section
+        )
+        self.spell_workbench_toggle_btn.pack(side="left")
+
+        self.spell_workbench_container = ttk.Frame(main_frame)
+        self.spell_workbench_section = SpellWorkbenchSection(
+            self.spell_workbench_container
+        )
+        self.spell_workbench_separator = ttk.Separator(main_frame, orient='horizontal')
+
         # Clear button (always visible at bottom)
         self.clear_button = ttk.Button(main_frame, text="Clear All", command=self.clear_all)
         self.clear_button.pack(pady=10)
@@ -667,6 +685,20 @@ class DotaCalculator:
             self.item_workbench_toggle_btn.config(text="▼ Hide Item Workbench Section")
             self.item_workbench_visible = True
             self.item_workbench_section.pack_content()
+
+    def toggle_spell_workbench_section(self):
+        """Toggle the visibility of the Spell Workbench section"""
+        if self.spell_workbench_visible:
+            self.spell_workbench_container.pack_forget()
+            self.spell_workbench_separator.pack_forget()
+            self.spell_workbench_toggle_btn.config(text="▶ Show Spell Workbench Section")
+            self.spell_workbench_visible = False
+        else:
+            self.spell_workbench_container.pack(fill="x", pady=5, after=self.spell_workbench_toggle_frame)
+            self.spell_workbench_separator.pack(fill="x", pady=15, after=self.spell_workbench_container)
+            self.spell_workbench_toggle_btn.config(text="▼ Hide Spell Workbench Section")
+            self.spell_workbench_visible = True
+            self.spell_workbench_section.pack_content()
 
     def toggle_armor_mode(self):
         """Toggle between Armor and Physical Reduction mode"""
@@ -995,6 +1027,7 @@ class DotaCalculator:
         self.spells_section.clear()
         self.hero_lab_section.clear()
         self.item_workbench_section.clear()
+        self.spell_workbench_section.clear()
 
         self.add_physical_row()
         self.add_magic_row()

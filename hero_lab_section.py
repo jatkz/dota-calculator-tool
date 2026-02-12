@@ -10,25 +10,49 @@ from utils import safe_eval, armor_to_reduction
 
 
 class HeroSpellRow:
-    """Simple editable spell row attached to a hero."""
+    """Editable spell row with per-level values attached to a hero."""
 
     DAMAGE_TYPES = ("Physical", "Magic", "Pure")
+    DEFAULT_LEVEL = {
+        "damage": "0",
+        "damage_type": "Magic",
+        "hits": "1",
+        "cast": "0",
+        "stun": "0",
+        "mana": "0",
+        "cooldown": "0",
+    }
 
-    def __init__(self, parent, on_delete):
+    def __init__(self, parent, on_delete=None, show_delete_button=True):
         self.parent = parent
         self.on_delete = on_delete
+        self.show_delete_button = show_delete_button
         self.frame = ttk.Frame(parent)
+        self._syncing_level_fields = False
+        self._syncing_level_controls = False
+        self.levels = []
         self._create_widgets()
 
     def _create_widgets(self):
         self.name_var = tk.StringVar(value="Spell")
-        self.damage_var = tk.StringVar(value="0")
-        self.damage_type_var = tk.StringVar(value=self.DAMAGE_TYPES[1])
-        self.hits_var = tk.StringVar(value="1")
-        self.cast_var = tk.StringVar(value="0")
-        self.stun_var = tk.StringVar(value="0")
-        self.mana_var = tk.StringVar(value="0")
-        self.cooldown_var = tk.StringVar(value="0")
+        self.max_level_var = tk.StringVar(value="4")
+        self.current_level_var = tk.StringVar(value="1")
+        self.damage_var = tk.StringVar(value=self.DEFAULT_LEVEL["damage"])
+        self.damage_type_var = tk.StringVar(value=self.DEFAULT_LEVEL["damage_type"])
+        self.hits_var = tk.StringVar(value=self.DEFAULT_LEVEL["hits"])
+        self.cast_var = tk.StringVar(value=self.DEFAULT_LEVEL["cast"])
+        self.stun_var = tk.StringVar(value=self.DEFAULT_LEVEL["stun"])
+        self.mana_var = tk.StringVar(value=self.DEFAULT_LEVEL["mana"])
+        self.cooldown_var = tk.StringVar(value=self.DEFAULT_LEVEL["cooldown"])
+        self.level_field_vars = [
+            self.damage_var,
+            self.damage_type_var,
+            self.hits_var,
+            self.cast_var,
+            self.stun_var,
+            self.mana_var,
+            self.cooldown_var,
+        ]
 
         top_row = ttk.Frame(self.frame)
         top_row.pack(fill="x")
@@ -37,6 +61,26 @@ class HeroSpellRow:
 
         ttk.Label(top_row, text="Name:", font=('Arial', 8)).pack(side="left", padx=(0, 2))
         ttk.Entry(top_row, textvariable=self.name_var, width=14).pack(side="left", padx=2)
+
+        ttk.Label(top_row, text="Max Lvl:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        self.max_level_combo = ttk.Combobox(
+            top_row,
+            textvariable=self.max_level_var,
+            values=[str(i) for i in range(1, 11)],
+            state="readonly",
+            width=4
+        )
+        self.max_level_combo.pack(side="left", padx=2)
+
+        ttk.Label(top_row, text="Current Lvl:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        self.current_level_combo = ttk.Combobox(
+            top_row,
+            textvariable=self.current_level_var,
+            values=["1"],
+            state="readonly",
+            width=4
+        )
+        self.current_level_combo.pack(side="left", padx=2)
 
         ttk.Label(top_row, text="Damage:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
         ttk.Entry(top_row, textvariable=self.damage_var, width=8).pack(side="left", padx=2)
@@ -50,8 +94,9 @@ class HeroSpellRow:
             width=9
         ).pack(side="left", padx=2)
 
-        ttk.Button(top_row, text="X", width=2,
-                   command=lambda: self.on_delete(self)).pack(side="right", padx=4)
+        if self.show_delete_button and self.on_delete:
+            ttk.Button(top_row, text="X", width=2,
+                       command=lambda: self.on_delete(self)).pack(side="right", padx=4)
 
         ttk.Label(bottom_row, text="Hits:", font=('Arial', 8)).pack(side="left", padx=(0, 2))
         ttk.Entry(bottom_row, textvariable=self.hits_var, width=6).pack(side="left", padx=2)
@@ -68,6 +113,109 @@ class HeroSpellRow:
         ttk.Label(bottom_row, text="CD:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
         ttk.Entry(bottom_row, textvariable=self.cooldown_var, width=8).pack(side="left", padx=2)
 
+        self.max_level_var.trace('w', lambda *args: self._on_max_level_changed())
+        self.current_level_var.trace('w', lambda *args: self._on_current_level_changed())
+        for var in self.level_field_vars:
+            var.trace('w', lambda *args: self._sync_current_level_values())
+
+        self._ensure_levels(4)
+        self._refresh_level_controls()
+        self._load_current_level_values()
+
+    def _default_level_data(self):
+        """Get a new default level dictionary."""
+        return dict(self.DEFAULT_LEVEL)
+
+    def _parse_level(self, raw_value, default_value):
+        """Parse level integer with bounds."""
+        try:
+            value = int(str(raw_value).strip())
+        except (TypeError, ValueError):
+            return default_value
+        return max(1, min(10, value))
+
+    def _ensure_levels(self, max_level):
+        """Resize level list to the provided max level."""
+        max_level = max(1, min(10, int(max_level)))
+        while len(self.levels) < max_level:
+            if self.levels:
+                self.levels.append(dict(self.levels[-1]))
+            else:
+                self.levels.append(self._default_level_data())
+        if len(self.levels) > max_level:
+            self.levels = self.levels[:max_level]
+
+    def _refresh_level_controls(self):
+        """Refresh max/current level control values and options."""
+        self._syncing_level_controls = True
+        max_level = self._parse_level(self.max_level_var.get(), 1)
+        if self.max_level_var.get() != str(max_level):
+            self.max_level_var.set(str(max_level))
+        self.current_level_combo["values"] = [str(i) for i in range(1, max_level + 1)]
+        current_level = self._parse_level(self.current_level_var.get(), 1)
+        current_level = max(1, min(max_level, current_level))
+        if self.current_level_var.get() != str(current_level):
+            self.current_level_var.set(str(current_level))
+        self._syncing_level_controls = False
+
+    def _on_max_level_changed(self):
+        """Handle max level changes."""
+        if self._syncing_level_controls:
+            return
+        max_level = self._parse_level(self.max_level_var.get(), 1)
+        self._ensure_levels(max_level)
+        self._refresh_level_controls()
+        self._load_current_level_values()
+
+    def _on_current_level_changed(self):
+        """Handle current level changes."""
+        if self._syncing_level_controls:
+            return
+        self._refresh_level_controls()
+        self._load_current_level_values()
+
+    def _current_level_index(self):
+        """Get zero-based current level index."""
+        current_level = self._parse_level(self.current_level_var.get(), 1)
+        return max(0, min(len(self.levels) - 1, current_level - 1))
+
+    def _sync_current_level_values(self):
+        """Persist currently displayed field values into active level slot."""
+        if self._syncing_level_fields or not self.levels:
+            return
+        idx = self._current_level_index()
+        level = self.levels[idx]
+        level["damage"] = self.damage_var.get()
+        damage_type = self.damage_type_var.get()
+        if damage_type not in self.DAMAGE_TYPES:
+            damage_type = self.DEFAULT_LEVEL["damage_type"]
+            self.damage_type_var.set(damage_type)
+        level["damage_type"] = damage_type
+        level["hits"] = self.hits_var.get()
+        level["cast"] = self.cast_var.get()
+        level["stun"] = self.stun_var.get()
+        level["mana"] = self.mana_var.get()
+        level["cooldown"] = self.cooldown_var.get()
+
+    def _load_current_level_values(self):
+        """Load active level values into visible field vars."""
+        if not self.levels:
+            self._ensure_levels(1)
+        idx = self._current_level_index()
+        level = self.levels[idx]
+        self._syncing_level_fields = True
+        self.damage_var.set(str(level.get("damage", self.DEFAULT_LEVEL["damage"])))
+        damage_type = str(level.get("damage_type", self.DEFAULT_LEVEL["damage_type"]))
+        if damage_type not in self.DAMAGE_TYPES:
+            damage_type = self.DEFAULT_LEVEL["damage_type"]
+        self.damage_type_var.set(damage_type)
+        self.hits_var.set(str(level.get("hits", self.DEFAULT_LEVEL["hits"])))
+        self.cast_var.set(str(level.get("cast", self.DEFAULT_LEVEL["cast"])))
+        self.stun_var.set(str(level.get("stun", self.DEFAULT_LEVEL["stun"])))
+        self.mana_var.set(str(level.get("mana", self.DEFAULT_LEVEL["mana"])))
+        self.cooldown_var.set(str(level.get("cooldown", self.DEFAULT_LEVEL["cooldown"])))
+        self._syncing_level_fields = False
+
     def pack(self, **kwargs):
         """Pack spell row widget."""
         self.frame.pack(**kwargs)
@@ -78,29 +226,61 @@ class HeroSpellRow:
 
     def to_dict(self):
         """Serialize spell row to dictionary."""
+        self._sync_current_level_values()
+        max_level = self._parse_level(self.max_level_var.get(), 1)
+        current_level = self._parse_level(self.current_level_var.get(), 1)
         return {
             "name": self.name_var.get(),
-            "damage": self.damage_var.get(),
-            "damage_type": self.damage_type_var.get(),
-            "hits": self.hits_var.get(),
-            "cast": self.cast_var.get(),
-            "stun": self.stun_var.get(),
-            "mana": self.mana_var.get(),
-            "cooldown": self.cooldown_var.get(),
+            "max_level": max_level,
+            "current_level": max(1, min(max_level, current_level)),
+            "levels": [dict(level_data) for level_data in self.levels[:max_level]],
         }
 
     def load_from_dict(self, data):
         """Load spell row values from dictionary."""
         self.name_var.set(str(data.get("name", self.name_var.get())))
-        self.damage_var.set(str(data.get("damage", self.damage_var.get())))
-        damage_type = str(data.get("damage_type", self.damage_type_var.get()))
-        if damage_type in self.DAMAGE_TYPES:
-            self.damage_type_var.set(damage_type)
-        self.hits_var.set(str(data.get("hits", self.hits_var.get())))
-        self.cast_var.set(str(data.get("cast", self.cast_var.get())))
-        self.stun_var.set(str(data.get("stun", self.stun_var.get())))
-        self.mana_var.set(str(data.get("mana", self.mana_var.get())))
-        self.cooldown_var.set(str(data.get("cooldown", self.cooldown_var.get())))
+        levels_data = data.get("levels")
+        if isinstance(levels_data, list) and levels_data:
+            parsed_levels = []
+            for level_data in levels_data[:10]:
+                parsed = self._default_level_data()
+                if isinstance(level_data, dict):
+                    parsed["damage"] = str(level_data.get("damage", parsed["damage"]))
+                    damage_type = str(level_data.get("damage_type", parsed["damage_type"]))
+                    parsed["damage_type"] = (
+                        damage_type if damage_type in self.DAMAGE_TYPES else self.DEFAULT_LEVEL["damage_type"]
+                    )
+                    parsed["hits"] = str(level_data.get("hits", parsed["hits"]))
+                    parsed["cast"] = str(level_data.get("cast", parsed["cast"]))
+                    parsed["stun"] = str(level_data.get("stun", parsed["stun"]))
+                    parsed["mana"] = str(level_data.get("mana", parsed["mana"]))
+                    parsed["cooldown"] = str(level_data.get("cooldown", parsed["cooldown"]))
+                parsed_levels.append(parsed)
+            self.levels = parsed_levels
+            max_level_default = len(self.levels)
+        else:
+            # Backward compatibility for single-level spell payloads.
+            legacy_level = self._default_level_data()
+            legacy_level["damage"] = str(data.get("damage", legacy_level["damage"]))
+            legacy_type = str(data.get("damage_type", legacy_level["damage_type"]))
+            legacy_level["damage_type"] = (
+                legacy_type if legacy_type in self.DAMAGE_TYPES else self.DEFAULT_LEVEL["damage_type"]
+            )
+            legacy_level["hits"] = str(data.get("hits", legacy_level["hits"]))
+            legacy_level["cast"] = str(data.get("cast", legacy_level["cast"]))
+            legacy_level["stun"] = str(data.get("stun", legacy_level["stun"]))
+            legacy_level["mana"] = str(data.get("mana", legacy_level["mana"]))
+            legacy_level["cooldown"] = str(data.get("cooldown", legacy_level["cooldown"]))
+            self.levels = [legacy_level]
+            max_level_default = 1
+
+        max_level = self._parse_level(data.get("max_level", max_level_default), max_level_default)
+        self._ensure_levels(max_level)
+        current_level = self._parse_level(data.get("current_level", 1), 1)
+        self.max_level_var.set(str(max_level))
+        self.current_level_var.set(str(max(1, min(max_level, current_level))))
+        self._refresh_level_controls()
+        self._load_current_level_values()
 
 
 class HeroRow:
@@ -130,13 +310,23 @@ class HeroRow:
         ("turn_rate", "Turn Rate", "0.6"),
     ]
 
-    def __init__(self, parent, hero_id, on_delete, on_save, get_variables, get_item_library_items):
+    def __init__(
+        self,
+        parent,
+        hero_id,
+        on_delete,
+        on_save,
+        get_variables,
+        get_item_library_items,
+        get_spell_library_spells
+    ):
         self.parent = parent
         self.hero_id = hero_id
         self.on_delete = on_delete
         self.on_save = on_save
         self.get_variables = get_variables
         self.get_item_library_items = get_item_library_items
+        self.get_spell_library_spells = get_spell_library_spells
         self.modifiers = []
         self.spell_rows = []
         self.items = []
@@ -211,8 +401,10 @@ class HeroRow:
         spells_header.pack(fill="x", pady=(0, 2))
         ttk.Label(spells_header, text="Spells",
                   font=('Arial', 9, 'bold')).pack(side="left")
+        ttk.Button(spells_header, text="+ Add Spell From Library",
+                   command=self.open_add_spell_menu).pack(side="right")
         ttk.Button(spells_header, text="+ Add Spell",
-                   command=self.add_spell).pack(side="right")
+                   command=self.add_spell).pack(side="right", padx=(0, 5))
 
         self.spells_container = ttk.Frame(self.frame)
         self.spells_container.pack(fill="x")
@@ -584,6 +776,59 @@ class HeroRow:
         self.spell_rows.remove(spell_row)
         spell_row.destroy()
 
+    def _spell_display_name(self, spell_data, fallback_index=None):
+        """Get display name for a spell payload."""
+        spell_name = str(spell_data.get("name", "")).strip() if isinstance(spell_data, dict) else ""
+        if spell_name:
+            return spell_name
+        if fallback_index is not None:
+            return f"Spell {fallback_index + 1}"
+        return "Spell"
+
+    def open_add_spell_menu(self):
+        """Open a menu to attach a spell from spell library."""
+        library_spells = self.get_spell_library_spells() if self.get_spell_library_spells else []
+        if not library_spells:
+            messagebox.showinfo("No Spell Library", "No saved spells found in spell library.")
+            return
+
+        menu = tk.Toplevel(self.parent)
+        menu.title("Add Spell")
+        menu.transient(self.parent.winfo_toplevel())
+        menu.grab_set()
+        menu.resizable(False, False)
+
+        content = ttk.Frame(menu, padding="12")
+        content.pack(fill="both", expand=True)
+        ttk.Label(content, text="Select spell from library:",
+                  font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 6))
+
+        display_names = [self._spell_display_name(spell, idx) for idx, spell in enumerate(library_spells)]
+        selected_name = tk.StringVar(value=display_names[0])
+        combo = ttk.Combobox(
+            content,
+            textvariable=selected_name,
+            values=display_names,
+            state="readonly",
+            width=32
+        )
+        combo.pack(fill="x", pady=(0, 10))
+
+        buttons = ttk.Frame(content)
+        buttons.pack(fill="x")
+
+        def _add_selected():
+            selected_index = combo.current()
+            if selected_index < 0:
+                return
+            selected_spell = library_spells[selected_index]
+            copied_spell = json.loads(json.dumps(selected_spell))
+            self.add_spell(spell_data=copied_spell)
+            menu.destroy()
+
+        ttk.Button(buttons, text="Add Selected", command=_add_selected).pack(side="left")
+        ttk.Button(buttons, text="Cancel", command=menu.destroy).pack(side="right")
+
     def _item_display_name(self, item_data, fallback_index=None):
         """Get display name for attached item."""
         item_name = item_data.get("fields", {}).get("name", "").strip()
@@ -935,6 +1180,7 @@ class HeroLabSection:
 
     HERO_LIBRARY_FILENAME = "hero_library.json"
     ITEM_LIBRARY_FILENAME = "item_library.json"
+    SPELL_LIBRARY_FILENAME = "spell_library.json"
 
     def __init__(self, parent, get_variables):
         """
@@ -997,7 +1243,8 @@ class HeroLabSection:
             self.delete_hero,
             self.save_hero,
             self.get_variables,
-            self.get_item_library_items
+            self.get_item_library_items,
+            self.get_spell_library_spells
         )
         if hero_data:
             hero_row.load_from_dict(hero_data)
@@ -1071,6 +1318,10 @@ class HeroLabSection:
         """Get canonical path for item library file."""
         return os.path.join(os.path.dirname(__file__), self.ITEM_LIBRARY_FILENAME)
 
+    def _get_spell_library_path(self):
+        """Get canonical path for spell library file."""
+        return os.path.join(os.path.dirname(__file__), self.SPELL_LIBRARY_FILENAME)
+
     def _read_library_heroes(self):
         """Read hero library and return list of hero dictionaries."""
         file_path = self._get_library_path()
@@ -1120,6 +1371,30 @@ class HeroLabSection:
         """Get item library list for attaching items to heroes."""
         items = self._read_library_items()
         return items if items is not None else []
+
+    def _read_library_spells(self):
+        """Read spell library and return list of spell dictionaries."""
+        file_path = self._get_spell_library_path()
+        if not os.path.exists(file_path):
+            return []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (OSError, json.JSONDecodeError) as exc:
+            messagebox.showerror("Library Error", f"Could not read spell library:\n{exc}")
+            return None
+
+        spells = payload.get("spells", [])
+        if not isinstance(spells, list):
+            messagebox.showerror("Library Error", "Invalid spell library format.")
+            return None
+        return [spell for spell in spells if isinstance(spell, dict)]
+
+    def get_spell_library_spells(self):
+        """Get spell library list for attaching spells to heroes."""
+        spells = self._read_library_spells()
+        return spells if spells is not None else []
 
     def _write_library_items(self, items):
         """Write list of item dictionaries to item library file."""

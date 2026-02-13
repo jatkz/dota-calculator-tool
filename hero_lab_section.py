@@ -32,7 +32,6 @@ class HeroSpellRow:
         self._syncing_level_fields = False
         self._syncing_level_controls = False
         self._loaded_level_index = 0
-        self._visited_level_indices = {0}
         self.levels = []
         self.level_modifiers = []
         self._create_widgets()
@@ -175,20 +174,6 @@ class HeroSpellRow:
                 self.levels.append(self._default_level_data())
         if len(self.levels) > max_level:
             self.levels = self.levels[:max_level]
-        self._visited_level_indices = {
-            idx for idx in self._visited_level_indices if idx < len(self.levels)
-        }
-        if self.levels:
-            self._visited_level_indices.add(0)
-
-    def _clone_level_from_previous_level(self, target_idx):
-        """Copy level values/modifiers from previous numeric level into target level."""
-        if target_idx <= 0 or target_idx >= len(self.levels):
-            return
-        source = self.levels[target_idx - 1]
-        copied = dict(source)
-        copied["modifiers"] = json.loads(json.dumps(source.get("modifiers", [])))
-        self.levels[target_idx] = copied
 
     def _refresh_level_controls(self):
         """Refresh max/current level control values and options."""
@@ -219,9 +204,6 @@ class HeroSpellRow:
             return
         self._save_current_level_modifiers()
         self._refresh_level_controls()
-        target_idx = self._current_level_index()
-        if target_idx not in self._visited_level_indices:
-            self._clone_level_from_previous_level(target_idx)
         self._load_current_level_values()
 
     def _current_level_index(self):
@@ -252,7 +234,6 @@ class HeroSpellRow:
         if not self.levels:
             self._ensure_levels(1)
         idx = self._current_level_index()
-        self._visited_level_indices.add(idx)
         level = self.levels[idx]
         self._syncing_level_fields = True
         self.damage_var.set(str(level.get("damage", self.DEFAULT_LEVEL["damage"])))
@@ -438,7 +419,6 @@ class HeroSpellRow:
 
         max_level = self._parse_level(data.get("max_level", max_level_default), max_level_default)
         self._ensure_levels(max_level)
-        self._visited_level_indices = set(range(len(self.levels)))
         current_level = self._parse_level(data.get("current_level", 1), 1)
         self.max_level_var.set(str(max_level))
         self.current_level_var.set(str(max(1, min(max_level, current_level))))

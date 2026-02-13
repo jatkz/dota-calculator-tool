@@ -11,11 +11,12 @@ from hero_lab_section import HeroSpellRow
 class SpellWorkbenchRow:
     """Single spell row for creating and persisting reusable spells."""
 
-    def __init__(self, parent, spell_id, on_delete, on_save):
+    def __init__(self, parent, spell_id, on_delete, on_save, get_variables=None):
         self.parent = parent
         self.spell_id = spell_id
         self.on_delete = on_delete
         self.on_save = on_save
+        self.get_variables = get_variables
         self.notes_var = tk.StringVar(value="")
 
         self.frame = ttk.Frame(parent, relief='solid', borderwidth=1, padding="8")
@@ -35,7 +36,12 @@ class SpellWorkbenchRow:
         ttk.Entry(notes_row, textvariable=self.notes_var, width=90).pack(side="left", fill="x", expand=True)
 
         ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
-        self.spell_editor = HeroSpellRow(self.frame, on_delete=None, show_delete_button=False)
+        self.spell_editor = HeroSpellRow(
+            self.frame,
+            on_delete=None,
+            show_delete_button=False,
+            get_variables=self.get_variables
+        )
         self.spell_editor.pack(fill="x", pady=2)
 
     def to_dict(self):
@@ -61,8 +67,9 @@ class SpellWorkbenchSection:
 
     SPELL_LIBRARY_FILENAME = "spell_library.json"
 
-    def __init__(self, parent):
+    def __init__(self, parent, get_variables=None):
         self.parent = parent
+        self.get_variables = get_variables
         self.visible = False
         self.spell_rows = []
         self.next_spell_id = 1
@@ -105,6 +112,7 @@ class SpellWorkbenchSection:
             spell_id,
             self.delete_spell,
             self.save_spell,
+            self.get_variables,
         )
         if spell_data:
             spell_row.load_from_dict(spell_data)
@@ -195,10 +203,19 @@ class SpellWorkbenchSection:
                   font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 8))
 
         existing_names = [self._spell_name_from_data(spell, idx) for idx, spell in enumerate(existing_spells)]
-        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        selected_update_index = next(
+            (idx for idx, name in enumerate(existing_names)
+             if self._normalize_name(name) == self._normalize_name(current_name)),
+            0
+        ) if existing_names else -1
+        update_name_var = tk.StringVar(
+            value=existing_names[selected_update_index] if selected_update_index >= 0 else ""
+        )
         update_combo = ttk.Combobox(content, textvariable=update_name_var, values=existing_names, state="readonly", width=32)
         update_combo.pack(fill="x", pady=(0, 10))
-        if not existing_names:
+        if selected_update_index >= 0:
+            update_combo.current(selected_update_index)
+        else:
             update_combo.configure(state="disabled")
 
         buttons = ttk.Frame(content)

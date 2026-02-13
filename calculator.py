@@ -422,7 +422,8 @@ class DotaCalculator:
 
         self.spell_workbench_container = ttk.Frame(main_frame)
         self.spell_workbench_section = SpellWorkbenchSection(
-            self.spell_workbench_container
+            self.spell_workbench_container,
+            get_variables=self.get_variables
         )
         self.spell_workbench_separator = ttk.Separator(main_frame, orient='horizontal')
 

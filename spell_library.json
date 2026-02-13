@@ -1,4 +1,280 @@
 {
   "version": 1,
-  "spells": []
+  "spells": [
+    {
+      "name": "grow",
+      "max_level": 4,
+      "current_level": 3,
+      "levels": [
+        {
+          "damage": "0",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": "0",
+          "stun": "0",
+          "mana": "0",
+          "cooldown": "0",
+          "modifiers": [
+            {
+              "type": "Flat Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Flat Damage",
+                "value_var": "50",
+                "info_var": "= +50.0"
+              }
+            },
+            {
+              "type": "Armor",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Armor",
+                "value_var": "5",
+                "info_var": "= +5.0"
+              }
+            },
+            {
+              "type": "Movespeed Flat",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Movespeed Flat",
+                "value_var": "10",
+                "info_var": "= +10.0"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "0",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": "0",
+          "stun": "0",
+          "mana": "0",
+          "cooldown": "0",
+          "modifiers": [
+            {
+              "type": "Flat Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Flat Damage",
+                "value_var": "110",
+                "info_var": "= +110.0"
+              }
+            },
+            {
+              "type": "Movespeed Flat",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Movespeed Flat",
+                "value_var": "15",
+                "info_var": "= +15.0"
+              }
+            },
+            {
+              "type": "Armor",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Armor",
+                "value_var": "10",
+                "info_var": "= +10.0"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "0",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": "0",
+          "stun": "0",
+          "mana": "0",
+          "cooldown": "0",
+          "modifiers": [
+            {
+              "type": "Flat Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Flat Damage",
+                "value_var": "165",
+                "info_var": "= +165.0"
+              }
+            },
+            {
+              "type": "Armor",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Armor",
+                "value_var": "15",
+                "info_var": "= +15.0"
+              }
+            },
+            {
+              "type": "Movespeed Flat",
+              "values": {
+                "enabled_var": true,
+                "label_var": "Movespeed Flat",
+                "value_var": "20",
+                "info_var": "= +20.0"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "0",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": "0",
+          "stun": "0",
+          "mana": "0",
+          "cooldown": "0",
+          "modifiers": []
+        }
+      ],
+      "spell_id": 1,
+      "notes": "tiny"
+    },
+    {
+      "name": "avalanche",
+      "max_level": 4,
+      "current_level": 4,
+      "levels": [
+        {
+          "damage": "20",
+          "damage_type": "Magic",
+          "hits": "5",
+          "cast": ".53",
+          "stun": "1.5",
+          "mana": "95",
+          "cooldown": "23",
+          "modifiers": []
+        },
+        {
+          "damage": "38",
+          "damage_type": "Magic",
+          "hits": "5",
+          "cast": ".53",
+          "stun": "1.5",
+          "mana": "110",
+          "cooldown": "20",
+          "modifiers": []
+        },
+        {
+          "damage": "76",
+          "damage_type": "Magic",
+          "hits": "5",
+          "cast": ".53",
+          "stun": "1.5",
+          "mana": "125",
+          "cooldown": "17",
+          "modifiers": []
+        },
+        {
+          "damage": "94",
+          "damage_type": "Magic",
+          "hits": "5",
+          "cast": ".53",
+          "stun": "1.5",
+          "mana": "140",
+          "cooldown": "14",
+          "modifiers": []
+        }
+      ],
+      "spell_id": 2,
+      "notes": "tiny"
+    },
+    {
+      "name": "toss",
+      "max_level": 4,
+      "current_level": 4,
+      "levels": [
+        {
+          "damage": "90",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": ".53",
+          "stun": "0",
+          "mana": "110",
+          "cooldown": "20",
+          "modifiers": [
+            {
+              "type": "Percentage Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "crash landing",
+                "value_var": "20",
+                "apply_to_total_var": true,
+                "info_var": "= 1.20x (total)"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "180",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": ".53",
+          "stun": "0",
+          "mana": "125",
+          "cooldown": "17",
+          "modifiers": [
+            {
+              "type": "Percentage Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "crash landing",
+                "value_var": "20",
+                "apply_to_total_var": true,
+                "info_var": "= 1.20x (total)"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "270",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": ".53",
+          "stun": "0",
+          "mana": "140",
+          "cooldown": "14",
+          "modifiers": [
+            {
+              "type": "Percentage Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "crash landing",
+                "value_var": "20",
+                "apply_to_total_var": true,
+                "info_var": "= 1.20x (total)"
+              }
+            }
+          ]
+        },
+        {
+          "damage": "360",
+          "damage_type": "Magic",
+          "hits": "1",
+          "cast": ".53",
+          "stun": "0",
+          "mana": "155",
+          "cooldown": "11",
+          "modifiers": [
+            {
+              "type": "Percentage Damage",
+              "values": {
+                "enabled_var": true,
+                "label_var": "crash landing",
+                "value_var": "20",
+                "apply_to_total_var": true,
+                "info_var": "= 1.20x (total)"
+              }
+            }
+          ]
+        }
+      ],
+      "spell_id": 3,
+      "notes": "tiny"
+    }
+  ]
 }

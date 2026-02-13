@@ -301,10 +301,19 @@ class ItemWorkbenchSection:
                   font=('Arial', 9, 'bold')).pack(anchor="w", pady=(0, 8))
 
         existing_names = [self._item_name_from_data(item, idx) for idx, item in enumerate(existing_items)]
-        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        selected_update_index = next(
+            (idx for idx, name in enumerate(existing_names)
+             if self._normalize_name(name) == self._normalize_name(current_name)),
+            0
+        ) if existing_names else -1
+        update_name_var = tk.StringVar(
+            value=existing_names[selected_update_index] if selected_update_index >= 0 else ""
+        )
         update_combo = ttk.Combobox(content, textvariable=update_name_var, values=existing_names, state="readonly", width=32)
         update_combo.pack(fill="x", pady=(0, 10))
-        if not existing_names:
+        if selected_update_index >= 0:
+            update_combo.current(selected_update_index)
+        else:
             update_combo.configure(state="disabled")
 
         buttons = ttk.Frame(content)

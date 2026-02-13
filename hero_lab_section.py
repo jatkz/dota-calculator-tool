@@ -23,14 +23,18 @@ class HeroSpellRow:
         "cooldown": "0",
     }
 
-    def __init__(self, parent, on_delete=None, show_delete_button=True):
+    def __init__(self, parent, on_delete=None, show_delete_button=True, get_variables=None):
         self.parent = parent
         self.on_delete = on_delete
         self.show_delete_button = show_delete_button
+        self.get_variables = get_variables
         self.frame = ttk.Frame(parent)
         self._syncing_level_fields = False
         self._syncing_level_controls = False
+        self._loaded_level_index = 0
+        self._visited_level_indices = {0}
         self.levels = []
+        self.level_modifiers = []
         self._create_widgets()
 
     def _create_widgets(self):
@@ -113,6 +117,28 @@ class HeroSpellRow:
         ttk.Label(bottom_row, text="CD:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
         ttk.Entry(bottom_row, textvariable=self.cooldown_var, width=8).pack(side="left", padx=2)
 
+        ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=4)
+        mod_header = ttk.Frame(self.frame)
+        mod_header.pack(fill="x", pady=(0, 2))
+        ttk.Label(mod_header, text="Level Modifiers",
+                  font=('Arial', 8, 'bold')).pack(side="left")
+        self.modifier_type_var = tk.StringVar(value="")
+        self.modifier_combo = ttk.Combobox(
+            mod_header,
+            textvariable=self.modifier_type_var,
+            state="readonly",
+            width=20
+        )
+        self.modifier_combo["values"] = Modifier.get_available_types()
+        if self.modifier_combo["values"]:
+            self.modifier_type_var.set(self.modifier_combo["values"][0])
+        self.modifier_combo.pack(side="right", padx=2)
+        ttk.Button(mod_header, text="+ Add Modifier",
+                   command=self.add_modifier).pack(side="right", padx=5)
+
+        self.modifiers_container = ttk.Frame(self.frame)
+        self.modifiers_container.pack(fill="x")
+
         self.max_level_var.trace('w', lambda *args: self._on_max_level_changed())
         self.current_level_var.trace('w', lambda *args: self._on_current_level_changed())
         for var in self.level_field_vars:
@@ -124,7 +150,9 @@ class HeroSpellRow:
 
     def _default_level_data(self):
         """Get a new default level dictionary."""
-        return dict(self.DEFAULT_LEVEL)
+        level_data = dict(self.DEFAULT_LEVEL)
+        level_data["modifiers"] = []
+        return level_data
 
     def _parse_level(self, raw_value, default_value):
         """Parse level integer with bounds."""
@@ -139,11 +167,28 @@ class HeroSpellRow:
         max_level = max(1, min(10, int(max_level)))
         while len(self.levels) < max_level:
             if self.levels:
-                self.levels.append(dict(self.levels[-1]))
+                prior = self.levels[-1]
+                copied = dict(prior)
+                copied["modifiers"] = json.loads(json.dumps(prior.get("modifiers", [])))
+                self.levels.append(copied)
             else:
                 self.levels.append(self._default_level_data())
         if len(self.levels) > max_level:
             self.levels = self.levels[:max_level]
+        self._visited_level_indices = {
+            idx for idx in self._visited_level_indices if idx < len(self.levels)
+        }
+        if self.levels:
+            self._visited_level_indices.add(0)
+
+    def _clone_level_from_previous_level(self, target_idx):
+        """Copy level values/modifiers from previous numeric level into target level."""
+        if target_idx <= 0 or target_idx >= len(self.levels):
+            return
+        source = self.levels[target_idx - 1]
+        copied = dict(source)
+        copied["modifiers"] = json.loads(json.dumps(source.get("modifiers", [])))
+        self.levels[target_idx] = copied
 
     def _refresh_level_controls(self):
         """Refresh max/current level control values and options."""
@@ -162,6 +207,7 @@ class HeroSpellRow:
         """Handle max level changes."""
         if self._syncing_level_controls:
             return
+        self._save_current_level_modifiers()
         max_level = self._parse_level(self.max_level_var.get(), 1)
         self._ensure_levels(max_level)
         self._refresh_level_controls()
@@ -171,7 +217,11 @@ class HeroSpellRow:
         """Handle current level changes."""
         if self._syncing_level_controls:
             return
+        self._save_current_level_modifiers()
         self._refresh_level_controls()
+        target_idx = self._current_level_index()
+        if target_idx not in self._visited_level_indices:
+            self._clone_level_from_previous_level(target_idx)
         self._load_current_level_values()
 
     def _current_level_index(self):
@@ -202,6 +252,7 @@ class HeroSpellRow:
         if not self.levels:
             self._ensure_levels(1)
         idx = self._current_level_index()
+        self._visited_level_indices.add(idx)
         level = self.levels[idx]
         self._syncing_level_fields = True
         self.damage_var.set(str(level.get("damage", self.DEFAULT_LEVEL["damage"])))
@@ -215,6 +266,105 @@ class HeroSpellRow:
         self.mana_var.set(str(level.get("mana", self.DEFAULT_LEVEL["mana"])))
         self.cooldown_var.set(str(level.get("cooldown", self.DEFAULT_LEVEL["cooldown"])))
         self._syncing_level_fields = False
+        self._load_current_level_modifiers()
+
+    def _serialize_modifier(self, mod):
+        """Serialize modifier to dictionary."""
+        values = {}
+        for key, value in mod.__dict__.items():
+            if key.endswith("_var") and hasattr(value, "get"):
+                values[key] = value.get()
+        return {
+            "type": getattr(mod, "TYPE_NAME", ""),
+            "values": values
+        }
+
+    def _save_current_level_modifiers(self, level_index=None):
+        """Persist active modifier widgets to current level data."""
+        if not self.levels:
+            return
+        if level_index is None:
+            idx = self._loaded_level_index
+        else:
+            idx = max(0, min(len(self.levels) - 1, int(level_index)))
+        self.levels[idx]["modifiers"] = [
+            self._serialize_modifier(mod) for mod in self.level_modifiers
+        ]
+
+    def _destroy_level_modifiers(self):
+        """Destroy active modifier widgets."""
+        for mod in self.level_modifiers[:]:
+            mod.destroy()
+        self.level_modifiers.clear()
+
+    def _load_modifier_into_ui(self, modifier_data):
+        """Instantiate one modifier widget from saved dictionary."""
+        type_name = modifier_data.get("type")
+        if not type_name:
+            return
+        mod = Modifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_modifier_changed,
+            self.delete_modifier,
+            get_variables=self.get_variables
+        )
+        if not mod:
+            return
+        for key, value in modifier_data.get("values", {}).items():
+            var = getattr(mod, key, None)
+            if hasattr(var, "set"):
+                var.set(value)
+        mod.pack(fill="x", pady=1)
+        if hasattr(mod, "update_display"):
+            mod.update_display()
+        self.level_modifiers.append(mod)
+
+    def _load_current_level_modifiers(self):
+        """Load modifier widgets for current level."""
+        self._destroy_level_modifiers()
+        if not self.levels:
+            return
+        idx = self._current_level_index()
+        self._loaded_level_index = idx
+        modifiers_data = self.levels[idx].get("modifiers", [])
+        if not isinstance(modifiers_data, list):
+            modifiers_data = []
+        for modifier_data in modifiers_data:
+            if isinstance(modifier_data, dict):
+                self._load_modifier_into_ui(modifier_data)
+
+    def _on_modifier_changed(self):
+        """Update modifier displays and sync active level modifier payload."""
+        for mod in self.level_modifiers:
+            if hasattr(mod, "update_display"):
+                mod.update_display()
+        self._save_current_level_modifiers()
+
+    def add_modifier(self):
+        """Add a modifier to current spell level."""
+        type_name = self.modifier_type_var.get()
+        if not type_name:
+            return
+        mod = Modifier.create(
+            type_name,
+            self.modifiers_container,
+            self._on_modifier_changed,
+            self.delete_modifier,
+            get_variables=self.get_variables
+        )
+        if not mod:
+            return
+        mod.pack(fill="x", pady=1)
+        self.level_modifiers.append(mod)
+        self._on_modifier_changed()
+
+    def delete_modifier(self, mod):
+        """Delete modifier from current spell level."""
+        if mod in self.level_modifiers:
+            self.level_modifiers.remove(mod)
+        mod.destroy()
+        self._on_modifier_changed()
 
     def pack(self, **kwargs):
         """Pack spell row widget."""
@@ -222,11 +372,13 @@ class HeroSpellRow:
 
     def destroy(self):
         """Destroy spell row widget."""
+        self._destroy_level_modifiers()
         self.frame.destroy()
 
     def to_dict(self):
         """Serialize spell row to dictionary."""
         self._sync_current_level_values()
+        self._save_current_level_modifiers()
         max_level = self._parse_level(self.max_level_var.get(), 1)
         current_level = self._parse_level(self.current_level_var.get(), 1)
         return {
@@ -255,6 +407,11 @@ class HeroSpellRow:
                     parsed["stun"] = str(level_data.get("stun", parsed["stun"]))
                     parsed["mana"] = str(level_data.get("mana", parsed["mana"]))
                     parsed["cooldown"] = str(level_data.get("cooldown", parsed["cooldown"]))
+                    modifiers_data = level_data.get("modifiers", [])
+                    if isinstance(modifiers_data, list):
+                        parsed["modifiers"] = [
+                            mod for mod in modifiers_data if isinstance(mod, dict)
+                        ]
                 parsed_levels.append(parsed)
             self.levels = parsed_levels
             max_level_default = len(self.levels)
@@ -271,11 +428,17 @@ class HeroSpellRow:
             legacy_level["stun"] = str(data.get("stun", legacy_level["stun"]))
             legacy_level["mana"] = str(data.get("mana", legacy_level["mana"]))
             legacy_level["cooldown"] = str(data.get("cooldown", legacy_level["cooldown"]))
+            legacy_modifiers = data.get("modifiers", [])
+            if isinstance(legacy_modifiers, list):
+                legacy_level["modifiers"] = [
+                    mod for mod in legacy_modifiers if isinstance(mod, dict)
+                ]
             self.levels = [legacy_level]
             max_level_default = 1
 
         max_level = self._parse_level(data.get("max_level", max_level_default), max_level_default)
         self._ensure_levels(max_level)
+        self._visited_level_indices = set(range(len(self.levels)))
         current_level = self._parse_level(data.get("current_level", 1), 1)
         self.max_level_var.set(str(max_level))
         self.current_level_var.set(str(max(1, min(max_level, current_level))))
@@ -440,12 +603,44 @@ class HeroRow:
                     state="readonly",
                     width=11
                 )
+                entry.pack(anchor="w")
+            elif key == "level":
+                level_input = ttk.Frame(field_frame)
+                level_input.pack(anchor="w")
+                entry = ttk.Entry(level_input, textvariable=var, width=6)
+                entry.pack(side="left")
+                ttk.Button(
+                    level_input,
+                    text="+",
+                    width=2,
+                    command=lambda v=var: self._change_level_value(v, 1)
+                ).pack(side="left", padx=(2, 0))
+                ttk.Button(
+                    level_input,
+                    text="-",
+                    width=2,
+                    command=lambda v=var: self._change_level_value(v, -1)
+                ).pack(side="left", padx=(2, 0))
             else:
                 entry = ttk.Entry(field_frame, textvariable=var, width=11)
-            entry.pack(anchor="w")
+                entry.pack(anchor="w")
             self.field_vars[key] = var
             self.field_entries[key] = entry
             var.trace('w', lambda *args: self.update_totals())
+
+    def _change_level_value(self, level_var, step):
+        """Increment/decrement hero level by step, clamped to at least 1."""
+        variables = self.get_variables() if self.get_variables else None
+        current_value = safe_eval(level_var.get(), variables)
+        if current_value is None:
+            current_level = 1
+        else:
+            try:
+                current_level = int(current_value)
+            except (TypeError, ValueError):
+                current_level = 1
+        new_level = max(1, current_level + step)
+        level_var.set(str(new_level))
 
     def _create_totals_widgets(self):
         """Create display rows for all requested totals."""
@@ -765,7 +960,12 @@ class HeroRow:
 
     def add_spell(self, spell_data=None):
         """Add a spell attached to this hero."""
-        spell_row = HeroSpellRow(self.spells_container, self.delete_spell)
+        spell_row = HeroSpellRow(
+            self.spells_container,
+            self.delete_spell,
+            show_delete_button=True,
+            get_variables=self.get_variables
+        )
         if spell_data:
             spell_row.load_from_dict(spell_data)
         spell_row.pack(fill="x", pady=2)
@@ -1484,7 +1684,14 @@ class HeroLabSection:
             for idx, hero in enumerate(existing_heroes)
         ]
 
-        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        selected_update_index = next(
+            (idx for idx, name in enumerate(existing_names)
+             if self._normalize_name(name) == self._normalize_name(current_name)),
+            0
+        ) if existing_names else -1
+        update_name_var = tk.StringVar(
+            value=existing_names[selected_update_index] if selected_update_index >= 0 else ""
+        )
         update_combo = ttk.Combobox(
             content,
             textvariable=update_name_var,
@@ -1493,7 +1700,9 @@ class HeroLabSection:
             width=32
         )
         update_combo.pack(fill="x", pady=(0, 10))
-        if not existing_names:
+        if selected_update_index >= 0:
+            update_combo.current(selected_update_index)
+        else:
             update_combo.configure(state="disabled")
 
         buttons = ttk.Frame(content)
@@ -1607,7 +1816,14 @@ class HeroLabSection:
             for idx, item in enumerate(existing_items)
         ]
 
-        update_name_var = tk.StringVar(value=existing_names[0] if existing_names else "")
+        selected_update_index = next(
+            (idx for idx, name in enumerate(existing_names)
+             if self._normalize_name(name) == self._normalize_name(current_name)),
+            0
+        ) if existing_names else -1
+        update_name_var = tk.StringVar(
+            value=existing_names[selected_update_index] if selected_update_index >= 0 else ""
+        )
         update_combo = ttk.Combobox(
             content,
             textvariable=update_name_var,
@@ -1616,7 +1832,9 @@ class HeroLabSection:
             width=32
         )
         update_combo.pack(fill="x", pady=(0, 10))
-        if not existing_names:
+        if selected_update_index >= 0:
+            update_combo.current(selected_update_index)
+        else:
             update_combo.configure(state="disabled")
 
         buttons = ttk.Frame(content)

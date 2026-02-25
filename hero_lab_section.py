@@ -5,7 +5,9 @@ import os
 import tkinter as tk
 from tkinter import messagebox, ttk
 
+from hero_implementations import HeroImplementationRegistry
 from modifiers import Modifier
+from talent_effects import TalentEffectModifier, build_talents_payload, normalize_key
 from utils import safe_eval, armor_to_reduction
 
 
@@ -23,17 +25,32 @@ class HeroSpellRow:
         "cooldown": "0",
     }
 
-    def __init__(self, parent, on_delete=None, show_delete_button=True, get_variables=None):
+    def __init__(
+        self,
+        parent,
+        on_delete=None,
+        show_delete_button=True,
+        get_variables=None,
+        on_spell_change=None,
+        get_hero_implementation=None
+    ):
         self.parent = parent
         self.on_delete = on_delete
         self.show_delete_button = show_delete_button
         self.get_variables = get_variables
+        self.on_spell_change = on_spell_change
+        self.get_hero_implementation = get_hero_implementation
         self.frame = ttk.Frame(parent)
         self._syncing_level_fields = False
         self._syncing_level_controls = False
         self._loaded_level_index = 0
         self.levels = []
         self.level_modifiers = []
+        self.metadata = {}
+        self.talent_effect_var = tk.StringVar(value="")
+        self.runtime_status_var = tk.StringVar(value="")
+        self.hero_kills_credited_var = tk.StringVar(value="0")
+        self.target_armors_var = tk.StringVar(value="0")
         self._create_widgets()
 
     def _create_widgets(self):
@@ -138,10 +155,38 @@ class HeroSpellRow:
         self.modifiers_container = ttk.Frame(self.frame)
         self.modifiers_container.pack(fill="x")
 
+        self.talent_effect_label = ttk.Label(
+            self.frame,
+            textvariable=self.talent_effect_var,
+            font=('Arial', 8),
+            foreground="#6c757d"
+        )
+        self.talent_effect_label.pack(fill="x", pady=(1, 0))
+
+        runtime_frame = ttk.Frame(self.frame)
+        runtime_frame.pack(fill="x", pady=(1, 0))
+        ttk.Label(runtime_frame, text="Runtime (Stifling):", font=('Arial', 8, 'bold')).pack(side="left")
+        ttk.Label(runtime_frame, text="Kills Credited:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        ttk.Entry(runtime_frame, textvariable=self.hero_kills_credited_var, width=4).pack(side="left", padx=2)
+        ttk.Label(runtime_frame, text="Target Armors CSV:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        ttk.Entry(runtime_frame, textvariable=self.target_armors_var, width=20).pack(side="left", padx=2)
+        ttk.Label(runtime_frame, text="(e.g. 8,12,15)", font=('Arial', 8), foreground="#777").pack(side="left", padx=(4, 0))
+
+        self.runtime_status_label = ttk.Label(
+            self.frame,
+            textvariable=self.runtime_status_var,
+            font=('Arial', 8),
+            foreground="#355070"
+        )
+        self.runtime_status_label.pack(fill="x", pady=(1, 0))
+
         self.max_level_var.trace('w', lambda *args: self._on_max_level_changed())
         self.current_level_var.trace('w', lambda *args: self._on_current_level_changed())
         for var in self.level_field_vars:
             var.trace('w', lambda *args: self._sync_current_level_values())
+        self.name_var.trace('w', lambda *args: self._notify_spell_changed())
+        self.hero_kills_credited_var.trace('w', lambda *args: self._notify_spell_changed())
+        self.target_armors_var.trace('w', lambda *args: self._notify_spell_changed())
 
         self._ensure_levels(4)
         self._refresh_level_controls()
@@ -205,6 +250,45 @@ class HeroSpellRow:
         self._save_current_level_modifiers()
         self._refresh_level_controls()
         self._load_current_level_values()
+        self._notify_spell_changed()
+
+    def _notify_spell_changed(self):
+        """Notify parent hero row that spell state changed."""
+        if callable(self.on_spell_change):
+            self.on_spell_change()
+
+    def _runtime_int(self, value, default=0):
+        """Parse integer runtime input."""
+        try:
+            return int(float(str(value).strip()))
+        except (TypeError, ValueError):
+            return int(default)
+
+    def get_runtime_targets(self):
+        """Parse target armor CSV into deterministic target payloads."""
+        raw = str(self.target_armors_var.get() or "").strip()
+        if not raw:
+            return [{"name": "Target 1", "armor": 0.0}]
+        targets = []
+        for idx, chunk in enumerate(raw.split(",")):
+            text = chunk.strip()
+            if not text:
+                continue
+            value = safe_eval(text, self.get_variables() if self.get_variables else None)
+            if value is None:
+                continue
+            targets.append({"name": f"Target {idx + 1}", "armor": float(value)})
+        return targets or [{"name": "Target 1", "armor": 0.0}]
+
+    def get_runtime_context(self):
+        """Get cast-local runtime inputs for evaluator."""
+        return {
+            "hero_kills_credited_this_cast": max(0, self._runtime_int(self.hero_kills_credited_var.get(), 0)),
+        }
+
+    def set_runtime_status(self, text):
+        """Set runtime evaluation status text."""
+        self.runtime_status_var.set(str(text or ""))
 
     def _current_level_index(self):
         """Get zero-based current level index."""
@@ -228,6 +312,7 @@ class HeroSpellRow:
         level["stun"] = self.stun_var.get()
         level["mana"] = self.mana_var.get()
         level["cooldown"] = self.cooldown_var.get()
+        self._notify_spell_changed()
 
     def _load_current_level_values(self):
         """Load active level values into visible field vars."""
@@ -321,6 +406,7 @@ class HeroSpellRow:
             if hasattr(mod, "update_display"):
                 mod.update_display()
         self._save_current_level_modifiers()
+        self._notify_spell_changed()
 
     def add_modifier(self):
         """Add a modifier to current spell level."""
@@ -362,16 +448,37 @@ class HeroSpellRow:
         self._save_current_level_modifiers()
         max_level = self._parse_level(self.max_level_var.get(), 1)
         current_level = self._parse_level(self.current_level_var.get(), 1)
-        return {
+        payload = {
             "name": self.name_var.get(),
             "max_level": max_level,
             "current_level": max(1, min(max_level, current_level)),
             "levels": [dict(level_data) for level_data in self.levels[:max_level]],
         }
+        metadata_out = json.loads(json.dumps(self.metadata)) if isinstance(self.metadata, dict) else {}
+        metadata_out["runtime_inputs"] = {
+            "hero_kills_credited_this_cast": max(0, self._runtime_int(self.hero_kills_credited_var.get(), 0)),
+            "target_armors_csv": str(self.target_armors_var.get() or ""),
+        }
+        impl = self.get_hero_implementation() if callable(self.get_hero_implementation) else None
+        if impl:
+            metadata_out = impl.normalize_spell_metadata(self.name_var.get(), metadata_out)
+        if metadata_out:
+            payload["metadata"] = metadata_out
+        return payload
 
     def load_from_dict(self, data):
         """Load spell row values from dictionary."""
         self.name_var.set(str(data.get("name", self.name_var.get())))
+        metadata = data.get("metadata", {})
+        self.metadata = metadata if isinstance(metadata, dict) else {}
+        impl = self.get_hero_implementation() if callable(self.get_hero_implementation) else None
+        if impl:
+            self.metadata = impl.normalize_spell_metadata(self.name_var.get(), self.metadata)
+
+        runtime_inputs = self.metadata.get("runtime_inputs", {}) if isinstance(self.metadata, dict) else {}
+        if isinstance(runtime_inputs, dict):
+            self.hero_kills_credited_var.set(str(runtime_inputs.get("hero_kills_credited_this_cast", "0")))
+            self.target_armors_var.set(str(runtime_inputs.get("target_armors_csv", "0")))
         levels_data = data.get("levels")
         if isinstance(levels_data, list) and levels_data:
             parsed_levels = []
@@ -424,6 +531,11 @@ class HeroSpellRow:
         self.current_level_var.set(str(max(1, min(max_level, current_level))))
         self._refresh_level_controls()
         self._load_current_level_values()
+        self._notify_spell_changed()
+
+    def set_talent_effect_text(self, text):
+        """Set spell-level talent effect hint text."""
+        self.talent_effect_var.set(str(text or ""))
 
 
 class HeroRow:
@@ -471,6 +583,7 @@ class HeroRow:
         self.get_item_library_items = get_item_library_items
         self.get_spell_library_spells = get_spell_library_spells
         self.modifiers = []
+        self.talent_modifiers = []
         self.spell_rows = []
         self.items = []
         self.item_widgets = []
@@ -478,6 +591,12 @@ class HeroRow:
         self.field_vars = {}
         self.field_entries = {}
         self.total_vars = {}
+        self.talents = build_talents_payload({})
+        self.talent_side_vars = {}
+        self.talent_effect_labels = []
+        self._latest_total_auto_attack_damage = 0.0
+        self.hero_impl = HeroImplementationRegistry.get_implementation("Hero")
+        self._seeding_templates = False
 
         self.frame = ttk.Frame(parent, relief='solid', borderwidth=1, padding="8")
         self._create_widgets()
@@ -552,6 +671,25 @@ class HeroRow:
         self.spells_container = ttk.Frame(self.frame)
         self.spells_container.pack(fill="x")
 
+        # Talents block
+        ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
+        talents_header = ttk.Frame(self.frame)
+        talents_header.pack(fill="x", pady=(0, 2))
+        ttk.Label(talents_header, text="Talents",
+                  font=('Arial', 9, 'bold')).pack(side="left")
+        self.talent_status_var = tk.StringVar(value="")
+        ttk.Label(
+            talents_header,
+            textvariable=self.talent_status_var,
+            font=('Arial', 8),
+            foreground="#666"
+        ).pack(side="right")
+
+        self.talents_container = ttk.Frame(self.frame)
+        self.talents_container.pack(fill="x")
+        self.talent_effects_container = ttk.Frame(self.frame)
+        self.talent_effects_container.pack(fill="x", pady=(2, 0))
+
         # Totals block
         ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=5)
         totals_header = ttk.Frame(self.frame)
@@ -563,6 +701,9 @@ class HeroRow:
         self.totals_container.pack(fill="x")
         # Hidden container for item-derived modifier instances used in totals math.
         self.item_modifiers_eval_container = ttk.Frame(self.frame)
+        self._resolve_hero_implementation()
+        self._render_talent_controls()
+        self._refresh_talent_effects()
         self._create_totals_widgets()
         self.update_totals()
 
@@ -606,7 +747,10 @@ class HeroRow:
                 entry.pack(anchor="w")
             self.field_vars[key] = var
             self.field_entries[key] = entry
-            var.trace('w', lambda *args: self.update_totals())
+            if key == "name":
+                var.trace('w', lambda *args: self._on_hero_name_changed())
+            else:
+                var.trace('w', lambda *args: self.update_totals())
 
     def _change_level_value(self, level_var, step):
         """Increment/decrement hero level by step, clamped to at least 1."""
@@ -621,6 +765,235 @@ class HeroRow:
                 current_level = 1
         new_level = max(1, current_level + step)
         level_var.set(str(new_level))
+
+    def _resolve_hero_implementation(self):
+        """Resolve and cache active hero implementation by current hero name."""
+        hero_name = self.field_vars.get("name").get() if "name" in self.field_vars else ""
+        self.hero_impl = HeroImplementationRegistry.get_implementation(hero_name)
+
+    def _deep_merge_dicts(self, base, override):
+        """Recursively merge dictionaries with override precedence."""
+        if isinstance(base, dict) and isinstance(override, dict):
+            merged = json.loads(json.dumps(base))
+            for key, value in override.items():
+                if key in merged:
+                    merged[key] = self._deep_merge_dicts(merged[key], value)
+                else:
+                    merged[key] = json.loads(json.dumps(value))
+            return merged
+        return json.loads(json.dumps(override))
+
+    def _is_blank_for_template_seed(self):
+        """Check whether row is still blank enough to apply hero templates."""
+        if self.spell_rows or self.modifiers or self.items:
+            return False
+
+        defaults = {key: str(default) for key, _, default in self.FIELD_CONFIG}
+        for key, var in self.field_vars.items():
+            if key == "name":
+                continue
+            if str(var.get()) != defaults.get(key, ""):
+                return False
+
+        for tier in self.talents.get("tiers", []):
+            if tier.get("selected_side") in ("left", "right"):
+                return False
+        return True
+
+    def _seed_from_implementation_templates(self):
+        """Seed blank row from implementation templates."""
+        if self._seeding_templates:
+            return
+        self._seeding_templates = True
+        try:
+            template_fields = self.hero_impl.get_hero_fields_template()
+            for key, value in template_fields.items():
+                if key in self.field_vars:
+                    self.field_vars[key].set(str(value))
+
+            self.talents = self.hero_impl.normalize_talents(self.hero_impl.get_talents_template())
+            self._render_talent_controls()
+
+            if not self.spell_rows:
+                for spell_data in self.hero_impl.get_spells_template():
+                    copied_spell = json.loads(json.dumps(spell_data))
+                    self.add_spell(spell_data=copied_spell)
+        finally:
+            self._seeding_templates = False
+
+    def _on_hero_name_changed(self):
+        """Refresh totals and talent mapping when hero name changes."""
+        if self._seeding_templates:
+            return
+        self._resolve_hero_implementation()
+        if self._is_blank_for_template_seed():
+            self._seed_from_implementation_templates()
+        else:
+            self.talents = self.hero_impl.normalize_talents(self.talents)
+        self._refresh_talent_effects()
+        self.update_totals()
+
+    def _render_talent_controls(self):
+        """Render per-tier talent selectors."""
+        for child in self.talents_container.winfo_children():
+            child.destroy()
+        self.talent_side_vars.clear()
+
+        tiers = self.talents.get("tiers", [])
+        if not tiers:
+            self.talent_status_var.set("No talents loaded")
+            return
+
+        self.talent_status_var.set("Select: none / left / right")
+        for tier in tiers:
+            if not isinstance(tier, dict):
+                continue
+            level = int(tier.get("level", 0) or 0)
+            row = ttk.Frame(self.talents_container)
+            row.pack(fill="x", pady=1)
+
+            left_label = str(tier.get("left", {}).get("label", "")).strip() or "Left"
+            right_label = str(tier.get("right", {}).get("label", "")).strip() or "Right"
+
+            ttk.Label(row, text=f"L{level}", width=5, font=('Arial', 8, 'bold')).pack(side="left")
+            selected_side = tier.get("selected_side")
+            selected_side = selected_side if selected_side in ("left", "right") else "none"
+            side_var = tk.StringVar(value=selected_side)
+            side_var.trace('w', lambda *args, lvl=level, v=side_var: self._on_talent_side_changed(lvl, v))
+            selector = ttk.Frame(row)
+            selector.pack(side="left", padx=(8, 10))
+            ttk.Radiobutton(selector, text="None", value="none", variable=side_var).pack(side="left")
+            ttk.Radiobutton(selector, text="Left", value="left", variable=side_var).pack(side="left", padx=(6, 0))
+            ttk.Radiobutton(selector, text="Right", value="right", variable=side_var).pack(side="left", padx=(6, 0))
+
+            labels_row = ttk.Frame(self.talents_container)
+            labels_row.pack(fill="x", pady=(0, 1))
+            ttk.Label(labels_row, text=f"  Left: {left_label}", font=('Arial', 8), foreground="#2b2b2b").pack(side="left", padx=(8, 10))
+            ttk.Label(labels_row, text=f"Right: {right_label}", font=('Arial', 8), foreground="#2b2b2b").pack(side="left")
+            self.talent_side_vars[level] = side_var
+
+    def _on_talent_side_changed(self, level, side_var):
+        """Handle talent side selector changes."""
+        selected = side_var.get()
+        selected_side = selected if selected in ("left", "right") else None
+        for tier in self.talents.get("tiers", []):
+            if int(tier.get("level", 0) or 0) == int(level):
+                tier["selected_side"] = selected_side
+                left = tier.get("left", {})
+                right = tier.get("right", {})
+                if isinstance(left, dict):
+                    left["selected"] = selected_side == "left"
+                if isinstance(right, dict):
+                    right["selected"] = selected_side == "right"
+                break
+        self._refresh_talent_effects()
+        self.update_totals()
+
+    def _clear_talent_effect_labels(self):
+        """Destroy rendered talent effect labels."""
+        for widget in self.talent_effect_labels:
+            widget.destroy()
+        self.talent_effect_labels.clear()
+
+    def _refresh_talent_effects(self):
+        """Resolve talents and rebuild active talent modifier list."""
+        hero_name = self.field_vars.get("name").get() if "name" in self.field_vars else ""
+        self._resolve_hero_implementation()
+        self.talents = self.hero_impl.normalize_talents(self.talents)
+        effects = self.hero_impl.resolve_talent_effects({
+            "hero_name": hero_name,
+            "talents": self.talents,
+        })
+        self.talents["applied_effects"] = effects
+
+        self.talent_modifiers = []
+        for effect in effects:
+            if not effect.get("simulated"):
+                continue
+            field = effect.get("field")
+            value = float(effect.get("value", 0) or 0)
+            label = effect.get("label") or effect.get("id", "Talent Effect")
+            if field == "attack_speed":
+                self.talent_modifiers.append(
+                    TalentEffectModifier(label, attack_speed_bonus=value)
+                )
+            elif field == "evasion_pct":
+                self.talent_modifiers.append(
+                    TalentEffectModifier(label, evasion_bonus=value)
+                )
+
+        self._clear_talent_effect_labels()
+        if not effects:
+            label = ttk.Label(
+                self.talent_effects_container,
+                text="No active talent effects",
+                font=('Arial', 8),
+                foreground="#666"
+            )
+            label.pack(anchor="w")
+            self.talent_effect_labels.append(label)
+        else:
+            for effect in effects:
+                prefix = "Applied" if effect.get("simulated") else "Recognized"
+                note = str(effect.get("note", "")).strip()
+                suffix = f" - {note}" if note else ""
+                text = f"{prefix}: {effect.get('label', effect.get('id', 'Talent Effect'))}{suffix}"
+                color = "#2d6a4f" if effect.get("simulated") else "#8d6e63"
+                label = ttk.Label(
+                    self.talent_effects_container,
+                    text=text,
+                    font=('Arial', 8),
+                    foreground=color
+                )
+                label.pack(anchor="w")
+                self.talent_effect_labels.append(label)
+
+        self._apply_talent_effects_to_spells(effects)
+
+    def _metadata_level_value(self, metadata, key, level_index):
+        """Read a metadata array value for current level."""
+        if not isinstance(metadata, dict):
+            return None
+        values = metadata.get(key)
+        if isinstance(values, list) and 0 <= level_index < len(values):
+            return values[level_index]
+        return None
+
+    def _apply_talent_effects_to_spells(self, effects):
+        """Attach spell-side talent effect and runtime evaluation text to each spell row."""
+        for spell_row in self.spell_rows:
+            spell_name = spell_row.name_var.get()
+            runtime_context = spell_row.get_runtime_context()
+            level_index = spell_row._current_level_index() if spell_row.levels else 0
+            levels = spell_row.levels or []
+            level_data = levels[level_index] if 0 <= level_index < len(levels) else {}
+            metadata = spell_row.metadata if isinstance(spell_row.metadata, dict) else {}
+            normalized_metadata = self.hero_impl.normalize_spell_metadata(spell_name, metadata)
+            if normalized_metadata is not metadata:
+                spell_row.metadata = normalized_metadata
+
+            spell_state = {
+                "spell_name": spell_name,
+                "level_index": level_index,
+                "level_data": level_data,
+                "levels": levels,
+                "metadata": normalized_metadata,
+                "runtime_inputs": runtime_context,
+            }
+            hero_state = {
+                "hero_name": self.field_vars.get("name").get() if "name" in self.field_vars else "",
+                "talent_effects": effects,
+                "hero_auto_attack_damage": self._latest_total_auto_attack_damage,
+            }
+            eval_context = {
+                "safe_eval": lambda expr: safe_eval(expr, self.get_variables() if self.get_variables else None),
+                "selected_targets": spell_row.get_runtime_targets(),
+            }
+            result = self.hero_impl.evaluate_spell(spell_state, hero_state, eval_context)
+            ui_model = self.hero_impl.build_spell_runtime_ui_model(spell_state, result)
+
+            spell_row.set_talent_effect_text(str(ui_model.get("talent_text", "") or ""))
+            spell_row.set_runtime_status(str(ui_model.get("runtime_status", "") or ""))
 
     def _create_totals_widgets(self):
         """Create display rows for all requested totals."""
@@ -771,7 +1144,7 @@ class HeroRow:
 
     def update_totals(self):
         """Recalculate and refresh all totals for this hero."""
-        all_modifiers = self.modifiers + self.item_modifiers
+        all_modifiers = self.modifiers + self.item_modifiers + self.talent_modifiers
 
         base_hp = self._get_numeric_field("base_hp")
         base_hp_regen = self._get_numeric_field("base_hp_regen")
@@ -805,6 +1178,7 @@ class HeroRow:
         bonus_hp = sum(mod.get_hp_bonus() for mod in all_modifiers if mod.is_enabled())
         bonus_mana_regen = sum(mod.get_mana_regen_flat_bonus() for mod in all_modifiers if mod.is_enabled())
         bonus_hp_regen = sum(mod.get_hp_regen_flat_bonus() for mod in all_modifiers if mod.is_enabled())
+        bonus_evasion = sum(getattr(mod, "get_evasion_bonus", lambda: 0)() for mod in all_modifiers if mod.is_enabled())
 
         level_factor = max(0.0, level - 1.0)
         strength = base_strength + (strength_per_level * level_factor) + bonus_strength
@@ -855,6 +1229,7 @@ class HeroRow:
 
         total_estimated_attack_damage = estimated_physical_damage + estimated_magic_damage
         estimated_dps = total_estimated_attack_damage * attacks_per_second
+        self._latest_total_auto_attack_damage = total_auto_attack_damage
 
         total_movespeed = (base_movespeed + bonus_movespeed_flat) * (1 + bonus_movespeed_pct)
         armor = base_armor + (agility / 6.0) + bonus_armor
@@ -865,7 +1240,7 @@ class HeroRow:
             bonus_fraction = self._clamp(bonus, 0, 100) / 100.0
             remaining_magic_damage *= (1 - bonus_fraction)
         magic_resistance = self._clamp((1 - remaining_magic_damage) * 100.0, 0, 100)
-        evasion = base_evasion
+        evasion = self._clamp(base_evasion + bonus_evasion, 0, 100)
 
         physical_reduction_fraction = physical_reduction / 100.0
         magic_resistance_fraction = magic_resistance / 100.0
@@ -907,6 +1282,7 @@ class HeroRow:
         self.total_vars["ehp_evasion"].set(self._format_value(ehp_evasion))
         self.total_vars["ehp_physical_evasion"].set(self._format_value(ehp_physical_evasion))
         self.total_vars["ehp_magic_resistance"].set(self._format_value(ehp_magic_resistance))
+        self._apply_talent_effects_to_spells(self.talents.get("applied_effects", []))
 
     def add_modifier(self):
         """Add a modifier attached to this hero."""
@@ -938,23 +1314,31 @@ class HeroRow:
             mod.update_display()
         self.update_totals()
 
+    def _on_spell_changed(self):
+        """Refresh totals/spell effects when spell data changes."""
+        self.update_totals()
+
     def add_spell(self, spell_data=None):
         """Add a spell attached to this hero."""
         spell_row = HeroSpellRow(
             self.spells_container,
             self.delete_spell,
             show_delete_button=True,
-            get_variables=self.get_variables
+            get_variables=self.get_variables,
+            on_spell_change=self._on_spell_changed,
+            get_hero_implementation=lambda: self.hero_impl
         )
         if spell_data:
             spell_row.load_from_dict(spell_data)
         spell_row.pack(fill="x", pady=2)
         self.spell_rows.append(spell_row)
+        self._apply_talent_effects_to_spells(self.talents.get("applied_effects", []))
 
     def delete_spell(self, spell_row):
         """Delete a spell attached to this hero."""
         self.spell_rows.remove(spell_row)
         spell_row.destroy()
+        self._apply_talent_effects_to_spells(self.talents.get("applied_effects", []))
 
     def _spell_display_name(self, spell_data, fallback_index=None):
         """Get display name for a spell payload."""
@@ -1144,18 +1528,33 @@ class HeroRow:
 
     def to_dict(self):
         """Serialize hero row including fields, modifiers, spells, and items."""
+        self._resolve_hero_implementation()
+        talents_payload = self.hero_impl.normalize_talents(self.talents)
+        talents_payload["applied_effects"] = json.loads(
+            json.dumps(self.talents.get("applied_effects", []))
+        )
         return {
             "hero_id": self.hero_id,
             "fields": {key: var.get() for key, var in self.field_vars.items()},
             "modifiers": [self._serialize_modifier(mod) for mod in self.modifiers],
             "spells": [spell_row.to_dict() for spell_row in self.spell_rows],
             "items": self.items[:],
+            "talents": talents_payload,
         }
 
     def load_from_dict(self, data):
         """Load hero row data including fields, modifiers, spells, and items."""
-        for key, value in data.get("fields", {}).items():
+        saved_fields = data.get("fields", {})
+        if not isinstance(saved_fields, dict):
+            saved_fields = {}
+        for key, value in saved_fields.items():
             if key in self.field_vars:
+                self.field_vars[key].set(str(value))
+        self._resolve_hero_implementation()
+
+        template_fields = self.hero_impl.get_hero_fields_template()
+        for key, value in template_fields.items():
+            if key in self.field_vars and key not in saved_fields:
                 self.field_vars[key].set(str(value))
 
         for mod in self.modifiers[:]:
@@ -1169,8 +1568,36 @@ class HeroRow:
         for modifier_data in data.get("modifiers", []):
             self._load_modifier(modifier_data)
 
-        for spell_data in data.get("spells", []):
+        saved_spells = data.get("spells", None)
+        template_spells = self.hero_impl.get_spells_template()
+        template_spell_map = {
+            normalize_key(spell.get("name", "")): spell
+            for spell in template_spells if isinstance(spell, dict)
+        }
+        spells_to_load = []
+        if isinstance(saved_spells, list):
+            for spell_data in saved_spells:
+                if not isinstance(spell_data, dict):
+                    continue
+                key = normalize_key(spell_data.get("name", ""))
+                template_spell = template_spell_map.get(key, {})
+                merged_spell = self._deep_merge_dicts(template_spell, spell_data) if template_spell else spell_data
+                spells_to_load.append(merged_spell)
+        else:
+            spells_to_load = template_spells
+
+        for spell_data in spells_to_load:
             self.add_spell(spell_data=spell_data)
+
+        saved_talents = data.get("talents", None)
+        template_talents = self.hero_impl.get_talents_template()
+        if isinstance(saved_talents, dict):
+            merged_talents = self._deep_merge_dicts(template_talents, saved_talents)
+            self.talents = self.hero_impl.normalize_talents(merged_talents)
+        else:
+            self.talents = self.hero_impl.normalize_talents(template_talents)
+        self._render_talent_controls()
+        self._refresh_talent_effects()
 
         items = data.get("items", [])
         self.items = items if isinstance(items, list) else []

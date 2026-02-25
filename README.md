@@ -108,3 +108,25 @@ Every field change triggers instant recalculation:
 - Export results to file
 - Damage timeline/sequence
 - Hero-specific calculations
+
+## Developer notes
+
+Spell-specific math has been refactored into separate modules (e.g.
+`spells/stifling_dagger.py`) so each ability can be calculated independently of the GUI
+logic.  These functions accept simple caster/target dictionaries and return raw
+and reduced damage values, making them easier to review and test.  For example,
+`spells/stifling_dagger.stifling_dagger` now accepts a simple caster dictionary containing
+`attack_damage` and optional `level_index`; the function looks up the
+appropriate factor/bonus from the tooltip data and computes raw/after‑armor
+damage. Hits are fixed at one (the spell’s data determines that) and
+modifiers should already be applied to the caster’s attack damage externally.
+routines.  Damage type is hard‑coded by the spell, eliminating the need for
+callers to specify it.
+
+Spell modules delegate common formulas to the shared
+``spell_calculations`` package; for example, ``apply_physical_resistance``
+is imported rather than re‑implemented.  This keeps ability files focused on
+spell‑specific logic.  When appropriate caster information (e.g. slow values
+or on‑hit modifiers) is provided, the spell helper will return a ``debuffs``
+list describing any effects the ability applies, which can simplify payload
+construction for hero implementations.

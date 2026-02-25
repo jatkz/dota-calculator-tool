@@ -1,4 +1,579 @@
 {
   "version": 1,
-  "heroes": []
+  "heroes": [
+    {
+      "hero_id": 1,
+      "fields": {
+        "name": "Phantom Assassin",
+        "attribute_type": "Agility",
+        "level": "1",
+        "base_hp": "120",
+        "base_hp_regen": "1",
+        "movespeed": "310",
+        "attack_speed": "110",
+        "bat": "1.7",
+        "base_damage": "36",
+        "base_armor": "1",
+        "base_magic_resist": "25",
+        "evasion": "0",
+        "strength": "19",
+        "agility": "21",
+        "intelligence": "15",
+        "strength_per_level": "2",
+        "agility_per_level": "3.4",
+        "intelligence_per_level": "1.7",
+        "turn_rate": "0.8"
+      },
+      "modifiers": [],
+      "spells": [
+        {
+          "name": "Stifling Dagger",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "82.1",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0.3+0.47",
+              "stun": "0",
+              "mana": "30",
+              "cooldown": "6",
+              "modifiers": []
+            },
+            {
+              "damage": "95.65",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0.3+0.47",
+              "stun": "0",
+              "mana": "30",
+              "cooldown": "6",
+              "modifiers": []
+            },
+            {
+              "damage": "109.2",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0.3+0.47",
+              "stun": "0",
+              "mana": "30",
+              "cooldown": "6",
+              "modifiers": []
+            },
+            {
+              "damage": "122.75",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0.3+0.47",
+              "stun": "0",
+              "mana": "30",
+              "cooldown": "6",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "affects": "Enemy Units / Self",
+            "tooltip_damage_mode": "Instant Attack / Physical",
+            "attack_damage_factor": [
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "attack_damage_factor_with_talent": [
+              0.45,
+              0.6,
+              0.75,
+              0.9
+            ],
+            "attack_damage_bonus": [
+              65,
+              70,
+              75,
+              80
+            ],
+            "cast_range": [
+              700,
+              850,
+              1000,
+              1150
+            ],
+            "targets_base": 1,
+            "targets_with_talent": 3,
+            "move_speed_slow_pct": 50,
+            "slow_duration": [
+              2.1,
+              2.4,
+              2.7,
+              3
+            ],
+            "secondary_target_radius": 300,
+            "scepter_shard_cooldown_on_hero_kill": 4,
+            "calculation_mode": "instant_attack",
+            "base_attack_factor_by_level": [
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "talent_attack_factor_by_level": [
+              0.45,
+              0.6,
+              0.75,
+              0.9
+            ],
+            "attack_bonus_by_level": [
+              65,
+              70,
+              75,
+              80
+            ],
+            "cast_range_by_level": [
+              700,
+              850,
+              1000,
+              1150
+            ],
+            "slow_duration_by_level": [
+              2.1,
+              2.4,
+              2.7,
+              3
+            ],
+            "slow_pct": 50,
+            "cast_animation": "0.3+0.47",
+            "shard_cd_reduction_per_hero_kill": 4
+          }
+        },
+        {
+          "name": "Blur",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Pure",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Pure",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Pure",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Pure",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/blur.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Coupdegrace",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/coupdegrace.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Fanofknives",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/fanofknives.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Immaterial",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Magic",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/immaterial.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Methodical Coupdegrace",
+          "max_level": 1,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/methodical-coupdegrace.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Methodical Stiflingdagger",
+          "max_level": 1,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/methodical-stiflingdagger.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Phantomstrike",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/phantomstrike.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Stiflingdagger",
+          "max_level": 4,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            },
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/stiflingdagger.png",
+            "generated_from_image": true
+          }
+        },
+        {
+          "name": "Sweetrelease Stiflingdagger",
+          "max_level": 1,
+          "current_level": 1,
+          "levels": [
+            {
+              "damage": "0",
+              "damage_type": "Physical",
+              "hits": "1",
+              "cast": "0",
+              "stun": "0",
+              "mana": "0",
+              "cooldown": "0",
+              "modifiers": []
+            }
+          ],
+          "metadata": {
+            "hero": "Phantom Assassin",
+            "image_asset": "hero-images/phantom-assassin/sweetrelease-stiflingdagger.png",
+            "generated_from_image": true
+          }
+        }
+      ],
+      "talents": {
+        "version": 1,
+        "attribute_bonus": {
+          "all_attributes": "+2"
+        },
+        "tiers": [
+          {
+            "level": 10,
+            "left": {
+              "label": "-2s Stifling Dagger Cooldown"
+            },
+            "right": {
+              "label": "+0.6s Phantom Strike Duration"
+            },
+            "selected_side": null
+          },
+          {
+            "level": 15,
+            "left": {
+              "label": "+15% Stifling Dagger Instant Attack Damage"
+            },
+            "right": {
+              "label": "+20% Immaterial Evasion"
+            },
+            "selected_side": null
+          },
+          {
+            "level": 20,
+            "left": {
+              "label": "+60 Phantom Strike Attack Speed"
+            },
+            "right": {
+              "label": "+200 Phantom Strike Cast Range"
+            },
+            "selected_side": null
+          },
+          {
+            "level": 25,
+            "left": {
+              "label": "Triple Stifling Dagger Strikes"
+            },
+            "right": {
+              "label": "+10% Coup de Grace Chance, -1 Methodical Required Attacks"
+            },
+            "selected_side": null
+          }
+        ]
+      },
+      "items": []
+    }
+  ]
 }

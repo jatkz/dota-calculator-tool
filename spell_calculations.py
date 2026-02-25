@@ -81,6 +81,27 @@ def calculate_spell_dps(damage, cast_time, cooldown):
     return damage / cycle_time
 
 
+def damage_per_cooldown(damage, cooldown):
+    """Return raw damage divided by cooldown seconds (DPS over cooldown).
+
+    Mirrors previous utilities that lived in spell-specific modules.
+    Returns ``inf`` if ``cooldown`` is zero or negative while damage > 0.
+    """
+    if cooldown <= 0:
+        return float('inf') if damage > 0 else 0.0
+    return damage / cooldown
+
+
+def damage_per_mana(damage, mana_cost):
+    """Return raw damage per mana spent.
+
+    Returns ``inf`` under the same conditions as ``damage_per_cooldown``.
+    """
+    if mana_cost <= 0:
+        return float('inf') if damage > 0 else 0.0
+    return damage / mana_cost
+
+
 def calculate_mana_efficiency(damage, mana_cost):
     """
     Calculate damage per mana spent.

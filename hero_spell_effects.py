@@ -46,6 +46,9 @@ def evaluate_hero_spell(spell_row, hero_row, selected_targets, context):
         "hero_auto_attack_damage": hero_auto_attack_damage,
         "talent_effects": talent_effects,
     }
+    # propagate facet information if provided by calling code
+    if "facets" in context:
+        hero_state["facets"] = context.get("facets")
 
     eval_context = dict(context)
     eval_context["selected_targets"] = selected_targets if isinstance(selected_targets, list) else []

@@ -6,8 +6,10 @@ entry point takes a lightweight ``caster`` payload and a ``target`` dict and
 returns raw/reduced damage plus a handful of static ability values.
 
 Only the fields actually used by the math are required; callers may supply
-additional keys (talent flags, slow data, on-hit modifiers) and the helper
-will include them in the result when relevant.
+additional keys such as talent flag booleans or on-hit modifiers.  Hero
+implementations should translate their own talent/facet state into those
+flags before calling this helper – the spell module itself never inspects
+labels or talent lists.
 
 Example usage::
 
@@ -61,9 +63,18 @@ STIFLING_DAGGER_STATS = {
 def stifling_dagger(caster: Dict, level_index: int, target: Dict) -> Dict:
     """Compute Stifling Dagger damage using a caster payload and explicit level.
 
+    The helper assumes the caster is Phantom Assassin.  It will translate
+    talent and facet information when provided, but it no longer raises an
+    error if the supplied ``hero_name`` does not match.
+
     Args:
         caster: dictionary containing at least:
             - "attack_damage" (float): final attack damage value to use.
+            - optional boolean flags such as
+              ``stifling_dagger_instant_attack_damage_pct``,
+              ``stifling_dagger_cooldown`` or ``sweet_release``.  Hero
+              implementations are expected to set these based on talent/facet
+              state.
         level_index: zero-based ability level (0..3); controls factor/bonus.
         target: dict with key "armor" (float) for physical resistance.
 
@@ -75,37 +86,68 @@ def stifling_dagger(caster: Dict, level_index: int, target: Dict) -> Dict:
         A dict with "raw", "after_reduction", and "damage_type" keys.
     """
 
-    attack_damage = float(caster.get("attack_damage", 0) or 0)
+    # make a working copy so we can annotate booleans without mutating caller
+    c = dict(caster)
+
+    # determine talent flags from selected stable ids
+    selected_talent_ids = set()
+    for t in c.get("talents", []) or []:
+        if isinstance(t, dict) and t.get("selected"):
+            tid = t.get("id")
+            if tid:
+                selected_talent_ids.add(str(tid))
+
+    instant_flag = "stifling_dagger_instant_pct" in selected_talent_ids
+    cooldown_flag = "stifling_dagger_cd" in selected_talent_ids
+    triple_flag = "stifling_dagger_triple" in selected_talent_ids
+
+    # facets are mutually exclusive and always present in caster payload
+    facets = c["facets"]
+    sweet_flag = bool(facets.get("sweet_release"))
+    methodical_flag = bool(facets.get("methodical"))
+
+    # ------------------------------------------------------------------
+    # core damage computation (using translated caster data)
+    # ------------------------------------------------------------------
+    attack_damage = float(c.get("attack_damage", 0) or 0)
     lvl_idx = max(0, min(level_index, len(STIFLING_DAGGER_STATS["instant_attack_factor"]) - 1))
 
     factor = STIFLING_DAGGER_STATS["instant_attack_factor"][lvl_idx]
     bonus = STIFLING_DAGGER_STATS["attack_damage_bonus"][lvl_idx]
 
     # apply instant attack damage talent flag by bumping the factor
-    if caster.get("stifling_dagger_instant_attack_damage_pct"):
+    if instant_flag:
         factor += 0.15
     raw = attack_damage * factor + bonus
 
     armor = float(target.get("armor", 0) or 0)
     reduced = apply_physical_resistance(raw, armor)
 
-    # collect debuffs: slow info plus any on-hit modifiers provided by caster
+    # collect debuffs: slow from the spell's tooltip plus any on-hit modifiers
     debuffs = []
-    slow_val = caster.get("slow_pct") or caster.get("move_speed_slow_pct")
-    if slow_val is not None:
+    debuffs.append({
+        "type": "slow",
+        "value": STIFLING_DAGGER_STATS.get("move_speed_slow_pct"),
+        "duration": STIFLING_DAGGER_STATS.get("slow_duration")[lvl_idx],
+    })
+    if methodical_flag:
         debuffs.append({
-            "type": "slow",
-            "value": slow_val,
-            "duration": caster.get("slow_duration"),
+            "type": "deadly_focus",
+            "stacks": 2,
         })
-    for mod in caster.get("on_hit_modifiers", []) or []:
+    for mod in c.get("on_hit_modifiers", []) or []:
         if isinstance(mod, dict):
             debuffs.append(mod)
 
     # optional addon from sweet_release talent
     other_damage = None
-    if caster.get("sweet_release"):
+    if sweet_flag:
         other_damage = raw * 0.5
+
+    # adjust targets count for triple-strike
+    targets = STIFLING_DAGGER_STATS.get("targets", 1)
+    if triple_flag:
+        targets = 3
 
     return {
         "raw": raw,
@@ -114,8 +156,9 @@ def stifling_dagger(caster: Dict, level_index: int, target: Dict) -> Dict:
         "debuffs": debuffs,
         "mana_cost": STIFLING_DAGGER_STATS.get("mana_cost"),
         "cooldown": STIFLING_DAGGER_STATS.get("cooldown")
-                    - (2 if caster.get("stifling_dagger_cooldown") else 0),
+                    - (2 if cooldown_flag else 0),
         "cast_range": STIFLING_DAGGER_STATS.get("cast_range")[lvl_idx],
         "cast_animation": STIFLING_DAGGER_STATS.get("cast_animation"),
         "other_damage": other_damage,
+        "targets": targets,
     }

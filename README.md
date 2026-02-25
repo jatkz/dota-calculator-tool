@@ -130,3 +130,18 @@ spell‑specific logic.  When appropriate caster information (e.g. slow values
 or on‑hit modifiers) is provided, the spell helper will return a ``debuffs``
 list describing any effects the ability applies, which can simplify payload
 construction for hero implementations.
+
+Hero talent data has been simplified across the codebase: talents are now
+stored as a flat list with each entry containing a ``level``, ``label`` and a
+boolean ``selected`` flag.  This avoids tiered left/right structures and
+makes it easier to iterate over available talents.
+
+Hero implementations are responsible for translating their talent
+selections and facet flags into the simple boolean values that spell helpers
+consume.  Most of the time you can just forward the hero's ``talents`` list
+and ``facets`` dict directly and the helper will convert them for you; this
+is what ``spells/stifling_dagger.py`` does so the minimal hero class in
+``heroes/phantom_assassin.py`` works without extra glue.  Spell modules
+remain otherwise pure math – they look for flags like
+``stifling_dagger_cooldown`` or ``sweet_release`` and don't care about labels
+or levels.

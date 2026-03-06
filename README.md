@@ -145,3 +145,9 @@ is what ``spells/stifling_dagger.py`` does so the minimal hero class in
 remain otherwise pure math – they look for flags like
 ``stifling_dagger_cooldown`` or ``sweet_release`` and don't care about labels
 or levels.
+
+## Spell load instructions
+- use upload the file and say "can you analyze and display this spell"
+- for changes you can say "a few things" then what the changes are then end with "display again"
+- you will need to correct the talent level manually. and possibly aghamins
+- when you are done say "save the spell to spell library"

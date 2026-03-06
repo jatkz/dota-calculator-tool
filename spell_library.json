@@ -162,6 +162,296 @@
           }
         }
       ]
+    },
+    {
+      "name": "Launch Snowball",
+      "hero_key": "tusk",
+      "tags": [
+        "Sub-Ability",
+        "Self",
+        "Allied Units",
+        "Magical",
+        "Stun"
+      ],
+      "max_level": 4,
+      "notes": "Sub-ability of Snowball. Cannot recast while projectile is active.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0 + 0",
+          "Snowball Speed": "575",
+          "Max Chase Duration": "3",
+          "Effect Radius": "200",
+          "Radius Increase per Second": "40",
+          "Base Damage": "80",
+          "Base Stun Duration": "0.6",
+          "Spell Damage Bonus per Valid Allied Hero Gathered": "40",
+          "Stun Duration Bonus per Valid Allied Hero Gathered": "0.2",
+          "Downtime": "3",
+          "Mana Cost": "0",
+          "Cannot Recast While Projectile Active": "true"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Snowball Speed": "600",
+            "Base Damage": "140",
+            "Base Stun Duration": "0.8",
+            "Spell Damage Bonus per Valid Allied Hero Gathered": "65"
+          }
+        },
+        {
+          "effects": {
+            "Snowball Speed": "625",
+            "Base Damage": "200",
+            "Base Stun Duration": "1.0",
+            "Spell Damage Bonus per Valid Allied Hero Gathered": "90"
+          }
+        },
+        {
+          "effects": {
+            "Snowball Speed": "650",
+            "Base Damage": "260",
+            "Base Stun Duration": "1.2",
+            "Spell Damage Bonus per Valid Allied Hero Gathered": "115"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_launch_snowball_damage",
+          "label": "Talent (Level 15): Launch Snowball Damage Bonus",
+          "effects": {
+            "Damage Bonus": "120"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tag Team",
+      "hero_key": "tusk",
+      "tags": [
+        "Ability",
+        "Affects Units",
+        "Debuff Aura",
+        "Move Speed Slow",
+        "Allied Attack Bonus"
+      ],
+      "max_level": 4,
+      "notes": "Tusk E. Applies debuff aura and grants allied attackers bonus attack damage against debuffed targets.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0 + 0",
+          "Mana Cost": "70",
+          "Cooldown": "24",
+          "Radius": "350",
+          "Move Speed Slow": "75%",
+          "Slow Duration": "0.5",
+          "Aura Duration": "6",
+          "Aura Linger Duration": "0.5",
+          "Attack Damage Bonus": "25"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "21",
+            "Attack Damage Bonus": "50"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "18",
+            "Attack Damage Bonus": "75"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "15",
+            "Attack Damage Bonus": "100"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_tag_team_aura_duration",
+          "label": "Talent (Level 10): Tag Team Aura Duration Increase",
+          "effects": {
+            "Aura Duration": "8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drinking Buddies",
+      "hero_key": "tusk",
+      "tags": [
+        "Ability",
+        "Affects Units",
+        "Buff",
+        "Movement Speed Bonus",
+        "Attack Damage Bonus"
+      ],
+      "max_level": 4,
+      "notes": "Drinking Buddies is inactive during Snowball.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.1 + 0",
+          "Mana Cost": "80",
+          "Cooldown": "23",
+          "Cast Range": "900",
+          "Min Tag Distance": "250",
+          "Max Tag Distance": "1200",
+          "Pull Duration": "0.2",
+          "Move Speed Bonus": "11%",
+          "Attack Damage Bonus": "20",
+          "Buff Duration": "6",
+          "Ally Cast Range (Alt-Cast)": "450",
+          "Active During Snowball": "false"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "20",
+            "Move Speed Bonus": "14%",
+            "Attack Damage Bonus": "50"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "17",
+            "Move Speed Bonus": "17%",
+            "Attack Damage Bonus": "80"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "14",
+            "Move Speed Bonus": "20%",
+            "Attack Damage Bonus": "110"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_drinking_buddies_buff_duration",
+          "label": "Talent (Level 10): Drinking Buddies Buff Duration Increase",
+          "effects": {
+            "Buff Duration": "8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Walrus Kick",
+      "hero_key": "tusk",
+      "tags": [
+        "Unit Target",
+        "Vector",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Forced Movement",
+        "Stun",
+        "Slow"
+      ],
+      "max_level": 1,
+      "notes": "Roshan and Tormentor are immune to forced movement; other effects still apply.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.2 + 1.3",
+          "Mana Cost": "100",
+          "Cooldown": "12",
+          "Creep Cast Cooldown": "6",
+          "Cast Range": "250",
+          "Damage Radius": "250",
+          "Push Distance": "1200",
+          "Damage": "550",
+          "Move Speed Slow": "40%",
+          "Slow Duration": "2",
+          "Stun Duration": "1",
+          "Active During Snowball": "false"
+        }
+      },
+      "level_overrides": [],
+      "toggleable_upgrades": [
+        {
+          "id": "aghanims_scepter_unlock",
+          "label": "Aghanim's Scepter: Unlock Walrus Kick",
+          "effects": {
+            "Spell Available": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Walrus PUNCH!",
+      "hero_key": "tusk",
+      "tags": [
+        "Autocast",
+        "Active Attack Modifier",
+        "Passive",
+        "Self",
+        "Enemy Units",
+        "Physical",
+        "Critical Strike",
+        "Forced Movement"
+      ],
+      "max_level": 3,
+      "notes": "Roshan and Tormentor are immune to forced movement; other effects still apply.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.36 + 0.64",
+          "Mana Cost": "75",
+          "Cooldown": "16",
+          "Cast Range": "150",
+          "Attack Damage Bonus": "60",
+          "Crit Damage": "250%",
+          "Stun Duration": "1",
+          "Self Attack Point Factor": "0.6",
+          "Active During Snowball": "false"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "13",
+            "Attack Damage Bonus": "90",
+            "Crit Damage": "325%"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "10",
+            "Attack Damage Bonus": "120",
+            "Crit Damage": "400%"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_walrus_punch_stun",
+          "label": "Talent (Level 10): Walrus PUNCH! Stun Duration Increase",
+          "effects": {
+            "Stun Duration Bonus": "0.75"
+          }
+        },
+        {
+          "id": "talent_walrus_punch_crit",
+          "label": "Talent (Level 20): Walrus PUNCH! Crit Damage Increase",
+          "effects": {
+            "Crit Damage Bonus": "75%"
+          }
+        },
+        {
+          "id": "talent_walrus_punch_proc",
+          "label": "Talent (Level 25): Passive Walrus PUNCH! Proc Chance",
+          "effects": {
+            "Proc Chance": "12%"
+          }
+        }
+      ]
     }
   ]
 }

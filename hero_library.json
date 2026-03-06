@@ -3,54 +3,62 @@
   "heroes": [
     {
       "fields": {
-        "name": "Phantom Assassin",
-        "attribute_type": "Agility",
+        "name": "Jakiro",
+        "attribute_type": "Intelligence",
         "level": "1",
-        "base_hp": "120",
-        "base_hp_regen": "1",
-        "movespeed": "310",
-        "attack_speed": "110",
+        "base_hp": "670",
+        "base_hp_regen": "2.75",
+        "base_mana": "375",
+        "base_mana_regen": "1.25",
+        "movespeed": "290",
+        "attack_speed": "100",
         "bat": "1.7",
-        "base_damage": "36",
-        "base_armor": "1",
-        "base_magic_resist": "25",
-        "evasion": "0",
-        "strength": "19",
-        "agility": "21",
-        "intelligence": "15",
-        "strength_per_level": "2",
-        "agility_per_level": "3.4",
-        "intelligence_per_level": "1.7",
-        "turn_rate": "0.8"
+        "base_damage": "52-60",
+        "base_armor": "3.5",
+        "base_magic_resist": "27.5",
+        "strength": "25",
+        "agility": "15",
+        "intelligence": "25",
+        "strength_per_level": "2.5",
+        "agility_per_level": "1.2",
+        "intelligence_per_level": "3",
+        "turn_rate": "0.8",
+        "attack_range": "400",
+        "projectile_speed": "1100",
+        "attack_animation": "0.4 + 0.3",
+        "collision_size": "27",
+        "bound_radius": "24",
+        "vision_day": "1800",
+        "vision_night": "800"
       },
       "talents": {
         "tiers": [
           {
             "level": 10,
             "choices": [
-              "-2s Stifling Dagger Cooldown",
-              "+0.6s Phantom Strike Duration"
+              "+60 Ice Path First Damage",
+              "+30 Liquid Fire Attack Speed Slow"
             ]
           },
           {
             "level": 15,
             "choices": [
-              "+15% Stifling Dagger Instant Attack Damage",
-              "+20% Immaterial Evasion"
+              "-3s Dual Breath Cooldown",
+              "+175 Attack Range"
             ]
           },
           {
             "level": 20,
             "choices": [
-              "+60 Phantom Strike Attack Speed",
-              "+200 Phantom Strike Cast Range"
+              "+20% Macropyre Damage per Second",
+              "+0.4s Ice Path Duration/Stun Duration"
             ]
           },
           {
             "level": 25,
             "choices": [
-              "Triple Stifling Dagger Strikes",
-              "+10% Coup de Grace Chance, -1 Methodical Required Attacks"
+              "+3% Liquid Fire / Liquid Frost Max Health as Damage",
+              "2x Dual Breath Damage/Range"
             ]
           }
         ]

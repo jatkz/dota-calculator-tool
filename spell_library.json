@@ -800,6 +800,39 @@
       },
       "level_overrides": [],
       "toggleable_upgrades": []
+    },
+    {
+      "name": "Double Trouble",
+      "hero_key": "jakiro",
+      "tags": [
+        "Passive",
+        "Affects Self",
+        "Attack Modifier"
+      ],
+      "max_level": 4,
+      "notes": "Jakiro passive. Ice Head always attacks first.",
+      "base_level": {
+        "effects": {
+          "Total Attack Damage Reduction": "50%",
+          "Attacks per Attack Point": "2",
+          "Priority Rule": "Ice Head always attacks first"
+        }
+      },
+      "level_overrides": [
+        {},
+        {},
+        {}
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "twin_terror",
+          "label": "Twin Terror",
+          "effects": {
+            "Total Attack Damage Reduction": "40%/35%/30%/25%",
+            "Levels With": "Macropyre"
+          }
+        }
+      ]
     }
   ]
 }

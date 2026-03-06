@@ -150,4 +150,4 @@ or levels.
 - use upload the file and say "can you analyze and display this spell"
 - for changes you can say "a few things" then what the changes are then end with "display again"
 - you will need to correct the talent level manually. and possibly aghamins
-- when you are done say "save the spell to spell library"
+- when you are done say "save the spell to spell library" or you can save it manually faster

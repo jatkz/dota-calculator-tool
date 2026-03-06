@@ -3,6 +3,7 @@
   "spells": [
     {
       "name": "Bitter Chill",
+      "hero_key": "tusk",
       "tags": [
         "Passive",
         "Aura",
@@ -33,6 +34,131 @@
         {
           "effects": {
             "Attack Speed Slow": "80"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ice Shards",
+      "hero_key": "tusk",
+      "tags": [
+        "Point Target",
+        "Aura",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Path Blocker"
+      ],
+      "max_level": 4,
+      "notes": "Tusk Q. Includes toggleable Level 20 talent and Aghanim's Shard upgrades.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.1 + 0",
+          "Mana Cost": "100",
+          "Cooldown": "23",
+          "Cast Range": "1400",
+          "Max Travel Distance": "1400",
+          "Damage Radius": "200",
+          "Shards Spawn Radius": "200",
+          "Shards Spawn Angle": "40",
+          "Number of Shards": "7",
+          "Damage": "75",
+          "Shards Duration": "4"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "20",
+            "Damage": "150",
+            "Shards Duration": "5"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "17",
+            "Damage": "225",
+            "Shards Duration": "6"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "14",
+            "Damage": "300",
+            "Shards Duration": "7"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_ice_shards_cd",
+          "label": "Talent (Level 20): Ice Shards Cooldown Reduction",
+          "effects": {
+            "Cooldown Reduction": "6"
+          }
+        },
+        {
+          "id": "aghanims_shard",
+          "label": "Aghanim's Shard Upgrade",
+          "effects": {
+            "Number of Shards": "11",
+            "Secondary Aura Radius": "200",
+            "Damage per Second": "85",
+            "Move Speed Slow": "50%",
+            "Aura Linger Duration": "0.5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Snowball",
+      "hero_key": "tusk",
+      "tags": [
+        "Unit Target",
+        "Spell",
+        "Magical",
+        "Affects Allies",
+        "Affects Self"
+      ],
+      "max_level": 4,
+      "notes": "Tusk W. Levels up with Launch Snowball.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.1 + 0.5",
+          "Mana Cost": "75",
+          "Cooldown": "21",
+          "Cast Range": "1150",
+          "Max Hold Duration": "3",
+          "Ally Gather Radius": "325",
+          "Ally Jump-in Radius": "110",
+          "Drinking Buddies Active During Snowball": "false",
+          "Walrus Kick Active During Snowball": "false",
+          "Walrus Punch Active During Snowball": "false"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "19"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "17"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "15"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_snowball_cd",
+          "label": "Talent (Level 25): Snowball Cooldown Reduction",
+          "effects": {
+            "Cooldown Reduction": "8"
           }
         }
       ]

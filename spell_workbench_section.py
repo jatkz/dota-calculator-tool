@@ -6,14 +6,14 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from hero_lab_section import HeroSpellRow
+from spell_schema import migrate_spell_dict_to_sparse
 
 
 class SpellWorkbenchRow:
     """Single spell row for creating and persisting reusable spells."""
 
-    def __init__(self, parent, spell_id, on_delete, on_save, get_variables=None):
+    def __init__(self, parent, on_delete, on_save, get_variables=None):
         self.parent = parent
-        self.spell_id = spell_id
         self.on_delete = on_delete
         self.on_save = on_save
         self.get_variables = get_variables
@@ -46,7 +46,6 @@ class SpellWorkbenchRow:
 
     def to_dict(self):
         spell_data = self.spell_editor.to_dict()
-        spell_data["spell_id"] = self.spell_id
         spell_data["notes"] = self.notes_var.get()
         return spell_data
 
@@ -66,13 +65,13 @@ class SpellWorkbenchSection:
     """Standalone spell workbench section."""
 
     SPELL_LIBRARY_FILENAME = "spell_library.json"
+    SPELL_LIBRARY_VERSION = 2
 
     def __init__(self, parent, get_variables=None):
         self.parent = parent
         self.get_variables = get_variables
         self.visible = False
         self.spell_rows = []
-        self.next_spell_id = 1
         self._create_widgets()
 
     def _create_widgets(self):
@@ -100,22 +99,19 @@ class SpellWorkbenchSection:
                 self.add_spell()
 
     def add_spell(self, spell_data=None):
-        if spell_data and isinstance(spell_data.get("spell_id"), int):
-            spell_id = spell_data["spell_id"]
-            self.next_spell_id = max(self.next_spell_id, spell_id + 1)
-        else:
-            spell_id = self.next_spell_id
-            self.next_spell_id += 1
-
         spell_row = SpellWorkbenchRow(
             self.spells_container,
-            spell_id,
             self.delete_spell,
             self.save_spell,
             self.get_variables,
         )
         if spell_data:
-            spell_row.load_from_dict(spell_data)
+            try:
+                spell_row.load_from_dict(spell_data)
+            except ValueError as exc:
+                spell_row.destroy()
+                messagebox.showerror("Invalid Spell Data", str(exc))
+                return
         spell_row.pack(fill="x", pady=4)
         self.spell_rows.append(spell_row)
 
@@ -128,7 +124,6 @@ class SpellWorkbenchSection:
         for spell_row in self.spell_rows[:]:
             spell_row.destroy()
         self.spell_rows.clear()
-        self.next_spell_id = 1
 
     def _get_spell_library_path(self):
         return os.path.join(os.path.dirname(__file__), self.SPELL_LIBRARY_FILENAME)
@@ -148,11 +143,37 @@ class SpellWorkbenchSection:
         if not isinstance(spells, list):
             messagebox.showerror("Library Error", "Invalid spell library format.")
             return None
-        return [spell for spell in spells if isinstance(spell, dict)]
+
+        migrated_spells = []
+        changed = False
+        for spell in spells:
+            migrated, did_change = migrate_spell_dict_to_sparse(
+                spell,
+                damage_types=HeroSpellRow.DAMAGE_TYPES,
+                default_level=HeroSpellRow.DEFAULT_LEVEL,
+            )
+            if migrated is None:
+                spell_name = spell.get("name", "Unknown") if isinstance(spell, dict) else "Unknown"
+                messagebox.showerror(
+                    "Library Error",
+                    f"Spell '{spell_name}' is invalid and could not be migrated to sparse format."
+                )
+                continue
+            migrated_spells.append(migrated)
+            changed = changed or did_change
+
+        if changed or int(payload.get("version", 1) or 1) < self.SPELL_LIBRARY_VERSION:
+            try:
+                self._write_library_spells(migrated_spells)
+            except OSError as exc:
+                messagebox.showerror("Library Error", f"Could not migrate spell library:\n{exc}")
+                return None
+
+        return migrated_spells
 
     def _write_library_spells(self, spells):
         file_path = self._get_spell_library_path()
-        payload = {"version": 1, "spells": spells}
+        payload = {"version": self.SPELL_LIBRARY_VERSION, "spells": spells}
         with open(file_path, "w", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2)
 

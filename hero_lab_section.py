@@ -7,6 +7,13 @@ from tkinter import messagebox, ttk
 
 from hero_implementations import HeroImplementationRegistry
 from modifiers import Modifier
+from spell_schema import (
+    build_sparse_model_from_effective_levels,
+    default_level_data,
+    materialize_effective_levels,
+    migrate_spell_dict_to_sparse,
+    normalize_level_data,
+)
 from talent_effects import TalentEffectModifier, build_talents_payload, normalize_key
 from utils import safe_eval, armor_to_reduction
 
@@ -14,15 +21,9 @@ from utils import safe_eval, armor_to_reduction
 class HeroSpellRow:
     """Editable spell row with per-level values attached to a hero."""
 
-    DAMAGE_TYPES = ("Physical", "Magic", "Pure")
+    DAMAGE_TYPES = ()
     DEFAULT_LEVEL = {
-        "damage": "0",
-        "damage_type": "Magic",
-        "hits": "1",
-        "cast": "0",
-        "stun": "0",
-        "mana": "0",
-        "cooldown": "0",
+        "effects": {},
     }
 
     def __init__(
@@ -45,33 +46,22 @@ class HeroSpellRow:
         self._syncing_level_controls = False
         self._loaded_level_index = 0
         self.levels = []
-        self.level_modifiers = []
         self.metadata = {}
         self.talent_effect_var = tk.StringVar(value="")
         self.runtime_status_var = tk.StringVar(value="")
+        self.override_status_var = tk.StringVar(value="")
         self.hero_kills_credited_var = tk.StringVar(value="0")
         self.target_armors_var = tk.StringVar(value="0")
         self._create_widgets()
 
     def _create_widgets(self):
         self.name_var = tk.StringVar(value="Spell")
+        self.tags_text_var = tk.StringVar(value="")
         self.max_level_var = tk.StringVar(value="4")
         self.current_level_var = tk.StringVar(value="1")
-        self.damage_var = tk.StringVar(value=self.DEFAULT_LEVEL["damage"])
-        self.damage_type_var = tk.StringVar(value=self.DEFAULT_LEVEL["damage_type"])
-        self.hits_var = tk.StringVar(value=self.DEFAULT_LEVEL["hits"])
-        self.cast_var = tk.StringVar(value=self.DEFAULT_LEVEL["cast"])
-        self.stun_var = tk.StringVar(value=self.DEFAULT_LEVEL["stun"])
-        self.mana_var = tk.StringVar(value=self.DEFAULT_LEVEL["mana"])
-        self.cooldown_var = tk.StringVar(value=self.DEFAULT_LEVEL["cooldown"])
+        self.effects_text_var = tk.StringVar(value="")
         self.level_field_vars = [
-            self.damage_var,
-            self.damage_type_var,
-            self.hits_var,
-            self.cast_var,
-            self.stun_var,
-            self.mana_var,
-            self.cooldown_var,
+            self.effects_text_var,
         ]
 
         top_row = ttk.Frame(self.frame)
@@ -81,6 +71,9 @@ class HeroSpellRow:
 
         ttk.Label(top_row, text="Name:", font=('Arial', 8)).pack(side="left", padx=(0, 2))
         ttk.Entry(top_row, textvariable=self.name_var, width=14).pack(side="left", padx=2)
+
+        ttk.Label(top_row, text="Tags:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        ttk.Entry(top_row, textvariable=self.tags_text_var, width=20).pack(side="left", padx=2)
 
         ttk.Label(top_row, text="Max Lvl:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
         self.max_level_combo = ttk.Combobox(
@@ -102,58 +95,29 @@ class HeroSpellRow:
         )
         self.current_level_combo.pack(side="left", padx=2)
 
-        ttk.Label(top_row, text="Damage:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Entry(top_row, textvariable=self.damage_var, width=8).pack(side="left", padx=2)
-
-        ttk.Label(top_row, text="Type:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Combobox(
-            top_row,
-            textvariable=self.damage_type_var,
-            values=self.DAMAGE_TYPES,
-            state="readonly",
-            width=9
-        ).pack(side="left", padx=2)
+        ttk.Label(top_row, text="Effects:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
+        ttk.Entry(top_row, textvariable=self.effects_text_var, width=48).pack(side="left", padx=2, fill="x", expand=True)
 
         if self.show_delete_button and self.on_delete:
             ttk.Button(top_row, text="X", width=2,
                        command=lambda: self.on_delete(self)).pack(side="right", padx=4)
 
-        ttk.Label(bottom_row, text="Hits:", font=('Arial', 8)).pack(side="left", padx=(0, 2))
-        ttk.Entry(bottom_row, textvariable=self.hits_var, width=6).pack(side="left", padx=2)
+        ttk.Label(
+            bottom_row,
+            text="Format: Effect=Value, Effect2=Value2",
+            font=('Arial', 8),
+            foreground="#666"
+        ).pack(side="left", padx=(0, 2))
 
-        ttk.Label(bottom_row, text="Cast:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Entry(bottom_row, textvariable=self.cast_var, width=6).pack(side="left", padx=2)
-
-        ttk.Label(bottom_row, text="Stun:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Entry(bottom_row, textvariable=self.stun_var, width=6).pack(side="left", padx=2)
-
-        ttk.Label(bottom_row, text="Mana:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Entry(bottom_row, textvariable=self.mana_var, width=8).pack(side="left", padx=2)
-
-        ttk.Label(bottom_row, text="CD:", font=('Arial', 8)).pack(side="left", padx=(8, 2))
-        ttk.Entry(bottom_row, textvariable=self.cooldown_var, width=8).pack(side="left", padx=2)
+        self.override_status_label = ttk.Label(
+            self.frame,
+            textvariable=self.override_status_var,
+            font=('Arial', 8),
+            foreground="#666"
+        )
+        self.override_status_label.pack(fill="x", pady=(1, 0))
 
         ttk.Separator(self.frame, orient='horizontal').pack(fill="x", pady=4)
-        mod_header = ttk.Frame(self.frame)
-        mod_header.pack(fill="x", pady=(0, 2))
-        ttk.Label(mod_header, text="Level Modifiers",
-                  font=('Arial', 8, 'bold')).pack(side="left")
-        self.modifier_type_var = tk.StringVar(value="")
-        self.modifier_combo = ttk.Combobox(
-            mod_header,
-            textvariable=self.modifier_type_var,
-            state="readonly",
-            width=20
-        )
-        self.modifier_combo["values"] = Modifier.get_available_types()
-        if self.modifier_combo["values"]:
-            self.modifier_type_var.set(self.modifier_combo["values"][0])
-        self.modifier_combo.pack(side="right", padx=2)
-        ttk.Button(mod_header, text="+ Add Modifier",
-                   command=self.add_modifier).pack(side="right", padx=5)
-
-        self.modifiers_container = ttk.Frame(self.frame)
-        self.modifiers_container.pack(fill="x")
 
         self.talent_effect_label = ttk.Label(
             self.frame,
@@ -185,6 +149,7 @@ class HeroSpellRow:
         for var in self.level_field_vars:
             var.trace('w', lambda *args: self._sync_current_level_values())
         self.name_var.trace('w', lambda *args: self._notify_spell_changed())
+        self.tags_text_var.trace('w', lambda *args: self._notify_spell_changed())
         self.hero_kills_credited_var.trace('w', lambda *args: self._notify_spell_changed())
         self.target_armors_var.trace('w', lambda *args: self._notify_spell_changed())
 
@@ -194,9 +159,7 @@ class HeroSpellRow:
 
     def _default_level_data(self):
         """Get a new default level dictionary."""
-        level_data = dict(self.DEFAULT_LEVEL)
-        level_data["modifiers"] = []
-        return level_data
+        return normalize_level_data(default_level_data(), default_level=self.DEFAULT_LEVEL)
 
     def _parse_level(self, raw_value, default_value):
         """Parse level integer with bounds."""
@@ -211,14 +174,69 @@ class HeroSpellRow:
         max_level = max(1, min(10, int(max_level)))
         while len(self.levels) < max_level:
             if self.levels:
-                prior = self.levels[-1]
-                copied = dict(prior)
-                copied["modifiers"] = json.loads(json.dumps(prior.get("modifiers", [])))
-                self.levels.append(copied)
+                self.levels.append(json.loads(json.dumps(self.levels[-1])))
             else:
                 self.levels.append(self._default_level_data())
         if len(self.levels) > max_level:
             self.levels = self.levels[:max_level]
+
+    def _resolve_effective_level(self, level_index):
+        """Return effective level payload for given index."""
+        if not self.levels:
+            self._ensure_levels(1)
+        idx = max(0, min(len(self.levels) - 1, int(level_index)))
+        return normalize_level_data(self.levels[idx], default_level=self.DEFAULT_LEVEL)
+
+    def _build_sparse_model_from_effective_levels(self, levels, max_level):
+        """Build sparse base/override model from effective levels."""
+        return build_sparse_model_from_effective_levels(
+            levels,
+            max_level=max_level,
+            default_level=self.DEFAULT_LEVEL,
+        )
+
+    def _materialize_effective_levels(self, base_level, level_overrides, max_level):
+        """Build effective levels list from sparse model."""
+        return materialize_effective_levels(
+            base_level=base_level,
+            level_overrides=level_overrides,
+            max_level=max_level,
+            default_level=self.DEFAULT_LEVEL,
+        )
+
+    def _parse_effects_text(self, raw_text):
+        """Parse text format `Name=Value, Name2=Value2` to effects map."""
+        text = str(raw_text or "").strip()
+        if not text:
+            return {}
+        effects = {}
+        for chunk in text.split(","):
+            part = chunk.strip()
+            if not part:
+                continue
+            if "=" in part:
+                key, value = part.split("=", 1)
+            elif ":" in part:
+                key, value = part.split(":", 1)
+            else:
+                key, value = part, ""
+            key = key.strip()
+            value = value.strip()
+            if key:
+                effects[key] = value
+        return effects
+
+    def _effects_to_text(self, effects):
+        """Render effects map to compact editable text."""
+        if not isinstance(effects, dict):
+            return ""
+        parts = []
+        for key, value in effects.items():
+            name = str(key).strip()
+            if not name:
+                continue
+            parts.append(f"{name}={str(value).strip()}")
+        return ", ".join(parts)
 
     def _refresh_level_controls(self):
         """Refresh max/current level control values and options."""
@@ -264,6 +282,37 @@ class HeroSpellRow:
         except (TypeError, ValueError):
             return int(default)
 
+    def _parse_tags(self, raw_value):
+        """Parse comma-separated tag text into unique string list."""
+        text = str(raw_value or "").strip()
+        if not text:
+            return []
+        tags = []
+        seen = set()
+        for chunk in text.split(","):
+            tag = chunk.strip()
+            if not tag:
+                continue
+            key = tag.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            tags.append(tag)
+        return tags
+
+    def _tags_to_text(self, tags):
+        """Render tag list for textbox display."""
+        if not isinstance(tags, list):
+            return ""
+        parts = []
+        for value in tags:
+            if value is None:
+                continue
+            tag = str(value).strip()
+            if tag:
+                parts.append(tag)
+        return ", ".join(parts)
+
     def get_runtime_targets(self):
         """Parse target armor CSV into deterministic target payloads."""
         raw = str(self.target_armors_var.get() or "").strip()
@@ -301,17 +350,8 @@ class HeroSpellRow:
             return
         idx = self._current_level_index()
         level = self.levels[idx]
-        level["damage"] = self.damage_var.get()
-        damage_type = self.damage_type_var.get()
-        if damage_type not in self.DAMAGE_TYPES:
-            damage_type = self.DEFAULT_LEVEL["damage_type"]
-            self.damage_type_var.set(damage_type)
-        level["damage_type"] = damage_type
-        level["hits"] = self.hits_var.get()
-        level["cast"] = self.cast_var.get()
-        level["stun"] = self.stun_var.get()
-        level["mana"] = self.mana_var.get()
-        level["cooldown"] = self.cooldown_var.get()
+        level["effects"] = self._parse_effects_text(self.effects_text_var.get())
+        self._refresh_override_status()
         self._notify_spell_changed()
 
     def _load_current_level_values(self):
@@ -321,18 +361,30 @@ class HeroSpellRow:
         idx = self._current_level_index()
         level = self.levels[idx]
         self._syncing_level_fields = True
-        self.damage_var.set(str(level.get("damage", self.DEFAULT_LEVEL["damage"])))
-        damage_type = str(level.get("damage_type", self.DEFAULT_LEVEL["damage_type"]))
-        if damage_type not in self.DAMAGE_TYPES:
-            damage_type = self.DEFAULT_LEVEL["damage_type"]
-        self.damage_type_var.set(damage_type)
-        self.hits_var.set(str(level.get("hits", self.DEFAULT_LEVEL["hits"])))
-        self.cast_var.set(str(level.get("cast", self.DEFAULT_LEVEL["cast"])))
-        self.stun_var.set(str(level.get("stun", self.DEFAULT_LEVEL["stun"])))
-        self.mana_var.set(str(level.get("mana", self.DEFAULT_LEVEL["mana"])))
-        self.cooldown_var.set(str(level.get("cooldown", self.DEFAULT_LEVEL["cooldown"])))
+        self.effects_text_var.set(self._effects_to_text(level.get("effects", {})))
         self._syncing_level_fields = False
-        self._load_current_level_modifiers()
+        self._refresh_override_status()
+
+    def _refresh_override_status(self):
+        """Update inherited/override hint for current level."""
+        if not self.levels:
+            self.override_status_var.set("")
+            return
+        idx = self._current_level_index()
+        if idx == 0:
+            self.override_status_var.set("Level 1 uses base values")
+            return
+        parent = self._resolve_effective_level(idx - 1)
+        current = self._resolve_effective_level(idx)
+        parent_effects = parent.get("effects", {})
+        current_effects = current.get("effects", {})
+        if current_effects == parent_effects:
+            self.override_status_var.set(f"Level {idx + 1} fully inherits Level {idx}")
+        else:
+            changed_keys = sorted(set(parent_effects.keys()) | set(current_effects.keys()))
+            self.override_status_var.set(
+                f"Level {idx + 1} overrides effects: {', '.join(changed_keys)}"
+            )
 
     def _serialize_modifier(self, mod):
         """Serialize modifier to dictionary."""
@@ -347,91 +399,31 @@ class HeroSpellRow:
 
     def _save_current_level_modifiers(self, level_index=None):
         """Persist active modifier widgets to current level data."""
-        if not self.levels:
-            return
-        if level_index is None:
-            idx = self._loaded_level_index
-        else:
-            idx = max(0, min(len(self.levels) - 1, int(level_index)))
-        self.levels[idx]["modifiers"] = [
-            self._serialize_modifier(mod) for mod in self.level_modifiers
-        ]
+        return
 
     def _destroy_level_modifiers(self):
         """Destroy active modifier widgets."""
-        for mod in self.level_modifiers[:]:
-            mod.destroy()
-        self.level_modifiers.clear()
+        return
 
     def _load_modifier_into_ui(self, modifier_data):
         """Instantiate one modifier widget from saved dictionary."""
-        type_name = modifier_data.get("type")
-        if not type_name:
-            return
-        mod = Modifier.create(
-            type_name,
-            self.modifiers_container,
-            self._on_modifier_changed,
-            self.delete_modifier,
-            get_variables=self.get_variables
-        )
-        if not mod:
-            return
-        for key, value in modifier_data.get("values", {}).items():
-            var = getattr(mod, key, None)
-            if hasattr(var, "set"):
-                var.set(value)
-        mod.pack(fill="x", pady=1)
-        if hasattr(mod, "update_display"):
-            mod.update_display()
-        self.level_modifiers.append(mod)
+        return
 
     def _load_current_level_modifiers(self):
         """Load modifier widgets for current level."""
-        self._destroy_level_modifiers()
-        if not self.levels:
-            return
-        idx = self._current_level_index()
-        self._loaded_level_index = idx
-        modifiers_data = self.levels[idx].get("modifiers", [])
-        if not isinstance(modifiers_data, list):
-            modifiers_data = []
-        for modifier_data in modifiers_data:
-            if isinstance(modifier_data, dict):
-                self._load_modifier_into_ui(modifier_data)
+        return
 
     def _on_modifier_changed(self):
         """Update modifier displays and sync active level modifier payload."""
-        for mod in self.level_modifiers:
-            if hasattr(mod, "update_display"):
-                mod.update_display()
-        self._save_current_level_modifiers()
-        self._notify_spell_changed()
+        return
 
     def add_modifier(self):
         """Add a modifier to current spell level."""
-        type_name = self.modifier_type_var.get()
-        if not type_name:
-            return
-        mod = Modifier.create(
-            type_name,
-            self.modifiers_container,
-            self._on_modifier_changed,
-            self.delete_modifier,
-            get_variables=self.get_variables
-        )
-        if not mod:
-            return
-        mod.pack(fill="x", pady=1)
-        self.level_modifiers.append(mod)
-        self._on_modifier_changed()
+        return
 
     def delete_modifier(self, mod):
         """Delete modifier from current spell level."""
-        if mod in self.level_modifiers:
-            self.level_modifiers.remove(mod)
-        mod.destroy()
-        self._on_modifier_changed()
+        return
 
     def pack(self, **kwargs):
         """Pack spell row widget."""
@@ -439,20 +431,24 @@ class HeroSpellRow:
 
     def destroy(self):
         """Destroy spell row widget."""
-        self._destroy_level_modifiers()
         self.frame.destroy()
 
     def to_dict(self):
         """Serialize spell row to dictionary."""
         self._sync_current_level_values()
-        self._save_current_level_modifiers()
         max_level = self._parse_level(self.max_level_var.get(), 1)
         current_level = self._parse_level(self.current_level_var.get(), 1)
+        effective_levels = [self._resolve_effective_level(i) for i in range(max_level)]
+        base_level, level_overrides = self._build_sparse_model_from_effective_levels(
+            effective_levels,
+            max_level=max_level
+        )
         payload = {
             "name": self.name_var.get(),
+            "tags": self._parse_tags(self.tags_text_var.get()),
             "max_level": max_level,
-            "current_level": max(1, min(max_level, current_level)),
-            "levels": [dict(level_data) for level_data in self.levels[:max_level]],
+            "base_level": base_level,
+            "level_overrides": level_overrides,
         }
         metadata_out = json.loads(json.dumps(self.metadata)) if isinstance(self.metadata, dict) else {}
         metadata_out["runtime_inputs"] = {
@@ -468,7 +464,22 @@ class HeroSpellRow:
 
     def load_from_dict(self, data):
         """Load spell row values from dictionary."""
+        if not isinstance(data, dict):
+            raise ValueError("Spell payload must be an object.")
+        if not isinstance(data.get("base_level"), dict):
+            raise ValueError("Spell payload missing required 'base_level' object.")
+        if "level_overrides" in data and not isinstance(data.get("level_overrides"), list):
+            raise ValueError("Spell payload field 'level_overrides' must be a list.")
+
         self.name_var.set(str(data.get("name", self.name_var.get())))
+        tags_value = data.get("tags", [])
+        if isinstance(tags_value, list):
+            tags_text = self._tags_to_text(tags_value)
+        elif isinstance(tags_value, str):
+            tags_text = self._tags_to_text(self._parse_tags(tags_value))
+        else:
+            tags_text = ""
+        self.tags_text_var.set(tags_text)
         metadata = data.get("metadata", {})
         self.metadata = metadata if isinstance(metadata, dict) else {}
         impl = self.get_hero_implementation() if callable(self.get_hero_implementation) else None
@@ -479,56 +490,14 @@ class HeroSpellRow:
         if isinstance(runtime_inputs, dict):
             self.hero_kills_credited_var.set(str(runtime_inputs.get("hero_kills_credited_this_cast", "0")))
             self.target_armors_var.set(str(runtime_inputs.get("target_armors_csv", "0")))
-        levels_data = data.get("levels")
-        if isinstance(levels_data, list) and levels_data:
-            parsed_levels = []
-            for level_data in levels_data[:10]:
-                parsed = self._default_level_data()
-                if isinstance(level_data, dict):
-                    parsed["damage"] = str(level_data.get("damage", parsed["damage"]))
-                    damage_type = str(level_data.get("damage_type", parsed["damage_type"]))
-                    parsed["damage_type"] = (
-                        damage_type if damage_type in self.DAMAGE_TYPES else self.DEFAULT_LEVEL["damage_type"]
-                    )
-                    parsed["hits"] = str(level_data.get("hits", parsed["hits"]))
-                    parsed["cast"] = str(level_data.get("cast", parsed["cast"]))
-                    parsed["stun"] = str(level_data.get("stun", parsed["stun"]))
-                    parsed["mana"] = str(level_data.get("mana", parsed["mana"]))
-                    parsed["cooldown"] = str(level_data.get("cooldown", parsed["cooldown"]))
-                    modifiers_data = level_data.get("modifiers", [])
-                    if isinstance(modifiers_data, list):
-                        parsed["modifiers"] = [
-                            mod for mod in modifiers_data if isinstance(mod, dict)
-                        ]
-                parsed_levels.append(parsed)
-            self.levels = parsed_levels
-            max_level_default = len(self.levels)
-        else:
-            # Backward compatibility for single-level spell payloads.
-            legacy_level = self._default_level_data()
-            legacy_level["damage"] = str(data.get("damage", legacy_level["damage"]))
-            legacy_type = str(data.get("damage_type", legacy_level["damage_type"]))
-            legacy_level["damage_type"] = (
-                legacy_type if legacy_type in self.DAMAGE_TYPES else self.DEFAULT_LEVEL["damage_type"]
-            )
-            legacy_level["hits"] = str(data.get("hits", legacy_level["hits"]))
-            legacy_level["cast"] = str(data.get("cast", legacy_level["cast"]))
-            legacy_level["stun"] = str(data.get("stun", legacy_level["stun"]))
-            legacy_level["mana"] = str(data.get("mana", legacy_level["mana"]))
-            legacy_level["cooldown"] = str(data.get("cooldown", legacy_level["cooldown"]))
-            legacy_modifiers = data.get("modifiers", [])
-            if isinstance(legacy_modifiers, list):
-                legacy_level["modifiers"] = [
-                    mod for mod in legacy_modifiers if isinstance(mod, dict)
-                ]
-            self.levels = [legacy_level]
-            max_level_default = 1
-
-        max_level = self._parse_level(data.get("max_level", max_level_default), max_level_default)
-        self._ensure_levels(max_level)
-        current_level = self._parse_level(data.get("current_level", 1), 1)
+        max_level = self._parse_level(data.get("max_level", 1), 1)
+        self.levels = self._materialize_effective_levels(
+            base_level=data.get("base_level", {}),
+            level_overrides=data.get("level_overrides", []),
+            max_level=max_level,
+        )
         self.max_level_var.set(str(max_level))
-        self.current_level_var.set(str(max(1, min(max_level, current_level))))
+        self.current_level_var.set("1")
         self._refresh_level_controls()
         self._load_current_level_values()
         self._notify_spell_changed()
@@ -1329,7 +1298,12 @@ class HeroRow:
             get_hero_implementation=lambda: self.hero_impl
         )
         if spell_data:
-            spell_row.load_from_dict(spell_data)
+            try:
+                spell_row.load_from_dict(spell_data)
+            except ValueError as exc:
+                spell_row.destroy()
+                messagebox.showerror("Invalid Spell Data", str(exc))
+                return
         spell_row.pack(fill="x", pady=2)
         self.spell_rows.append(spell_row)
         self._apply_talent_effects_to_spells(self.talents.get("applied_effects", []))
@@ -1788,6 +1762,7 @@ class HeroLabSection:
     HERO_LIBRARY_FILENAME = "hero_library.json"
     ITEM_LIBRARY_FILENAME = "item_library.json"
     SPELL_LIBRARY_FILENAME = "spell_library.json"
+    SPELL_LIBRARY_VERSION = 2
 
     def __init__(self, parent, get_variables):
         """
@@ -1996,7 +1971,38 @@ class HeroLabSection:
         if not isinstance(spells, list):
             messagebox.showerror("Library Error", "Invalid spell library format.")
             return None
-        return [spell for spell in spells if isinstance(spell, dict)]
+
+        migrated_spells = []
+        changed = False
+        for spell in spells:
+            migrated, did_change = migrate_spell_dict_to_sparse(
+                spell,
+                damage_types=HeroSpellRow.DAMAGE_TYPES,
+                default_level=HeroSpellRow.DEFAULT_LEVEL,
+            )
+            if migrated is None:
+                spell_name = spell.get("name", "Unknown") if isinstance(spell, dict) else "Unknown"
+                messagebox.showerror(
+                    "Library Error",
+                    f"Spell '{spell_name}' is invalid and could not be migrated to sparse format."
+                )
+                continue
+            migrated_spells.append(migrated)
+            changed = changed or did_change
+
+        if changed or int(payload.get("version", 1) or 1) < self.SPELL_LIBRARY_VERSION:
+            try:
+                with open(file_path, "w", encoding="utf-8") as handle:
+                    json.dump(
+                        {"version": self.SPELL_LIBRARY_VERSION, "spells": migrated_spells},
+                        handle,
+                        indent=2
+                    )
+            except OSError as exc:
+                messagebox.showerror("Library Error", f"Could not migrate spell library:\n{exc}")
+                return None
+
+        return migrated_spells
 
     def get_spell_library_spells(self):
         """Get spell library list for attaching spells to heroes."""

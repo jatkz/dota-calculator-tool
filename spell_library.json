@@ -833,6 +833,419 @@
           }
         }
       ]
+    },
+    {
+      "name": "Ice Path",
+      "hero_key": "jakiro",
+      "tags": [
+        "Point Target",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Stun"
+      ],
+      "max_level": 4,
+      "notes": "Creates an ice path that stuns and damages enemies that touch it.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.65 + 0.8",
+          "Mana Cost": "100",
+          "Cooldown": "20",
+          "Cast Range": "1100",
+          "Path Distance": "1100",
+          "Path Radius": "150",
+          "Effect Delay": "0.2",
+          "First Damage": "50",
+          "Stun Duration": "1.25",
+          "Path Duration": "2.6"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Cooldown": "17",
+            "First Damage": "70",
+            "Stun Duration": "1.5",
+            "Path Duration": "3.1"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "14",
+            "First Damage": "90",
+            "Stun Duration": "1.75",
+            "Path Duration": "3.6"
+          }
+        },
+        {
+          "effects": {
+            "Cooldown": "11",
+            "First Damage": "110",
+            "Stun Duration": "2",
+            "Path Duration": "4.1"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_ice_path_duration_stun",
+          "label": "Talent (Level 20): Ice Path Duration/Stun Duration",
+          "effects": {
+            "Stun Duration Bonus": "0.4",
+            "Path Duration Bonus": "0.4"
+          }
+        },
+        {
+          "id": "ice_breaker",
+          "label": "Ice Breaker",
+          "effects": {
+            "Auto Detonate On Expire": "true",
+            "Detonate Damage": "50/100/150/200",
+            "Detonate Stun Duration": "0.5",
+            "Path Duration": "5",
+            "Grants Sub-Ability": "Destroy Ice Path"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Destroy Ice Path",
+      "hero_key": "jakiro",
+      "tags": [
+        "Sub-Ability",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Stun"
+      ],
+      "max_level": 4,
+      "notes": "Sub-ability of Ice Path. Prematurely detonates Ice Path.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0 + 0",
+          "Mana Cost": "1",
+          "Detonate Damage": "50",
+          "Detonate Stun Duration": "0.5"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Detonate Damage": "100"
+          }
+        },
+        {
+          "effects": {
+            "Detonate Damage": "150"
+          }
+        },
+        {
+          "effects": {
+            "Detonate Damage": "200"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dual Breath",
+      "hero_key": "jakiro",
+      "tags": [
+        "Point Target",
+        "Enemy Units",
+        "Self",
+        "Spell",
+        "Magical",
+        "Debuff"
+      ],
+      "max_level": 4,
+      "notes": "Icy blast followed by fire wave in front of Jakiro.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.35 + 1.17",
+          "Mana Cost": "135",
+          "Cooldown": "10",
+          "Cast Range": "850",
+          "First Radius": "150",
+          "Travel Distance": "750",
+          "End Radius": "275",
+          "Ice First Damage": "0",
+          "Ice Move Speed Slow": "25%",
+          "Ice Attack Speed Slow": "25",
+          "Ice Debuff Duration": "5",
+          "Fire Effect Delay": "0.2",
+          "Fire First Damage": "0",
+          "Fire Damage per Second": "20",
+          "Fire Debuff Duration": "5"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Mana Cost": "150",
+            "Cooldown": "10",
+            "Ice Move Speed Slow": "30%",
+            "Ice Attack Speed Slow": "30",
+            "Fire Damage per Second": "40"
+          }
+        },
+        {
+          "effects": {
+            "Mana Cost": "165",
+            "Cooldown": "10",
+            "Ice Move Speed Slow": "35%",
+            "Ice Attack Speed Slow": "35",
+            "Fire Damage per Second": "60"
+          }
+        },
+        {
+          "effects": {
+            "Mana Cost": "180",
+            "Cooldown": "10",
+            "Ice Move Speed Slow": "40%",
+            "Ice Attack Speed Slow": "40",
+            "Fire Damage per Second": "80"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_dual_breath_damage_range",
+          "label": "Talent (Level 25): 2x Dual Breath Damage/Range",
+          "effects": {
+            "Cast Range": "1700",
+            "Travel Distance": "1500",
+            "Fire Damage per Second": "40/80/120/160"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Macropyre",
+      "hero_key": "jakiro",
+      "tags": [
+        "Point Target",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Pure",
+        "Damage over Time"
+      ],
+      "max_level": 3,
+      "notes": "Wide line of flames that damages per second.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.4 + 0.97",
+          "Mana Cost": "300",
+          "Cooldown": "90",
+          "Cast Range": "1400",
+          "Path Width": "500",
+          "Path Distance": "1400",
+          "Damage per Second": "100",
+          "Damage Linger Duration": "1",
+          "Path Duration": "10"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Mana Cost": "400",
+            "Cooldown": "80",
+            "Damage per Second": "150"
+          }
+        },
+        {
+          "effects": {
+            "Mana Cost": "500",
+            "Cooldown": "70",
+            "Damage per Second": "200"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_macropyre_damage_per_second",
+          "label": "Talent (Level 20): Macropyre Damage per Second",
+          "effects": {
+            "Damage per Second Bonus": "20"
+          }
+        },
+        {
+          "id": "aghanims_scepter_macropyre",
+          "label": "Aghanim's Scepter: Extended Duration + Pure Damage",
+          "effects": {
+            "Path Duration": "15",
+            "Damage Type": "Pure"
+          }
+        },
+        {
+          "id": "aghanims_scepter_ice_walls",
+          "label": "Aghanim's Scepter: Ice Wall Edges",
+          "effects": {
+            "Number of Walls": "2",
+            "Path Radius": "50",
+            "Move Speed Slow": "60%",
+            "Slow Linger Duration": "0.4"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Liquid Fire",
+      "hero_key": "jakiro",
+      "tags": [
+        "Autocast",
+        "Active Attack Modifier",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Debuff"
+      ],
+      "max_level": 4,
+      "notes": "Levels with Liquid Frost. Linked fixed cooldown behavior.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.4 + 0.3",
+          "Cast Range": "400",
+          "Effect Radius": "300",
+          "Attack Speed Slow": "30",
+          "Base Damage per Second": "15",
+          "Debuff Duration": "5",
+          "Active Cast Range": "600",
+          "Damage Factor vs Buildings": "0.75",
+          "Cooldown": "13"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "Attack Speed Slow": "40",
+            "Base Damage per Second": "25",
+            "Cooldown": "10"
+          }
+        },
+        {
+          "effects": {
+            "Attack Speed Slow": "50",
+            "Base Damage per Second": "35",
+            "Cooldown": "7"
+          }
+        },
+        {
+          "effects": {
+            "Attack Speed Slow": "60",
+            "Base Damage per Second": "45",
+            "Cooldown": "4"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_liquid_fire_range",
+          "label": "Talent (Level 15): +175 Cast/Active Cast Range",
+          "effects": {
+            "Cast Range": "575",
+            "Active Cast Range": "775"
+          }
+        },
+        {
+          "id": "talent_liquid_fire_max_hp_damage",
+          "label": "Talent (Level 25): Liquid Fire/Frost Max Health Damage",
+          "effects": {
+            "Max Health as Damage per Second": "3%"
+          }
+        },
+        {
+          "id": "aghanims_shard_liquid_fire_frost_cooldown",
+          "label": "Aghanim's Shard: Remove Shared Cooldown Restriction",
+          "effects": {
+            "Shared Cooldown Restriction Removed": "true"
+          }
+        },
+        {
+          "id": "talent_liquid_fire_attack_speed_slow",
+          "label": "Talent (Level 10): Liquid Fire Attack Speed Slow",
+          "effects": {
+            "Attack Speed Slow Bonus": "30"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Liquid Frost",
+      "hero_key": "jakiro",
+      "tags": [
+        "Autocast",
+        "Active Attack Modifier",
+        "Enemy Units",
+        "Spell",
+        "Magical",
+        "Debuff"
+      ],
+      "max_level": 4,
+      "notes": "Levels with Liquid Fire. Linked fixed cooldown behavior.",
+      "base_level": {
+        "effects": {
+          "Cast Animation": "0.4 + 0.3",
+          "Cast Range": "400",
+          "First Damage": "8",
+          "Proc Damage": "15",
+          "Move Speed Slow": "15%",
+          "Debuff Duration": "5",
+          "Active Cast Range": "600",
+          "Affects Buildings": "false",
+          "Cooldown": "13"
+        }
+      },
+      "level_overrides": [
+        {
+          "effects": {
+            "First Damage": "16",
+            "Proc Damage": "20",
+            "Move Speed Slow": "20%",
+            "Cooldown": "10"
+          }
+        },
+        {
+          "effects": {
+            "First Damage": "24",
+            "Proc Damage": "25",
+            "Move Speed Slow": "25%",
+            "Cooldown": "7"
+          }
+        },
+        {
+          "effects": {
+            "First Damage": "32",
+            "Proc Damage": "30",
+            "Move Speed Slow": "30%",
+            "Cooldown": "4"
+          }
+        }
+      ],
+      "toggleable_upgrades": [
+        {
+          "id": "talent_liquid_frost_range",
+          "label": "Talent (Level 15): +175 Cast/Active Cast Range",
+          "effects": {
+            "Cast Range": "575",
+            "Active Cast Range": "775"
+          }
+        },
+        {
+          "id": "talent_liquid_fire_frost_max_hp_damage",
+          "label": "Talent (Level 25): Liquid Fire/Frost Max Health Damage",
+          "effects": {
+            "Max Health as Damage per Second": "3%"
+          }
+        },
+        {
+          "id": "aghanims_shard_liquid_fire_frost_cooldown",
+          "label": "Aghanim's Shard: Remove Shared Cooldown Restriction",
+          "effects": {
+            "Shared Cooldown Restriction Removed": "true"
+          }
+        }
+      ]
     }
   ]
 }

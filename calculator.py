@@ -18,8 +18,10 @@ from spell_workbench_section import SpellWorkbenchSection
 class DotaCalculator:
     def __init__(self, root):
         self.root = root
-        self.root.title("Dota 2 Damage Calculator")
-        self.root.geometry("1000x1050")
+        if hasattr(self.root, "title"):
+            self.root.title("Dota 2 Damage Calculator")
+        if hasattr(self.root, "geometry"):
+            self.root.geometry("1000x1050")
 
         style = ttk.Style()
         style.theme_use('clam')

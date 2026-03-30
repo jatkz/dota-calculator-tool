@@ -12353,6 +12353,38 @@
                 }
             }
         },
+        "Kez": {
+            "general": {
+                "primary_attribute": "agility",
+                "strength": 20,
+                "strength_gain": 2.8,
+                "agility": 27,
+                "agility_gain": 3.5,
+                "intelligence": 20,
+                "intelligence_gain": 1.7,
+                "health": 560,
+                "mana": 315,
+                "armor": 5.5,
+                "magic_resist": 27,
+                "damage": [
+                    50,
+                    56
+                ],
+                "damage_avg": 53,
+                "projectile_speed": "Instant",
+                "attack_type": "melee",
+                "attack_range": 225,
+                "attack_speed": 100,
+                "bat": 1.9,
+                "animation": "0.35 + 1.12",
+                "move_speed": 310,
+                "turn_rate": 1,
+                "collision_size": 27,
+                "bound_radius": 24,
+                "vision_range": "1800 / 800",
+                "roles": "Carry, Escape, Disabler"
+            }
+        },
         "Kunkka": {
             "general": {
                 "primary_attribute": "strength",
@@ -12660,6 +12692,38 @@
                         "With Scepter: launches fleet of 2 ships with cannonball volleys dealing 40% damage"
                     ]
                 }
+            }
+        },
+        "Largo": {
+            "general": {
+                "primary_attribute": "strength",
+                "strength": 24,
+                "strength_gain": 3.6,
+                "agility": 14,
+                "agility_gain": 1.3,
+                "intelligence": 21,
+                "intelligence_gain": 2.6,
+                "health": 648,
+                "mana": 327,
+                "armor": 4.33,
+                "magic_resist": 27.1,
+                "damage": [
+                    63,
+                    69
+                ],
+                "damage_avg": 66,
+                "projectile_speed": "Instant",
+                "attack_type": "melee",
+                "attack_range": 150,
+                "attack_speed": 100,
+                "bat": 1.7,
+                "animation": "0.35 + 0.95",
+                "move_speed": 290,
+                "turn_rate": 0.7,
+                "collision_size": 27,
+                "bound_radius": 24,
+                "vision_range": "1800 / 800",
+                "roles": "Support, Disabler, Durable"
             }
         },
         "Legion Commander": {
@@ -14760,6 +14824,38 @@
                         "Does not affect invisible or fogged units"
                     ]
                 }
+            }
+        },
+        "Lycan": {
+            "general": {
+                "primary_attribute": "strength",
+                "strength": 28,
+                "strength_gain": 3.4,
+                "agility": 18,
+                "agility_gain": 1.7,
+                "intelligence": 23,
+                "intelligence_gain": 1.7,
+                "health": 736,
+                "mana": 351,
+                "armor": 3,
+                "magic_resist": 27.3,
+                "damage": [
+                    52,
+                    57
+                ],
+                "damage_avg": 54.5,
+                "projectile_speed": "Instant",
+                "attack_type": "melee",
+                "attack_range": 150,
+                "attack_speed": 110,
+                "bat": 1.7,
+                "animation": "0.55 + 0.25",
+                "move_speed": 305,
+                "turn_rate": 0.6,
+                "collision_size": 18,
+                "bound_radius": 8,
+                "vision_range": "1800 / 800",
+                "roles": "Carry, Pusher, Durable, Escape"
             }
         },
         "Magnus": {
@@ -20345,6 +20441,38 @@
                 }
             }
         },
+        "Phoenix": {
+            "general": {
+                "primary_attribute": "strength",
+                "strength": 23,
+                "strength_gain": 3.3,
+                "agility": 12,
+                "agility_gain": 1.5,
+                "intelligence": 16,
+                "intelligence_gain": 1.8,
+                "health": 626,
+                "mana": 267,
+                "armor": 1,
+                "magic_resist": 26.6,
+                "damage": [
+                    44,
+                    54
+                ],
+                "damage_avg": 49,
+                "projectile_speed": 1100,
+                "attack_type": "ranged",
+                "attack_range": 525,
+                "attack_speed": 100,
+                "bat": 1.7,
+                "animation": "0.35 + 0.633",
+                "move_speed": 280,
+                "turn_rate": 0.9,
+                "collision_size": 27,
+                "bound_radius": 24,
+                "vision_range": "1800 / 800",
+                "roles": "Support, Nuker, Initiator, Escape, Disabler"
+            }
+        },
         "Primal Beast": {
             "general": {
                 "primary_attribute": "strength",
@@ -24716,6 +24844,38 @@
                 }
             }
         },
+        "Snapfire": {
+            "general": {
+                "primary_attribute": "universal",
+                "strength": 21,
+                "strength_gain": 3.5,
+                "agility": 16,
+                "agility_gain": 1.9,
+                "intelligence": 21,
+                "intelligence_gain": 2.2,
+                "health": 582,
+                "mana": 327,
+                "armor": 3.67,
+                "magic_resist": 27.1,
+                "damage": [
+                    51,
+                    57
+                ],
+                "damage_avg": 54,
+                "projectile_speed": 1800,
+                "attack_type": "ranged",
+                "attack_range": 400,
+                "attack_speed": 100,
+                "bat": 1.8,
+                "animation": "0.35 + 1.23",
+                "move_speed": 300,
+                "turn_rate": 0.6,
+                "collision_size": 27,
+                "bound_radius": 24,
+                "vision_range": "1800 / 1400",
+                "roles": "Support, Nuker, Disabler, Escape"
+            }
+        },
         "Sniper": {
             "general": {
                 "primary_attribute": "agility",
@@ -25011,7 +25171,7 @@
         },
         "Spectre": {
             "general": {
-                "primary_attribute": "universal",
+                "primary_attribute": "agility",
                 "strength": 21,
                 "strength_gain": 2.5,
                 "agility": 25,

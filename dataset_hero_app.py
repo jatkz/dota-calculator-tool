@@ -5,6 +5,9 @@ from tkinter import ttk
 
 
 DEFAULT_INVENTORY_SLOTS = 6
+MAX_ATTRIBUTE_BONUS_POINTS = 7
+ATTRIBUTE_BONUS_AUTO_START_LEVEL = 16
+ATTRIBUTE_BONUS_PER_POINT = 2
 DISPLAY_STAT_ORDER = [
     "health",
     "mana",
@@ -86,6 +89,10 @@ def _format_number(value):
     if abs(rounded - round(rounded)) < 1e-9:
         return str(int(round(rounded)))
     return f"{rounded:.2f}".rstrip("0").rstrip(".")
+
+
+def _round_attribute(value):
+    return float(int(float(value) + 0.5))
 
 
 def _sum_damage_bonuses(bonus_data, stats_data, attack_type, primary_attribute):
@@ -270,6 +277,8 @@ class DatasetHeroApp:
 
         self.hero_var = tk.StringVar(value=self.hero_names[0] if self.hero_names else "")
         self.level_var = tk.StringVar(value="1")
+        self.attribute_bonus_var = tk.StringVar(value="0")
+        self.attribute_bonus_summary_var = tk.StringVar(value="")
         self.inventory_vars = [tk.StringVar(value="") for _ in range(DEFAULT_INVENTORY_SLOTS)]
         self.summary_var = tk.StringVar(value="")
 
@@ -317,12 +326,36 @@ class DatasetHeroApp:
         level_spin = ttk.Spinbox(top, from_=1, to=30, textvariable=self.level_var, width=6)
         level_spin.grid(row=0, column=3, sticky="w")
 
-        ttk.Label(top, textvariable=self.summary_var, foreground="#666").grid(row=1, column=0, columnspan=4, sticky="w", pady=(8, 0))
+        ttk.Label(top, text="Manual Attribute Bonus").grid(row=0, column=4, sticky="w", padx=(12, 6))
+        attribute_bonus_spin = ttk.Spinbox(
+            top,
+            from_=0,
+            to=MAX_ATTRIBUTE_BONUS_POINTS,
+            textvariable=self.attribute_bonus_var,
+            width=6,
+        )
+        attribute_bonus_spin.grid(row=0, column=5, sticky="w")
+
+        ttk.Label(top, textvariable=self.attribute_bonus_summary_var, foreground="#666").grid(
+            row=1,
+            column=0,
+            columnspan=6,
+            sticky="w",
+            pady=(8, 0),
+        )
+        ttk.Label(top, textvariable=self.summary_var, foreground="#666").grid(
+            row=2,
+            column=0,
+            columnspan=6,
+            sticky="w",
+            pady=(4, 0),
+        )
 
         hero_combo.bind("<<ComboboxSelected>>", lambda e: self.recalculate())
         hero_combo.bind("<KeyRelease>", lambda e: self._handle_combobox_keyrelease(e, self.hero_var, self.hero_names))
         hero_combo.bind("<FocusOut>", lambda e: self._normalize_combobox_value(self.hero_var, self.hero_names))
         self.level_var.trace_add("write", lambda *_: self.recalculate())
+        self.attribute_bonus_var.trace_add("write", lambda *_: self.recalculate())
 
         inventory_frame = ttk.LabelFrame(content, text="Inventory")
         inventory_frame.pack(fill="x", pady=(0, 12))
@@ -395,6 +428,22 @@ class DatasetHeroApp:
         except ValueError:
             level = 1
         return max(1, min(30, level))
+
+    def _parse_attribute_bonus_points(self):
+        try:
+            points = int(self.attribute_bonus_var.get())
+        except ValueError:
+            points = 0
+        return max(0, min(MAX_ATTRIBUTE_BONUS_POINTS, points))
+
+    def _resolve_attribute_bonus_points(self, level):
+        manual_points = self._parse_attribute_bonus_points()
+        auto_points = min(
+            MAX_ATTRIBUTE_BONUS_POINTS - manual_points,
+            max(0, level - ATTRIBUTE_BONUS_AUTO_START_LEVEL + 1),
+        )
+        total_points = min(MAX_ATTRIBUTE_BONUS_POINTS, manual_points + auto_points)
+        return manual_points, auto_points, total_points
 
     def _normalize_combobox_value(self, variable, values):
         current = variable.get().strip()
@@ -504,11 +553,29 @@ class DatasetHeroApp:
         hero = self.heroes.get(hero_name, {})
         general = hero.get("general", {})
         level = self._parse_level()
+        manual_attribute_points, auto_attribute_points, total_attribute_points = self._resolve_attribute_bonus_points(level)
         item_bonuses, selected_items = self._sum_item_bonuses(general)
 
-        strength = _to_float(general.get("strength")) + (_to_float(general.get("strength_gain")) * (level - 1)) + item_bonuses["strength"]
-        agility = _to_float(general.get("agility")) + (_to_float(general.get("agility_gain")) * (level - 1)) + item_bonuses["agility"]
-        intelligence = _to_float(general.get("intelligence")) + (_to_float(general.get("intelligence_gain")) * (level - 1)) + item_bonuses["intelligence"]
+        attribute_bonus_total = total_attribute_points * ATTRIBUTE_BONUS_PER_POINT
+
+        strength = _round_attribute(
+            _to_float(general.get("strength"))
+            + (_to_float(general.get("strength_gain")) * (level - 1))
+            + attribute_bonus_total
+            + item_bonuses["strength"]
+        )
+        agility = _round_attribute(
+            _to_float(general.get("agility"))
+            + (_to_float(general.get("agility_gain")) * (level - 1))
+            + attribute_bonus_total
+            + item_bonuses["agility"]
+        )
+        intelligence = _round_attribute(
+            _to_float(general.get("intelligence"))
+            + (_to_float(general.get("intelligence_gain")) * (level - 1))
+            + attribute_bonus_total
+            + item_bonuses["intelligence"]
+        )
 
         health = 120 + (22 * strength) + item_bonuses["health"]
         mana = 75 + (12 * intelligence) + item_bonuses["mana"]
@@ -632,6 +699,10 @@ class DatasetHeroApp:
         stats["total_attack_damage"] = stats["base_damage"] + stats["bonus_attack_damage"]
 
         item_summary = ", ".join(selected_items) if selected_items else "No items selected"
+        self.attribute_bonus_summary_var.set(
+            f"Attribute bonus: {total_attribute_points}/{MAX_ATTRIBUTE_BONUS_POINTS} points applied "
+            f"({manual_attribute_points} manual, {auto_attribute_points} auto, +{attribute_bonus_total} to each stat)"
+        )
         self.summary_var.set(f"Level {level} • {item_summary}")
         return stats
 

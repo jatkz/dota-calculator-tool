@@ -103,9 +103,13 @@ class HeroDraftLibraryApp:
         self.heroes = self._load_heroes()
         self.hero_names = sorted(self.heroes.keys())
         self.hero_attributes = {
-            hero: _normalize_attribute(self.heroes[hero].get("general", {}).get("primary_attribute"))
+            hero: self._resolve_hero_attribute(self.heroes[hero])
             for hero in self.hero_names
         }
+        self.hero_attribute_data_missing = bool(self.hero_names) and all(
+            self.hero_attributes.get(hero) == "uni"
+            for hero in self.hero_names
+        )
         self.heroes_by_attribute = {
             short: sorted([hero for hero in self.hero_names if self.hero_attributes.get(hero) == short])
             for short, _ in ATTRIBUTE_ORDER
@@ -131,7 +135,7 @@ class HeroDraftLibraryApp:
         self.saved_drafts_data = self._load_saved_drafts_data()
 
         self.current_edit_hero = None
-        self.current_edit_attribute = "str"
+        self.current_edit_attribute = "uni" if self.hero_attribute_data_missing else "str"
         self.loading_edit_values = False
         self.library_save_after_id = None
 
@@ -166,11 +170,30 @@ class HeroDraftLibraryApp:
         self._refresh_draft_outputs()
 
     def _load_heroes(self):
-        payload = _load_json_file(self.dataset_path, {"heroes": {}})
-        heroes = payload.get("heroes", {})
-        if not isinstance(heroes, dict):
-            return {}
-        return heroes
+        payload = _load_json_file(self.dataset_path, {"heroes": {}, "heroesCore": {}})
+        for key in ("heroes", "heroesCore"):
+            heroes = payload.get(key, {})
+            if isinstance(heroes, dict) and heroes:
+                return heroes
+        return {}
+
+    def _resolve_hero_attribute(self, hero_record):
+        if not isinstance(hero_record, dict):
+            return "uni"
+
+        general = hero_record.get("general", {})
+        if isinstance(general, dict):
+            normalized = _normalize_attribute(general.get("primary_attribute"))
+            if normalized != "uni" or str(general.get("primary_attribute", "")).strip().lower() == "universal":
+                return normalized
+
+        for key in ("primary_attribute", "primaryAttribute", "attribute_type"):
+            value = hero_record.get(key)
+            normalized = _normalize_attribute(value)
+            if normalized != "uni" or str(value or "").strip().lower() == "universal":
+                return normalized
+
+        return "uni"
 
     def _load_library_data(self):
         payload = _load_json_file(self.library_path, {"heroes": {}})
@@ -178,11 +201,15 @@ class HeroDraftLibraryApp:
         if not isinstance(heroes_payload, dict):
             heroes_payload = {}
 
+        if not self.hero_names:
+            return {"heroes": heroes_payload}
+
         normalized = {"heroes": {}}
         for hero_name in self.hero_names:
             normalized["heroes"][hero_name] = self._normalize_hero_record(heroes_payload.get(hero_name))
 
-        _write_json_file(self.library_path, normalized)
+        if normalized != payload:
+            _write_json_file(self.library_path, normalized)
         return normalized
 
     def _load_saved_drafts_data(self):
@@ -295,8 +322,9 @@ class HeroDraftLibraryApp:
             "<Configure>",
             lambda _event: canvas.configure(scrollregion=canvas.bbox("all")),
         )
-        canvas.create_window((0, 0), window=content, anchor="nw")
+        window_id = canvas.create_window((0, 0), window=content, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.bind("<Configure>", lambda event: canvas.itemconfigure(window_id, width=event.width))
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
@@ -313,6 +341,13 @@ class HeroDraftLibraryApp:
             self.edit_content,
             text="Choose an attribute tab, open a hero, then edit default role plus role-by-role synergy and matchup notes.",
         ).pack(anchor="w", pady=(0, 12))
+
+        if self.hero_attribute_data_missing:
+            ttk.Label(
+                self.edit_content,
+                text="This dataset does not expose primary attributes, so hero lists are grouped under UNI for now.",
+                foreground="#666",
+            ).pack(anchor="w", pady=(0, 12))
 
         self.edit_selector_frame = ttk.Frame(self.edit_content)
         self.edit_selector_frame.pack(fill="x", expand=True)
@@ -334,6 +369,9 @@ class HeroDraftLibraryApp:
             grid_frame = ttk.Frame(tab)
             grid_frame.pack(fill="x")
             self.edit_grid_frames[short_label] = grid_frame
+
+        if self.hero_attribute_data_missing:
+            self.edit_attribute_notebook.select(ATTRIBUTE_ORDER.index(("uni", "universal")))
 
         search_frame = ttk.LabelFrame(self.edit_selector_frame, text="Hero Search", padding=10)
         search_frame.pack(fill="x")
@@ -473,6 +511,13 @@ class HeroDraftLibraryApp:
             text="Set your role, choose a draft action, then click heroes to build bans, enemy picks, and allies.",
         ).pack(anchor="w", pady=(0, 12))
 
+        if self.hero_attribute_data_missing:
+            ttk.Label(
+                self.draft_content,
+                text="Current hero data is missing primary-attribute labels, so the hero grid is grouped under UNI.",
+                foreground="#666",
+            ).pack(anchor="w", pady=(0, 12))
+
         controls_frame = ttk.Frame(self.draft_content)
         controls_frame.pack(fill="x", pady=(0, 12))
 
@@ -564,6 +609,7 @@ class HeroDraftLibraryApp:
         self.draft_treeviews["enemies"] = self._create_summary_tree_tab(summary_notebook, "Enemy Sums")
         self.draft_treeviews["allies"] = self._create_summary_tree_tab(summary_notebook, "Ally Sums")
         self.draft_treeviews["overall"] = self._create_summary_tree_tab(summary_notebook, "Overall")
+        self.draft_treeviews["role3"] = self._create_summary_tree_tab(summary_notebook, "Role 3 Picks")
 
         save_frame = ttk.LabelFrame(self.draft_content, text="Save Draft", padding=10)
         save_frame.pack(fill="both", expand=True)
@@ -675,6 +721,8 @@ class HeroDraftLibraryApp:
     def _refresh_edit_search_results(self):
         query = self.edit_search_var.get().strip().lower()
         heroes = self.heroes_by_attribute.get(self.current_edit_attribute, [])
+        if not heroes:
+            heroes = self.hero_names
 
         if query:
             startswith_matches = [hero for hero in heroes if hero.lower().startswith(query)]
@@ -1018,6 +1066,10 @@ class HeroDraftLibraryApp:
             self.draft_treeviews["overall"],
             self._aggregate_entries(banned_entries + enemy_entries + ally_entries),
         )
+        self._populate_summary_tree(
+            self.draft_treeviews["role3"],
+            self._score_candidate_role("3"),
+        )
 
     def _aggregate_entries(self, entries):
         your_role = self.your_role_var.get()
@@ -1052,6 +1104,62 @@ class HeroDraftLibraryApp:
             for hero_name in mentioned_heroes:
                 hero_totals = totals.setdefault(hero_name, {"synergy": 0, "matchup": 0})
                 hero_totals[key_name] += score
+
+    def _score_candidate_role(self, candidate_role):
+        rows = []
+        excluded_heroes = set(self.banned_heroes)
+        excluded_heroes.update(self.enemy_assignments.keys())
+        excluded_heroes.update(self.ally_assignments.values())
+
+        for hero_name in self.hero_names:
+            if hero_name in excluded_heroes:
+                continue
+            if not self._hero_has_role_content(hero_name, candidate_role):
+                continue
+
+            synergy_total, matchup_total = self._score_single_candidate(hero_name, candidate_role)
+            total = synergy_total + matchup_total
+
+            rows.append((hero_name, synergy_total, matchup_total, total))
+
+        rows.sort(key=lambda item: (-item[3], -item[2], -item[1], item[0]))
+        return rows
+
+    def _hero_has_role_content(self, hero_name, hero_role):
+        record = self._ensure_hero_record(hero_name)
+        role_record = record["roles"].get(str(hero_role), _blank_role_record())
+        for box_type in BOX_TYPES:
+            for target_role in ROLE_KEYS:
+                for value in role_record.get(box_type, {}).get(target_role, {}).values():
+                    if str(value).strip():
+                        return True
+        return False
+
+    def _score_single_candidate(self, hero_name, hero_role):
+        record = self._ensure_hero_record(hero_name)
+        role_record = record["roles"].get(str(hero_role), _blank_role_record())
+
+        synergy_total = 0
+        for ally_role, ally_hero in self.ally_assignments.items():
+            synergy_rows = role_record["synergy"].get(str(ally_role), _blank_score_rows())
+            synergy_total += self._score_rows_for_selected_hero(synergy_rows, ally_hero)
+
+        matchup_total = 0
+        for enemy_hero, enemy_role in self.enemy_assignments.items():
+            matchup_rows = role_record["matchup"].get(str(enemy_role), _blank_score_rows())
+            matchup_total += self._score_rows_for_selected_hero(matchup_rows, enemy_hero)
+
+        return synergy_total, matchup_total
+
+    def _score_rows_for_selected_hero(self, rows, selected_hero):
+        total = 0
+        for score in SCORE_VALUES:
+            if score == 0:
+                continue
+            mentioned_heroes = self._extract_mentioned_heroes(rows.get(_score_key(score), ""))
+            if selected_hero in mentioned_heroes:
+                total += score
+        return total
 
     def _extract_mentioned_heroes(self, text):
         token_matches = {

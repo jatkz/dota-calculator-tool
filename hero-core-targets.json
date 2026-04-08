@@ -1,0 +1,43 @@
+{
+  "targets": [
+    {
+      "id": "d07a5c0236304588842690d332824d6e",
+      "name": "Warlock (Base) Lv5",
+      "hero_name": "Warlock",
+      "state": {
+        "level": 5,
+        "items": [
+          "Boots of Speed",
+          "Magic Wand",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "talents": {
+          "10": "none",
+          "15": "none",
+          "20": "none",
+          "25": "none"
+        },
+        "modifiers": []
+      },
+      "incoming_spells": [
+        {
+          "label": "void",
+          "damage": "240",
+          "damage_type": "Magical",
+          "enabled": true
+        },
+        {
+          "label": "fear",
+          "damage": "4.5*25",
+          "damage_type": "Physical",
+          "enabled": true
+        }
+      ],
+      "source_row_label": "Template",
+      "saved_at": "2026-04-07 21:29:56"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
     "heroesCore": {
         "Abaddon": {
             "name": "Abaddon",
-            "description": "The fog of war is no match for the mist of fate.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -27,8 +27,7 @@
                 "manaRegen": 0.1,
                 "armor": 0.25,
                 "attackSpeed": 1.5,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.75
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 582,
@@ -42,7 +41,6 @@
                 "damageAverage": 54.45,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 95,
                 "totalAttackSpeed": 117,
                 "bat": 1.5,
@@ -75,7 +73,7 @@
         },
         "Alchemist": {
             "name": "Alchemist",
-            "description": "Failure is just another kind of success.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -103,8 +101,7 @@
                 "manaRegen": 0.09,
                 "armor": 0.25,
                 "attackSpeed": 1.5,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.7
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 626,
@@ -118,7 +115,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 132,
                 "bat": 1.7,
@@ -151,7 +147,7 @@
         },
         "Ancient Apparition": {
             "name": "Ancient Apparition",
-            "description": "One day, ice will cover these lands, and it will be as if this war never happened.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -174,6 +170,7 @@
                 "mana": 37.2,
                 "manaRegen": 0.155,
                 "armor": 0.33,
+                "attackSpeed": 2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.1
             },
@@ -189,7 +186,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 1250,
                 "attackRange": 675,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 120,
                 "bat": 1.7,
@@ -222,7 +218,7 @@
         },
         "Anti-Mage": {
             "name": "Anti-Mage",
-            "description": "They who live by the wand shall die by my blade.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -261,7 +257,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.4,
@@ -294,7 +289,7 @@
         },
         "Arc Warden": {
             "name": "Arc Warden",
-            "description": "It is not to aid the Ancients that this war is joined, but to destroy them both. This disunity must end.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -318,7 +313,8 @@
                 "manaRegen": 0.13,
                 "armor": 0.45,
                 "attackSpeed": 2.7,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.38
             },
             "stats": {
                 "health": 560,
@@ -332,7 +328,6 @@
                 "damageAverage": 54.8,
                 "projectileSpeed": 900,
                 "attackRange": 625,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 130,
                 "bat": 1.7,
@@ -365,7 +360,7 @@
         },
         "Axe": {
             "name": "Axe",
-            "description": "Axe is all the reinforcement this army needs!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -390,7 +385,8 @@
                 "manaRegen": 0.08,
                 "armor": 0.28,
                 "attackSpeed": 1.7,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 2.7
             },
             "stats": {
                 "health": 670,
@@ -404,7 +400,6 @@
                 "damageAverage": 58,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 120,
                 "bat": 1.7,
@@ -437,7 +432,7 @@
         },
         "Bane": {
             "name": "Bane",
-            "description": "I dreamt a field of war…and woke to find myself upon it.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -477,7 +472,6 @@
                 "damageAverage": 58.05,
                 "projectileSpeed": 900,
                 "attackRange": 425,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.7,
@@ -510,7 +504,7 @@
         },
         "Batrider": {
             "name": "Batrider",
-            "description": "It's not the bat you gotta worry about. She eats fruit.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Initiator",
@@ -530,10 +524,10 @@
             "statGains": {
                 "health": 63.8,
                 "healthRegen": 0.29,
-                "armor": 0.33,
-                "attackSpeed": 2,
                 "mana": 34.8,
                 "manaRegen": 0.145,
+                "armor": 0.33,
+                "attackSpeed": 2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.51
             },
@@ -549,7 +543,6 @@
                 "damageAverage": 40.1,
                 "projectileSpeed": 900,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 113,
                 "bat": 1.7,
@@ -582,7 +575,7 @@
         },
         "Beastmaster": {
             "name": "Beastmaster",
-            "description": "I run with the rabbit and hunt with the hounds.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -606,7 +599,6 @@
                 "mana": 22.8,
                 "manaRegen": 0.095,
                 "armor": 0.33,
-                "attackSpeed": 2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.06
             },
@@ -622,7 +614,6 @@
                 "damageAverage": 52,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 119,
                 "bat": 1.7,
@@ -655,7 +646,7 @@
         },
         "Bloodseeker": {
             "name": "Bloodseeker",
-            "description": "You should be honored to bleed so that the Flayed Ones may live.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -680,7 +671,8 @@
                 "manaRegen": 0.1,
                 "armor": 0.52,
                 "attackSpeed": 3.1,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.1
             },
             "stats": {
                 "health": 648,
@@ -694,7 +686,6 @@
                 "damageAverage": 62,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.7,
@@ -727,7 +718,7 @@
         },
         "Bounty Hunter": {
             "name": "Bounty Hunter",
-            "description": "No job is too big; no fee is too big.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -750,8 +741,7 @@
                 "manaRegen": 0.095,
                 "armor": 0.43,
                 "attackSpeed": 2.6,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.6
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 538,
@@ -765,7 +755,6 @@
                 "damageAverage": 58,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 121,
                 "bat": 1.5,
@@ -798,7 +787,7 @@
         },
         "Brewmaster": {
             "name": "Brewmaster",
-            "description": "Shall we call this off and have a friendly round?",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -838,7 +827,6 @@
                 "damageAverage": 56.5,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 119,
                 "bat": 1.7,
@@ -871,7 +859,7 @@
         },
         "Bristleback": {
             "name": "Bristleback",
-            "description": "It was a barkeep that got me into this mess. Yeah, I think I'll pay em a visit when this is done.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -895,8 +883,8 @@
                 "mana": 33.6,
                 "manaRegen": 0.14,
                 "armor": 0.3,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.8
+                "attackSpeed": 1.8,
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 604,
@@ -910,7 +898,6 @@
                 "damageAverage": 56,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.8,
@@ -943,7 +930,7 @@
         },
         "Broodmother": {
             "name": "Broodmother",
-            "description": "I've promised you to my children.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -985,7 +972,6 @@
                 "damageAverage": 48,
                 "projectileSpeed": "Instant",
                 "attackRange": 175,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 125,
                 "totalAttackSpeed": 143,
                 "bat": 1.7,
@@ -1018,7 +1004,7 @@
         },
         "Centaur Warrunner": {
             "name": "Centaur Warrunner",
-            "description": "It is not pride I take in my own power, it is passion.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Durable",
@@ -1058,7 +1044,6 @@
                 "damageAverage": 64,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 105,
                 "bat": 1.7,
@@ -1091,7 +1076,7 @@
         },
         "Chaos Knight": {
             "name": "Chaos Knight",
-            "description": "The light shall be blackened, and chaos shall reign.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -1117,6 +1102,7 @@
                 "mana": 14.4,
                 "manaRegen": 0.06,
                 "armor": 0.3,
+                "attackSpeed": 1.8,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.1
             },
@@ -1132,7 +1118,6 @@
                 "damageAverage": 66,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -1165,7 +1150,7 @@
         },
         "Chen": {
             "name": "Chen",
-            "description": "You can learn faith at the end of a sword.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -1185,10 +1170,10 @@
             "statGains": {
                 "health": 44,
                 "healthRegen": 0.2,
-                "armor": 0.35,
-                "attackSpeed": 2.1,
                 "mana": 38.4,
                 "manaRegen": 0.16,
+                "armor": 0.35,
+                "attackSpeed": 2.1,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.2
             },
@@ -1204,7 +1189,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 1100,
                 "attackRange": 650,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -1237,7 +1221,7 @@
         },
         "Clinkz": {
             "name": "Clinkz",
-            "description": "Better to run than curse the road.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -1261,7 +1245,8 @@
                 "manaRegen": 0.11,
                 "armor": 0.45,
                 "attackSpeed": 2.7,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 2.7
             },
             "stats": {
                 "health": 494,
@@ -1275,7 +1260,6 @@
                 "damageAverage": 47,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 125,
                 "bat": 1.7,
@@ -1308,7 +1292,7 @@
         },
         "Clockwerk": {
             "name": "Clockwerk",
-            "description": "I've a mind like a steel trap, and the physique to go with it!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -1332,8 +1316,7 @@
                 "mana": 20.4,
                 "manaRegen": 0.085,
                 "armor": 0.38,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.2
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 692,
@@ -1347,7 +1330,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 113,
                 "bat": 1.7,
@@ -1380,7 +1362,7 @@
         },
         "Crystal Maiden": {
             "name": "Crystal Maiden",
-            "description": "When Hell freezes over, I'll start calling it Heaven.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -1403,7 +1385,6 @@
                 "mana": 39.6,
                 "manaRegen": 0.165,
                 "armor": 0.3,
-                "attackSpeed": 1.8,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.3
             },
@@ -1419,7 +1400,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -1452,7 +1432,7 @@
         },
         "Dark Seer": {
             "name": "Dark Seer",
-            "description": "If your enemy is equal, prepare for him.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -1475,7 +1455,6 @@
                 "mana": 32.4,
                 "manaRegen": 0.135,
                 "armor": 0.25,
-                "attackSpeed": 1.5,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 2.7
             },
@@ -1491,7 +1470,6 @@
                 "damageAverage": 56,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 119,
                 "bat": 1.7,
@@ -1524,7 +1502,7 @@
         },
         "Dark Willow": {
             "name": "Dark Willow",
-            "description": "Let's have some fun, shall we?",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -1564,7 +1542,6 @@
                 "damageAverage": 52,
                 "projectileSpeed": 1200,
                 "attackRange": 475,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 133,
                 "bat": 1.5,
@@ -1597,7 +1574,7 @@
         },
         "Dawnbreaker": {
             "name": "Dawnbreaker",
-            "description": "Darkness fears the break of dawn!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -1619,7 +1596,6 @@
                 "mana": 24,
                 "manaRegen": 0.1,
                 "armor": 0.28,
-                "attackSpeed": 1.7,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.4
             },
@@ -1635,7 +1611,6 @@
                 "damageAverage": 58,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -1668,7 +1643,7 @@
         },
         "Dazzle": {
             "name": "Dazzle",
-            "description": "Where my shadow falls, there falls my foe.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -1707,7 +1682,6 @@
                 "damageAverage": 50.8,
                 "projectileSpeed": 1200,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 120,
                 "bat": 1.7,
@@ -1740,7 +1714,7 @@
         },
         "Death Prophet": {
             "name": "Death Prophet",
-            "description": "Krobelus, the Death Prophet Creates a spirit link between Death Prophet and an enemy unit, draining health from the enemy.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -1780,7 +1754,6 @@
                 "damageAverage": 54.9,
                 "projectileSpeed": 1000,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -1813,7 +1786,7 @@
         },
         "Disruptor": {
             "name": "Disruptor",
-            "description": "By stormcraft, I shall lay my enemies low.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -1834,10 +1807,10 @@
             "statGains": {
                 "health": 52.8,
                 "healthRegen": 0.24,
-                "armor": 0.23,
-                "attackSpeed": 1.4,
                 "mana": 34.8,
                 "manaRegen": 0.145,
+                "armor": 0.23,
+                "attackSpeed": 1.4,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 2.9
             },
@@ -1853,7 +1826,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 1200,
                 "attackRange": 625,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -1886,7 +1858,7 @@
         },
         "Doom": {
             "name": "Doom",
-            "description": "Hehm ehme meh heh heh, speak of me, and I shall appear. Face me and face the furnace!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -1912,8 +1884,7 @@
                 "manaRegen": 0.085,
                 "armor": 0.25,
                 "attackSpeed": 1.5,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.6
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 648,
@@ -1927,7 +1898,6 @@
                 "damageAverage": 61,
                 "projectileSpeed": "Instant",
                 "attackRange": 200,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.9,
@@ -1960,7 +1930,7 @@
         },
         "Dragon Knight": {
             "name": "Dragon Knight",
-            "description": "The Dragon Slyrak sleeps within this armor, and the knight within the Dragon waits. Beware you do not wake them both.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -2001,7 +1971,6 @@
                 "damageAverage": 58,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.6,
@@ -2034,7 +2003,7 @@
         },
         "Drow Ranger": {
             "name": "Drow Ranger",
-            "description": "I walk alone, but the shadows are company enough.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -2073,7 +2042,6 @@
                 "damageAverage": 52.5,
                 "projectileSpeed": 1250,
                 "attackRange": 625,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.7,
@@ -2106,7 +2074,7 @@
         },
         "Earth Spirit": {
             "name": "Earth Spirit",
-            "description": "Through conflict, one's nature is revealed.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -2146,7 +2114,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -2173,13 +2140,13 @@
                 },
                 "25": {
                     "left": "+250 Geomagnetic Grip Remnant Damage",
-                    "right": "Earth Spririt Magnetizes Himself"
+                    "right": "Earth Spirit Magnetizes Himself"
                 }
             }
         },
         "Earthshaker": {
             "name": "Earthshaker",
-            "description": "There may be many earths, but there's only one Earthshaker.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -2204,8 +2171,7 @@
                 "manaRegen": 0.105,
                 "armor": 0.23,
                 "attackSpeed": 1.4,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.7
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 604,
@@ -2219,7 +2185,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 112,
                 "bat": 1.7,
@@ -2252,7 +2217,7 @@
         },
         "Elder Titan": {
             "name": "Elder Titan",
-            "description": "It is only right that I am cast into this world, for I had a hand in breaking it.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -2291,7 +2256,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -2324,7 +2288,7 @@
         },
         "Ember Spirit": {
             "name": "Ember Spirit",
-            "description": "Balance in all things.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -2364,7 +2328,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.7,
@@ -2397,7 +2360,7 @@
         },
         "Enchantress": {
             "name": "Enchantress",
-            "description": "You know what I love? Everything!",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -2421,8 +2384,8 @@
                 "mana": 48,
                 "manaRegen": 0.2,
                 "armor": 0.35,
-                "attackSpeed": 2.1,
                 "magicResistance": 0.1,
+                "attackSpeed": 2.1,
                 "mainAttackDamage": 4
             },
             "stats": {
@@ -2437,7 +2400,6 @@
                 "damageAverage": 48,
                 "projectileSpeed": 900,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 119,
                 "bat": 1.7,
@@ -2470,7 +2432,7 @@
         },
         "Enigma": {
             "name": "Enigma",
-            "description": "Chaos hunts the spark of endless suns, whose light will die in my crushing grasp.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Disabler",
@@ -2509,7 +2471,6 @@
                 "damageAverage": 46.3,
                 "projectileSpeed": 900,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -2542,7 +2503,7 @@
         },
         "Faceless Void": {
             "name": "Faceless Void",
-            "description": "From a place beyond time, and time beyond counting.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -2583,7 +2544,6 @@
                 "damageAverage": 61,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.7,
@@ -2616,7 +2576,7 @@
         },
         "Grimstroke": {
             "name": "Grimstroke",
-            "description": "I'll paint this world as I see fit.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -2640,7 +2600,9 @@
                 "mana": 45.6,
                 "manaRegen": 0.19,
                 "armor": 0.32,
-                "magicResistance": 0.1
+                "attackSpeed": 1.9,
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.8
             },
             "stats": {
                 "health": 582,
@@ -2654,7 +2616,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -2687,7 +2648,7 @@
         },
         "Gyrocopter": {
             "name": "Gyrocopter",
-            "description": "So much for being retired… Aurel, the Gyrocopter.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Escape",
@@ -2711,7 +2672,6 @@
                 "mana": 28.8,
                 "manaRegen": 0.12,
                 "armor": 0.57,
-                "attackSpeed": 3.4,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -2726,7 +2686,6 @@
                 "damageAverage": 46,
                 "projectileSpeed": 3000,
                 "attackRange": 365,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 140,
                 "bat": 1.7,
@@ -2759,7 +2718,7 @@
         },
         "Hoodwink": {
             "name": "Hoodwink",
-            "description": "Who said you could stroll in my woods?",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -2784,8 +2743,7 @@
                 "manaRegen": 0.145,
                 "armor": 0.6,
                 "attackSpeed": 3.6,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.6
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 494,
@@ -2799,7 +2757,6 @@
                 "damageAverage": 50.5,
                 "projectileSpeed": 1800,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 125,
                 "bat": 2,
@@ -2825,14 +2782,14 @@
                     "right": "Sharpshooter Grants Vision and True Sight During Wind-up"
                 },
                 "25": {
-                    "left": "2 Acorn Shot Charges",
-                    "right": "+400 Sharpshooter Max Damage"
+                    "left": "+400 Sharpshooter Max Damage",
+                    "right": "2 Acorn Shot Charges"
                 }
             }
         },
         "Huskar": {
             "name": "Huskar",
-            "description": "Those who are given more in life must not cling to it but risk it all at every moment.",
+            "primaryAttribute": "Strength",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -2870,7 +2827,6 @@
                 "damageAverage": 46.5,
                 "projectileSpeed": 1400,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 110,
                 "bat": 1.6,
@@ -2903,7 +2859,7 @@
         },
         "Invoker": {
             "name": "Invoker",
-            "description": "I am a beacon of knowledge blazing out across a black sea of ignorance.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -2925,10 +2881,9 @@
             "statGains": {
                 "health": 55,
                 "healthRegen": 0.25,
-                "armor": 0.33,
-                "attackSpeed": 2,
                 "mana": 48,
                 "manaRegen": 0.2,
+                "armor": 0.33,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 4
             },
@@ -2944,7 +2899,6 @@
                 "damageAverage": 44,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -2977,7 +2931,7 @@
         },
         "Io": {
             "name": "Io",
-            "description": "Beep Boop Link Io, the Wisp Io is everywhere, and in all things.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3016,7 +2970,6 @@
                 "damageAverage": 48.3,
                 "projectileSpeed": 1200,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -3049,7 +3002,7 @@
         },
         "Jakiro": {
             "name": "Jakiro",
-            "description": "Two sides of the same coin.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3073,6 +3026,7 @@
                 "mana": 36,
                 "manaRegen": 0.15,
                 "armor": 0.2,
+                "attackSpeed": 1.2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3
             },
@@ -3088,7 +3042,6 @@
                 "damageAverage": 56,
                 "projectileSpeed": 1100,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -3121,7 +3074,7 @@
         },
         "Juggernaut": {
             "name": "Juggernaut",
-            "description": "By the Visage of Vengeance, which drowned in the Isle of Masks, I will carry on the rites of the Faceless Ones.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -3159,7 +3112,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 142,
                 "bat": 1.4,
@@ -3173,26 +3125,26 @@
             },
             "talents": {
                 "10": {
-                    "left": "Left talent description",
-                    "right": "Right talent description"
+                    "left": "Left talent text",
+                    "right": "Right talent text"
                 },
                 "15": {
-                    "left": "Left talent description",
-                    "right": "Right talent description"
+                    "left": "Left talent text",
+                    "right": "Right talent text"
                 },
                 "20": {
-                    "left": "Left talent description",
-                    "right": "Right talent description"
+                    "left": "Left talent text",
+                    "right": "Right talent text"
                 },
                 "25": {
-                    "left": "Left talent description",
-                    "right": "Right talent description"
+                    "left": "Left talent text",
+                    "right": "Right talent text"
                 }
             }
         },
         "Keeper of the Light": {
             "name": "Keeper of the Light",
-            "description": "They say twas I who carried the first light into the universe.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3230,7 +3182,6 @@
                 "damageAverage": 47.5,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -3263,7 +3214,7 @@
         },
         "Kez": {
             "name": "Kez",
-            "description": "Flightless fury! Heh, that's what they call me.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -3301,7 +3252,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 0,
                 "attackRange": 225,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 127,
                 "bat": 1.9,
@@ -3334,7 +3284,7 @@
         },
         "Kunkka": {
             "name": "Kunkka",
-            "description": "Step lively now, your Admiral is on board!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -3360,6 +3310,7 @@
                 "mana": 21.6,
                 "manaRegen": 0.09,
                 "armor": 0.27,
+                "attackSpeed": 1.6,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -3374,7 +3325,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -3407,7 +3357,7 @@
         },
         "Largo": {
             "name": "Largo",
-            "description": "You hear that?",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -3430,7 +3380,9 @@
                 "mana": 31.2,
                 "manaRegen": 0.13,
                 "armor": 0.22,
-                "magicResistance": 0.1
+                "attackSpeed": 1.3,
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.6
             },
             "stats": {
                 "health": 648,
@@ -3444,7 +3396,6 @@
                 "damageAverage": 66,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -3477,7 +3428,7 @@
         },
         "Legion Commander": {
             "name": "Legion Commander",
-            "description": "If they want war, then we shall give it to them!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -3502,9 +3453,7 @@
                 "mana": 26.4,
                 "manaRegen": 0.11,
                 "armor": 0.28,
-                "attackSpeed": 1.7,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.1
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 648,
@@ -3518,7 +3467,6 @@
                 "damageAverage": 59,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -3551,7 +3499,7 @@
         },
         "Leshrac": {
             "name": "Leshrac",
-            "description": "Imbalance demands it.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -3576,6 +3524,7 @@
                 "mana": 42,
                 "manaRegen": 0.175,
                 "armor": 0.42,
+                "attackSpeed": 2.5,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.5
             },
@@ -3591,7 +3540,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 900,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -3624,7 +3572,7 @@
         },
         "Lich": {
             "name": "Lich",
-            "description": "And so the dead will bury the dead.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3646,6 +3594,7 @@
                 "mana": 40.8,
                 "manaRegen": 0.17,
                 "armor": 0.28,
+                "attackSpeed": 1.7,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.4
             },
@@ -3661,7 +3610,6 @@
                 "damageAverage": 56.5,
                 "projectileSpeed": 900,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -3694,7 +3642,7 @@
         },
         "Lifestealer": {
             "name": "Lifestealer",
-            "description": "Oh Master, behold all these lives for the taking! N'aix, the Lifestealer.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -3719,8 +3667,7 @@
                 "manaRegen": 0.09,
                 "armor": 0.32,
                 "attackSpeed": 1.9,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.4
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 626,
@@ -3734,7 +3681,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 120,
                 "totalAttackSpeed": 135,
                 "bat": 1.7,
@@ -3767,7 +3713,7 @@
         },
         "Lina": {
             "name": "Lina",
-            "description": "Fire makes a fine servant, but a harsh mistress.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3807,7 +3753,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": 1000,
                 "attackRange": 670,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.6,
@@ -3840,7 +3785,7 @@
         },
         "Lion": {
             "name": "Lion",
-            "description": "All hells broken loose, and I hold the pieces.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -3880,7 +3825,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 130,
                 "bat": 1.7,
@@ -3913,7 +3857,7 @@
         },
         "Lone Druid": {
             "name": "Lone Druid",
-            "description": "I wonder what awaits me at the end of everything… Sylla, the Lone Druid Both Lone Druid and the Spirit Bear's attacks do not apply the counter on enemy creeps.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -3937,6 +3881,7 @@
                 "manaRegen": 0.07,
                 "armor": 0.47,
                 "attackSpeed": 2.8,
+                "magicResistance": 0.1,
                 "mainAttackDamage": 2.8
             },
             "stats": {
@@ -3951,7 +3896,6 @@
                 "damageAverage": 46,
                 "projectileSpeed": 1125,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.6,
@@ -3984,7 +3928,7 @@
         },
         "Luna": {
             "name": "Luna",
-            "description": "I was once the scourge of the plains, a terror on the wind.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4008,7 +3952,8 @@
                 "manaRegen": 0.095,
                 "armor": 0.57,
                 "attackSpeed": 3.4,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.4
             },
             "stats": {
                 "health": 582,
@@ -4022,7 +3967,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 900,
                 "attackRange": 330,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.7,
@@ -4055,7 +3999,7 @@
         },
         "Lycan": {
             "name": "Lycan",
-            "description": "A wolf in man's clothing.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -4080,7 +4024,8 @@
                 "manaRegen": 0.085,
                 "armor": 0.28,
                 "attackSpeed": 1.7,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.4
             },
             "stats": {
                 "health": 736,
@@ -4094,7 +4039,6 @@
                 "damageAverage": 54.5,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 128,
                 "bat": 1.7,
@@ -4127,7 +4071,7 @@
         },
         "Magnus": {
             "name": "Magnus",
-            "description": "No, I blame no one who covets my horn. But to desire more than sight of it is a guarantee of death. Magnus, the Magnoceros.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -4151,6 +4095,7 @@
                 "mana": 25.2,
                 "manaRegen": 0.105,
                 "armor": 0.33,
+                "attackSpeed": 2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.24
             },
@@ -4166,7 +4111,6 @@
                 "damageAverage": 60.65,
                 "projectileSpeed": "Instant",
                 "attackRange": 200,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.8,
@@ -4199,7 +4143,7 @@
         },
         "Marci": {
             "name": "Marci",
-            "description": "Whistle Link Marci Marci bounds to the targeted unit, choosing a direction and distance she will spring away from it.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -4240,7 +4184,6 @@
                 "damageAverage": 58.9,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 120,
                 "bat": 1.7,
@@ -4273,7 +4216,7 @@
         },
         "Mars": {
             "name": "Mars",
-            "description": "To those behind, rally! To those ahead, kneel.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -4313,7 +4256,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": "Instant",
                 "attackRange": 250,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.8,
@@ -4346,7 +4288,7 @@
         },
         "Medusa": {
             "name": "Medusa",
-            "description": "The only real beauty is power.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4384,7 +4326,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 1200,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.7,
@@ -4417,7 +4358,7 @@
         },
         "Meepo": {
             "name": "Meepo",
-            "description": "All these fancy knights and scary monsters.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -4444,7 +4385,8 @@
                 "manaRegen": 0.095,
                 "armor": 0.35,
                 "attackSpeed": 2.1,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 2.1
             },
             "stats": {
                 "health": 648,
@@ -4458,7 +4400,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -4491,7 +4432,7 @@
         },
         "Mirana": {
             "name": "Mirana",
-            "description": "How long must we ride before we're summoned again to the Nightsilver Woods?",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4532,7 +4473,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 900,
                 "attackRange": 630,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 126,
                 "bat": 1.7,
@@ -4565,7 +4505,7 @@
         },
         "Monkey King": {
             "name": "Monkey King",
-            "description": "There's a lot of stories about the Monkey King. Some of 'em are even true.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -4590,7 +4530,6 @@
                 "manaRegen": 0.09,
                 "armor": 0.62,
                 "attackSpeed": 3.7,
-                "mainAttackDamage": 3.7,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -4605,7 +4544,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": "Instant",
                 "attackRange": 300,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 95,
                 "totalAttackSpeed": 119,
                 "bat": 1.6,
@@ -4638,7 +4576,7 @@
         },
         "Morphling": {
             "name": "Morphling",
-            "description": "You only miss the water when the well runs dry.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4660,12 +4598,12 @@
             "statGains": {
                 "health": 57.2,
                 "healthRegen": 0.26,
-                "armor": 0.65,
-                "attackSpeed": 3.9,
-                "mainAttackDamage": 3.9,
                 "mana": 21.6,
                 "manaRegen": 0.09,
-                "magicResistance": 0.1
+                "armor": 0.65,
+                "attackSpeed": 3.9,
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.9
             },
             "stats": {
                 "health": 626,
@@ -4679,7 +4617,6 @@
                 "damageAverage": 37.5,
                 "projectileSpeed": 1300,
                 "attackRange": 350,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.5,
@@ -4712,7 +4649,7 @@
         },
         "Muerta": {
             "name": "Muerta",
-            "description": "What fable of Muerta were YOU told? Whatever cruelties you've heard... the truth is far worse.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4736,8 +4673,7 @@
                 "manaRegen": 0.18,
                 "armor": 0.45,
                 "attackSpeed": 2.7,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.6
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 538,
@@ -4751,7 +4687,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 3000,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 136,
                 "bat": 1.7,
@@ -4784,7 +4719,7 @@
         },
         "Naga Siren": {
             "name": "Naga Siren",
-            "description": "I sing the Siren song of war.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -4826,7 +4761,6 @@
                 "damageAverage": 46,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 132,
                 "bat": 1.7,
@@ -4859,7 +4793,7 @@
         },
         "Nature's Prophet": {
             "name": "Nature's Prophet",
-            "description": "I woke within the seed and saw my destiny, and many were its branches.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4899,7 +4833,6 @@
                 "damageAverage": 47.75,
                 "projectileSpeed": 1125,
                 "attackRange": 620,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.5,
@@ -4932,7 +4865,7 @@
         },
         "Necrophos": {
             "name": "Necrophos",
-            "description": "Behold the Pope of Pestilence.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -4972,7 +4905,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": 1200,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 112,
                 "bat": 1.7,
@@ -5005,7 +4937,7 @@
         },
         "Night Stalker": {
             "name": "Night Stalker",
-            "description": "I feed the darkness and the darkness feeds me.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -5046,7 +4978,6 @@
                 "damageAverage": 65,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -5079,7 +5010,7 @@
         },
         "Nyx Assassin": {
             "name": "Nyx Assassin",
-            "description": "The blessing of Nyx gives me all the purpose I require.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Disabler",
@@ -5119,7 +5050,6 @@
                 "damageAverage": 53.2,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -5152,7 +5082,7 @@
         },
         "Ogre Magi": {
             "name": "Ogre Magi",
-            "description": "Once is not enough!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -5192,7 +5122,6 @@
                 "damageAverage": 73,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -5225,7 +5154,7 @@
         },
         "Omniknight": {
             "name": "Omniknight",
-            "description": "I have gazed into the Omniscience, and it has gazed into me.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -5263,7 +5192,6 @@
                 "damageAverage": 58,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -5296,7 +5224,7 @@
         },
         "Oracle": {
             "name": "Oracle",
-            "description": "I have an end in mind for you.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -5317,10 +5245,10 @@
             "statGains": {
                 "health": 48.4,
                 "healthRegen": 0.22,
-                "armor": 0.28,
-                "attackSpeed": 1.7,
                 "mana": 43.2,
                 "manaRegen": 0.18,
+                "armor": 0.28,
+                "attackSpeed": 1.7,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.6
             },
@@ -5336,7 +5264,6 @@
                 "damageAverage": 42,
                 "projectileSpeed": 900,
                 "attackRange": 625,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -5369,7 +5296,7 @@
         },
         "Outworld Destroyer": {
             "name": "Outworld Destroyer",
-            "description": "Their sanity I'll shatter; their dreams of conquest I'll destroy.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -5390,9 +5317,10 @@
             "statGains": {
                 "health": 63.8,
                 "healthRegen": 0.29,
+                "armor": 0.27,
+                "attackSpeed": 1.6,
                 "mana": 50.4,
                 "manaRegen": 0.21,
-                "armor": 0.27,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 4.2
             },
@@ -5408,7 +5336,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": 900,
                 "attackRange": 450,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.9,
@@ -5441,7 +5368,7 @@
         },
         "Pangolier": {
             "name": "Pangolier",
-            "description": "The honorable Donté Panlin, at your service. Donté Panlin, the Pangolier.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -5467,7 +5394,6 @@
                 "mana": 30,
                 "manaRegen": 0.125,
                 "armor": 0.53,
-                "attackSpeed": 3.2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.78
             },
@@ -5483,7 +5409,6 @@
                 "damageAverage": 53.3,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -5516,7 +5441,7 @@
         },
         "Phantom Assassin": {
             "name": "Phantom Assassin",
-            "description": "I'm here to blur the line between life and death.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -5553,7 +5478,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 131,
                 "bat": 1.7,
@@ -5586,7 +5510,7 @@
         },
         "Phantom Lancer": {
             "name": "Phantom Lancer",
-            "description": "We outnumbered you. We outnumber them all! Azwraith, the Phantom Lancer.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -5607,12 +5531,12 @@
             "statGains": {
                 "health": 48.4,
                 "healthRegen": 0.22,
-                "mana": 21.6,
-                "manaRegen": 0.09,
                 "armor": 0.57,
                 "attackSpeed": 3.4,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.4
+                "mainAttackDamage": 3.4,
+                "mana": 21.6,
+                "manaRegen": 0.09,
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 582,
@@ -5626,7 +5550,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": "Instant",
                 "attackRange": 225,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 136,
                 "bat": 1.7,
@@ -5659,7 +5582,7 @@
         },
         "Phoenix": {
             "name": "Phoenix",
-            "description": "Chirp!",
+            "primaryAttribute": "Strength",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -5684,8 +5607,7 @@
                 "mana": 21.6,
                 "manaRegen": 0.09,
                 "armor": 0.25,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.3
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 626,
@@ -5699,7 +5621,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 1100,
                 "attackRange": 525,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 112,
                 "bat": 1.7,
@@ -5732,7 +5653,7 @@
         },
         "Primal Beast": {
             "name": "Primal Beast",
-            "description": "RAAWR Primal Beast Though the deterioration of the Mistwood and its evolution from idyllic expanse to death-filled tanglewild was a slow, wizard-fueled process, most scholars agree the true beginning of the end was marked by the interdimensional arrival of the Primal Beast.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -5755,6 +5676,7 @@
                 "mana": 16.8,
                 "manaRegen": 0.07,
                 "armor": 0.17,
+                "attackSpeed": 1,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -5769,7 +5691,6 @@
                 "damageAverage": 63,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.8,
@@ -5802,7 +5723,7 @@
         },
         "Puck": {
             "name": "Puck",
-            "description": "I find myself strangely drawn to this odd configuration of activity.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Initiator",
@@ -5827,7 +5748,8 @@
                 "manaRegen": 0.19,
                 "armor": 0.38,
                 "attackSpeed": 2.3,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.8
             },
             "stats": {
                 "health": 494,
@@ -5841,7 +5763,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 900,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 114,
                 "bat": 1.7,
@@ -5874,7 +5795,7 @@
         },
         "Pudge": {
             "name": "Pudge",
-            "description": "When I'm through with these vermin, they'll be fit for a pie!",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Disabler",
@@ -5899,6 +5820,7 @@
                 "mana": 21.6,
                 "manaRegen": 0.09,
                 "armor": 0.23,
+                "attackSpeed": 1.4,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -5913,7 +5835,6 @@
                 "damageAverage": 73,
                 "projectileSpeed": "Instant",
                 "attackRange": 175,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 111,
                 "bat": 1.7,
@@ -5946,7 +5867,7 @@
         },
         "Pugna": {
             "name": "Pugna",
-            "description": "Who needs a blade when you have oblivion?",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Nuker",
@@ -5968,9 +5889,7 @@
                 "mana": 62.4,
                 "manaRegen": 0.26,
                 "armor": 0.22,
-                "attackSpeed": 1.3,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 5.2
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 538,
@@ -5984,7 +5903,6 @@
                 "damageAverage": 50.5,
                 "projectileSpeed": 900,
                 "attackRange": 630,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 121,
                 "bat": 1.7,
@@ -6017,7 +5935,7 @@
         },
         "Queen of Pain": {
             "name": "Queen of Pain",
-            "description": "They say pain is all in the mind, but they're wrong: It's all in my hands.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Escape",
@@ -6056,7 +5974,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": 1500,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 122,
                 "bat": 1.5,
@@ -6089,7 +6006,7 @@
         },
         "Razor": {
             "name": "Razor",
-            "description": "I bring my lightning whip not to punish souls, but only to hasten them toward the inevitable exit.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -6129,7 +6046,6 @@
                 "damageAverage": 48,
                 "projectileSpeed": 2000,
                 "attackRange": 475,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 124,
                 "bat": 1.7,
@@ -6162,7 +6078,7 @@
         },
         "Riki": {
             "name": "Riki",
-            "description": "There are none so stabbed as those who will not see.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -6186,6 +6102,7 @@
                 "manaRegen": 0.065,
                 "armor": 0.4,
                 "attackSpeed": 2.4,
+                "mainAttackDamage": 2.4,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -6200,7 +6117,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 120,
                 "bat": 1.7,
@@ -6233,7 +6149,7 @@
         },
         "Ringmaster": {
             "name": "Ringmaster",
-            "description": "Dress rehearsal is over -- now it's showtime.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Escape",
@@ -6273,7 +6189,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 1200,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 111,
                 "bat": 1.7,
@@ -6306,7 +6221,7 @@
         },
         "Rubick": {
             "name": "Rubick",
-            "description": "No sorcery lies beyond my grasp.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -6345,7 +6260,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 1125,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.7,
@@ -6378,7 +6292,7 @@
         },
         "Sand King": {
             "name": "Sand King",
-            "description": "I will show you fear in a handful of sand… Crixalis, the Sand King The sands of the Scintillant Waste are alive and sentient — the whole vast desert speaks to itself, thinking thoughts only such a vastness can conceive.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -6400,10 +6314,10 @@
             "statGains": {
                 "health": 50.6,
                 "healthRegen": 0.23,
-                "armor": 0.33,
-                "attackSpeed": 2,
                 "mana": 24,
                 "manaRegen": 0.1,
+                "armor": 0.33,
+                "attackSpeed": 2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 2.84
             },
@@ -6419,7 +6333,6 @@
                 "damageAverage": 50.55,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 129,
                 "bat": 1.7,
@@ -6452,7 +6365,7 @@
         },
         "Shadow Demon": {
             "name": "Shadow Demon",
-            "description": "Who toys with demons will find himself toyed with.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -6493,7 +6406,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 900,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -6526,7 +6438,7 @@
         },
         "Shadow Fiend": {
             "name": "Shadow Fiend",
-            "description": "So, you're curious where I come from? There's one easy way to find out for yourself. Nevermore, the Shadow Fiend.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -6563,7 +6475,6 @@
                 "damageAverage": 44,
                 "projectileSpeed": 1200,
                 "attackRange": 525,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 125,
                 "bat": 1.6,
@@ -6596,7 +6507,7 @@
         },
         "Shadow Shaman": {
             "name": "Shadow Shaman",
-            "description": "I am the intermediary between life and death.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -6618,12 +6529,11 @@
             "statGains": {
                 "health": 50.6,
                 "healthRegen": 0.23,
-                "armor": 0.27,
-                "attackSpeed": 1.6,
                 "mana": 42,
                 "manaRegen": 0.175,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.5
+                "armor": 0.27,
+                "attackSpeed": 1.6,
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 626,
@@ -6637,7 +6547,6 @@
                 "damageAverage": 66.5,
                 "projectileSpeed": 900,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -6670,7 +6579,7 @@
         },
         "Silencer": {
             "name": "Silencer",
-            "description": "Enemies should be seen and not heard.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -6711,7 +6620,6 @@
                 "damageAverage": 50,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 132,
                 "bat": 1.6,
@@ -6725,26 +6633,26 @@
             },
             "talents": {
                 "10": {
-                    "left": "+300 mana.",
-                    "right": "+15 Magic Resistance to enemies Silencer has silenced."
+                    "left": "Talent text for level 10 left",
+                    "right": "Talent text for level 10 right"
                 },
                 "15": {
-                    "left": "+20 Mana Regen",
-                    "right": "-40% Physical Resistance to enemies in Silence."
+                    "left": "Talent text for level 15 left",
+                    "right": "Talent text for level 15 right"
                 },
                 "20": {
-                    "left": "Gives enemies affected by Silencer an additional -10% Magic Resistance for 3 seconds when he uses Global Silence.",
-                    "right": "Reduces the cooldown of Lockdown and Global Silence by 8 seconds."
+                    "left": "Talent text for level 20 left",
+                    "right": "Talent text for level 20 right"
                 },
                 "25": {
-                    "left": "Increased the duration of Silencer's silence by +4 seconds.",
-                    "right": "Increases the damage reduction from Silence by 25%."
+                    "left": "Talent text for level 25 left",
+                    "right": "Talent text for level 25 right"
                 }
             }
         },
         "Skywrath Mage": {
             "name": "Skywrath Mage",
-            "description": "A highly placed mage in the court of the Ghastly Eyrie who serves as the sworn protector of the Skywrath scion.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -6764,10 +6672,9 @@
             "statGains": {
                 "health": 44,
                 "healthRegen": 0.2,
-                "armor": 0.13,
-                "attackSpeed": 0.8,
                 "mana": 49.2,
                 "manaRegen": 0.205,
+                "armor": 0.13,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 4.1
             },
@@ -6783,7 +6690,6 @@
                 "damageAverage": 46,
                 "projectileSpeed": 1000,
                 "attackRange": 625,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 103,
                 "bat": 1.7,
@@ -6816,7 +6722,7 @@
         },
         "Slardar": {
             "name": "Slardar",
-            "description": "I guard what slumbers in the deeps.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -6856,7 +6762,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -6889,7 +6794,7 @@
         },
         "Slark": {
             "name": "Slark",
-            "description": "If I'd known I'd end up here, I'd have stayed in Dark Reef Prison.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Escape",
@@ -6914,8 +6819,8 @@
                 "manaRegen": 0.095,
                 "armor": 0.25,
                 "attackSpeed": 1.5,
-                "mainAttackDamage": 1.5,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 1.5
             },
             "stats": {
                 "health": 560,
@@ -6929,7 +6834,6 @@
                 "damageAverage": 61,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 120,
                 "totalAttackSpeed": 141,
                 "bat": 1.7,
@@ -6960,7 +6864,7 @@
         },
         "Snapfire": {
             "name": "Snapfire",
-            "description": "Beadie and Mortimer. We're kind of a package deal.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -6981,10 +6885,9 @@
             "statGains": {
                 "health": 77,
                 "healthRegen": 0.35,
-                "armor": 0.32,
-                "attackSpeed": 1.9,
                 "mana": 26.4,
                 "manaRegen": 0.11,
+                "armor": 0.32,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.42
             },
@@ -7000,7 +6903,6 @@
                 "damageAverage": 54.1,
                 "projectileSpeed": 1800,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.8,
@@ -7033,7 +6935,7 @@
         },
         "Sniper": {
             "name": "Sniper",
-            "description": "Now that's what I call stopping power.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -7056,7 +6958,6 @@
                 "manaRegen": 0.13,
                 "armor": 0.53,
                 "attackSpeed": 3.2,
-                "mainAttackDamage": 3.2,
                 "magicResistance": 0.1
             },
             "stats": {
@@ -7071,7 +6972,6 @@
                 "damageAverage": 43,
                 "projectileSpeed": 3000,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 127,
                 "bat": 1.7,
@@ -7104,7 +7004,7 @@
         },
         "Spectre": {
             "name": "Spectre",
-            "description": "Among the Transcendencies, you would be thought ignoble.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7128,8 +7028,8 @@
                 "manaRegen": 0.085,
                 "armor": 0.4,
                 "attackSpeed": 2.4,
-                "mainAttackDamage": 2.4,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 2.4
             },
             "stats": {
                 "health": 582,
@@ -7143,7 +7043,6 @@
                 "damageAverage": 51,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 136,
                 "bat": 1.8,
@@ -7176,7 +7075,7 @@
         },
         "Spirit Bear": {
             "name": "Spirit Bear",
-            "description": "The Spirit Bear will level up alongside Lone Druid, with its Gold & EXP Bounty scaling as it levels up. Most spells and units interact with the Spirit Bear as if it was a Melee Hero.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7215,7 +7114,6 @@
                 "damageAverage": 28,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 500,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 110,
                 "bat": 1.5,
@@ -7241,14 +7139,14 @@
                     "right": "+30 Attack Damage"
                 },
                 "25": {
-                    "left": "Entangling Claws grants +15% Damage Amp against Entangled units",
+                    "left": "+15% Damage Amp against Entangled units",
                     "right": "+20% Demolish Bonus Building Damage"
                 }
             }
         },
         "Spirit Breaker": {
             "name": "Spirit Breaker",
-            "description": "I'm the beast of many parts; I part enemies from their lives.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7274,7 +7172,8 @@
                 "manaRegen": 0.09,
                 "armor": 0.28,
                 "attackSpeed": 1.7,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.3
             },
             "stats": {
                 "health": 736,
@@ -7288,7 +7187,6 @@
                 "damageAverage": 67,
                 "projectileSpeed": "Instant",
                 "attackRange": 170,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.9,
@@ -7321,7 +7219,7 @@
         },
         "Storm Spirit": {
             "name": "Storm Spirit",
-            "description": "Everyone complains about the weather…well, I'm doing something about it!",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -7343,10 +7241,10 @@
             "statGains": {
                 "health": 44,
                 "healthRegen": 0.2,
-                "armor": 0.43,
-                "attackSpeed": 2.6,
                 "mana": 44.4,
                 "manaRegen": 0.185,
+                "armor": 0.43,
+                "attackSpeed": 2.6,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.7
             },
@@ -7362,7 +7260,6 @@
                 "damageAverage": 52,
                 "projectileSpeed": 1100,
                 "attackRange": 480,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 137,
                 "bat": 1.6,
@@ -7395,7 +7292,7 @@
         },
         "Sven": {
             "name": "Sven",
-            "description": "May my enemies share the fate of the Shattered Helm.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7420,7 +7317,6 @@
                 "mana": 18,
                 "manaRegen": 0.075,
                 "armor": 0.37,
-                "attackSpeed": 2.2,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.5
             },
@@ -7436,7 +7332,6 @@
                 "damageAverage": 61,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 128,
                 "bat": 1.9,
@@ -7469,7 +7364,7 @@
         },
         "Techies": {
             "name": "Techies",
-            "description": "Measurements made.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Nuker",
@@ -7506,7 +7401,6 @@
                 "damageAverage": 48,
                 "projectileSpeed": 900,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 106,
                 "bat": 1.7,
@@ -7539,7 +7433,7 @@
         },
         "Templar Assassin": {
             "name": "Templar Assassin",
-            "description": "Where the Hidden Ones send me, I go without question. I do not even question why I question not.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -7577,7 +7471,6 @@
                 "damageAverage": 53.5,
                 "projectileSpeed": 1000,
                 "attackRange": 250,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.6,
@@ -7610,7 +7503,7 @@
         },
         "Terrorblade": {
             "name": "Terrorblade",
-            "description": "The self-righteous shall choke on their sanctimony.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7649,7 +7542,6 @@
                 "damageAverage": 52,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 133,
                 "bat": 1.5,
@@ -7682,7 +7574,7 @@
         },
         "Tidehunter": {
             "name": "Tidehunter",
-            "description": "You can't hide from the tide.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -7723,7 +7615,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.7,
@@ -7756,7 +7647,7 @@
         },
         "Timbersaw": {
             "name": "Timbersaw",
-            "description": "I'm not a lumberjack. This. This is personal.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Nuker",
@@ -7793,7 +7684,6 @@
                 "damageAverage": 48,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -7826,7 +7716,7 @@
         },
         "Tinker": {
             "name": "Tinker",
-            "description": "Victory is 10% inspiration, 90% decapitation!",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -7849,6 +7739,7 @@
                 "mana": 39.6,
                 "manaRegen": 0.165,
                 "armor": 0.23,
+                "attackSpeed": 1.4,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.3
             },
@@ -7864,7 +7755,6 @@
                 "damageAverage": 55,
                 "projectileSpeed": 900,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 117,
                 "bat": 1.7,
@@ -7897,7 +7787,7 @@
         },
         "Tiny": {
             "name": "Tiny",
-            "description": "My enemies break upon me like surf upon the stone.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -7938,7 +7828,6 @@
                 "damageAverage": 64,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 90,
                 "bat": 1.7,
@@ -7971,7 +7860,7 @@
         },
         "Treant Protector": {
             "name": "Treant Protector",
-            "description": "Life becomes death becomes new life. As it should be. Rooftrellen, the Treant Protector.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -7996,7 +7885,9 @@
                 "mana": 21.6,
                 "manaRegen": 0.09,
                 "armor": 0.3,
-                "magicResistance": 0.1
+                "attackSpeed": 1.8,
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.4
             },
             "stats": {
                 "health": 670,
@@ -8010,7 +7901,6 @@
                 "damageAverage": 89,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 115,
                 "bat": 1.9,
@@ -8043,7 +7933,7 @@
         },
         "Troll Warlord": {
             "name": "Troll Warlord",
-            "description": "I suffer the innocents and guilty alike. There are no innocents. Jah'rakal, the Troll Warlord.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -8068,7 +7958,8 @@
                 "manaRegen": 0.05,
                 "armor": 0.55,
                 "attackSpeed": 3.3,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.3
             },
             "stats": {
                 "health": 582,
@@ -8082,7 +7973,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": 1200,
                 "attackRange": 500,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.7,
@@ -8115,7 +8005,7 @@
         },
         "Tusk": {
             "name": "Tusk",
-            "description": "After a bar brawl it's customary, as a courtesy, to buy everyone who's still standing a round of drinks.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Initiator",
@@ -8139,8 +8029,7 @@
                 "manaRegen": 0.085,
                 "armor": 0.32,
                 "attackSpeed": 1.9,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.9
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 626,
@@ -8154,7 +8043,6 @@
                 "damageAverage": 52,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.7,
@@ -8187,7 +8075,7 @@
         },
         "Underlord": {
             "name": "Underlord",
-            "description": "Nothing can stop us. Nothing can slow our march. And when we have arrived, all will burn.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -8213,7 +8101,8 @@
                 "manaRegen": 0.115,
                 "armor": 0.27,
                 "attackSpeed": 1.6,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 3.2
             },
             "stats": {
                 "health": 670,
@@ -8227,7 +8116,6 @@
                 "damageAverage": 65,
                 "projectileSpeed": "Instant",
                 "attackRange": 200,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 112,
                 "bat": 1.7,
@@ -8260,7 +8148,7 @@
         },
         "Undying": {
             "name": "Undying",
-            "description": "Where go the living, the dead soon follow.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Support",
@@ -8285,7 +8173,8 @@
                 "manaRegen": 0.14,
                 "armor": 0.2,
                 "attackSpeed": 1.2,
-                "magicResistance": 0.1
+                "magicResistance": 0.1,
+                "mainAttackDamage": 2.4
             },
             "stats": {
                 "health": 604,
@@ -8299,7 +8188,6 @@
                 "damageAverage": 59,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 110,
                 "bat": 1.7,
@@ -8332,7 +8220,7 @@
         },
         "Ursa": {
             "name": "Ursa",
-            "description": "It is my spirit that keeps me safe, and not mere armor.",
+            "primaryAttribute": "Agility",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -8371,7 +8259,6 @@
                 "damageAverage": 44,
                 "projectileSpeed": "Instant",
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 118,
                 "bat": 1.7,
@@ -8404,7 +8291,7 @@
         },
         "Vengeful Spirit": {
             "name": "Vengeful Spirit",
-            "description": "The road of revenge is long, but what awaits me at the end makes it worthwhile.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -8444,7 +8331,6 @@
                 "damageAverage": 54,
                 "projectileSpeed": 1500,
                 "attackRange": 400,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 123,
                 "bat": 1.7,
@@ -8477,7 +8363,7 @@
         },
         "Venomancer": {
             "name": "Venomancer",
-            "description": "No necromancer shall raise what the venomancer puts down.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -8518,7 +8404,6 @@
                 "damageAverage": 47.85,
                 "projectileSpeed": 900,
                 "attackRange": 450,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 115,
                 "totalAttackSpeed": 140,
                 "bat": 1.7,
@@ -8541,17 +8426,17 @@
                 },
                 "20": {
                     "left": "-2s Plague Ward Cooldown",
-                    "right": "+40% Could not find Lpdb data for \"Snake Bite\" on \"Venomancer\" (stack trace logged) Damage"
+                    "right": "+40% Module: Ability_ID:31: Could not find Lpdb data for \"Snake Bite\" on \"Venomancer\" (stack trace logged) Damage"
                 },
                 "25": {
                     "left": "2.5x Plague Ward Health/Damage",
-                    "right": "Could not find Lpdb data for \"Snake Bite\" on \"Venomancer\" (stack trace logged) Undispellable"
+                    "right": "Module: Ability_ID:31: Could not find Lpdb data for \"Snake Bite\" on \"Venomancer\" (stack trace logged) Undispellable"
                 }
             }
         },
         "Viper": {
             "name": "Viper",
-            "description": "You've failed the acid test.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -8576,9 +8461,7 @@
                 "mana": 24,
                 "manaRegen": 0.1,
                 "armor": 0.45,
-                "attackSpeed": 2.7,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 2.7
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 582,
@@ -8592,7 +8475,6 @@
                 "damageAverage": 49,
                 "projectileSpeed": 1200,
                 "attackRange": 575,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 120,
                 "totalAttackSpeed": 141,
                 "bat": 1.7,
@@ -8625,7 +8507,7 @@
         },
         "Visage": {
             "name": "Visage",
-            "description": "It is one thing to animate a corpse from beneath the ground.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Escape",
@@ -8666,7 +8548,6 @@
                 "damageAverage": 50.75,
                 "projectileSpeed": 1400,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 110,
                 "totalAttackSpeed": 121,
                 "bat": 1.7,
@@ -8699,7 +8580,7 @@
         },
         "Void Spirit": {
             "name": "Void Spirit",
-            "description": "Friend or foe, in the wake of the confluence, you will follow where I lead.",
+            "primaryAttribute": "Universal",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -8723,9 +8604,7 @@
                 "mana": 37.2,
                 "manaRegen": 0.155,
                 "armor": 0.37,
-                "attackSpeed": 2.2,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.56
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 604,
@@ -8739,7 +8618,6 @@
                 "damageAverage": 54.15,
                 "projectileSpeed": "Instant",
                 "attackRange": 200,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 121,
                 "bat": 1.7,
@@ -8772,7 +8650,7 @@
         },
         "Warlock": {
             "name": "Warlock",
-            "description": "Chaos comes at my command!",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -8792,10 +8670,10 @@
             "statGains": {
                 "health": 52.8,
                 "healthRegen": 0.24,
-                "armor": 0.17,
-                "attackSpeed": 1,
                 "mana": 37.2,
                 "manaRegen": 0.155,
+                "armor": 0.17,
+                "attackSpeed": 1,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.1
             },
@@ -8811,7 +8689,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": 1200,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 100,
                 "bat": 1.7,
@@ -8844,7 +8721,7 @@
         },
         "Weaver": {
             "name": "Weaver",
-            "description": "Fate weaves the threads of our lives together. Fate also wields the blade that cuts them short. Skitskurr, the Weaver.",
+            "primaryAttribute": "Agility",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -8866,6 +8743,7 @@
                 "mana": 24,
                 "manaRegen": 0.1,
                 "armor": 0.55,
+                "attackSpeed": 3.3,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.3
             },
@@ -8881,7 +8759,6 @@
                 "damageAverage": 57,
                 "projectileSpeed": 900,
                 "attackRange": 425,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 120,
                 "totalAttackSpeed": 137,
                 "bat": 1.8,
@@ -8914,7 +8791,7 @@
         },
         "Windranger": {
             "name": "Windranger",
-            "description": "If at first you don't succeed, stand closer, shoot again.",
+            "primaryAttribute": "Universal",
             "attackType": "Ranged",
             "roles": [
                 "Carry",
@@ -8955,7 +8832,6 @@
                 "damageAverage": 53.85,
                 "projectileSpeed": 1250,
                 "attackRange": 600,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 90,
                 "totalAttackSpeed": 107,
                 "bat": 1.5,
@@ -8988,7 +8864,7 @@
         },
         "Winter Wyvern": {
             "name": "Winter Wyvern",
-            "description": "Some breathe fire. I breathe ice. Auroth, the Winter Wyvern.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -9011,8 +8887,8 @@
                 "mana": 43.2,
                 "manaRegen": 0.18,
                 "armor": 0.28,
-                "magicResistance": 0.1,
-                "mainAttackDamage": 3.6
+                "attackSpeed": 1.7,
+                "magicResistance": 0.1
             },
             "stats": {
                 "health": 604,
@@ -9026,7 +8902,6 @@
                 "damageAverage": 45.5,
                 "projectileSpeed": 700,
                 "attackRange": 450,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -9059,7 +8934,7 @@
         },
         "Witch Doctor": {
             "name": "Witch Doctor",
-            "description": "Malpractice makes perfect.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Support",
@@ -9079,10 +8954,10 @@
             "statGains": {
                 "health": 46.2,
                 "healthRegen": 0.21,
-                "mana": 37.2,
-                "manaRegen": 0.155,
                 "armor": 0.23,
                 "attackSpeed": 1.4,
+                "mana": 37.2,
+                "manaRegen": 0.155,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 3.1
             },
@@ -9098,7 +8973,6 @@
                 "damageAverage": 53,
                 "projectileSpeed": 1200,
                 "attackRange": 550,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 113,
                 "bat": 1.7,
@@ -9131,7 +9005,7 @@
         },
         "Wraith King": {
             "name": "Wraith King",
-            "description": "Purer than flesh, stronger than bone, imperishable is the essence of the wraith.",
+            "primaryAttribute": "Strength",
             "attackType": "Melee",
             "roles": [
                 "Carry",
@@ -9156,6 +9030,7 @@
                 "mana": 19.2,
                 "manaRegen": 0.08,
                 "armor": 0.28,
+                "attackSpeed": 1.7,
                 "magicResistance": 0.1,
                 "mainAttackDamage": 2.8
             },
@@ -9171,7 +9046,6 @@
                 "damageAverage": 61,
                 "projectileSpeed": 0,
                 "attackRange": 150,
-                "attackAcquisitionRange": 600,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 116,
                 "bat": 1.7,
@@ -9204,7 +9078,7 @@
         },
         "Zeus": {
             "name": "Zeus",
-            "description": "Immortality was overrated. This is much more interesting.",
+            "primaryAttribute": "Intelligence",
             "attackType": "Ranged",
             "roles": [
                 "Nuker",
@@ -9241,7 +9115,6 @@
                 "damageAverage": 56,
                 "projectileSpeed": 1100,
                 "attackRange": 380,
-                "attackAcquisitionRange": 800,
                 "attackSpeed": 100,
                 "totalAttackSpeed": 111,
                 "bat": 1.7,

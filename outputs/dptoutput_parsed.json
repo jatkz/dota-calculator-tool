@@ -1,0 +1,5876 @@
+{
+  "matchups": [
+    {
+      "hero": "Slark",
+      "winrate": 43.3,
+      "laneAdvantage": -5.1,
+      "matches": 2353,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lifestealer",
+      "winrate": 49.7,
+      "laneAdvantage": -2.5,
+      "matches": 1929,
+      "role": "Carry"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 1858,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 1793,
+      "role": "Support"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 51.0,
+      "laneAdvantage": null,
+      "matches": 1771,
+      "role": "Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 49.8,
+      "laneAdvantage": null,
+      "matches": 1677,
+      "role": "Mid"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 56.1,
+      "laneAdvantage": null,
+      "matches": 1507,
+      "role": "Mid"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 57.6,
+      "laneAdvantage": null,
+      "matches": 1420,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 59.1,
+      "laneAdvantage": null,
+      "matches": 1411,
+      "role": "Support"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 55.8,
+      "laneAdvantage": -2.0,
+      "matches": 1397,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 50.6,
+      "laneAdvantage": -4.9,
+      "matches": 1382,
+      "role": "Carry"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 53.5,
+      "laneAdvantage": -7.1,
+      "matches": 1343,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 1323,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 52.3,
+      "laneAdvantage": -3.0,
+      "matches": 1302,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 49.3,
+      "laneAdvantage": null,
+      "matches": 1297,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 50.8,
+      "laneAdvantage": null,
+      "matches": 1208,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 51.1,
+      "laneAdvantage": -4.3,
+      "matches": 1182,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 1170,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lich",
+      "winrate": 50.6,
+      "laneAdvantage": -4.0,
+      "matches": 1167,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 54.1,
+      "laneAdvantage": null,
+      "matches": 1144,
+      "role": "Mid"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 55.5,
+      "laneAdvantage": -5.8,
+      "matches": 1120,
+      "role": "Carry"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 58.1,
+      "laneAdvantage": -0.9,
+      "matches": 1088,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 54.6,
+      "laneAdvantage": -2.2,
+      "matches": 1059,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 49.7,
+      "laneAdvantage": null,
+      "matches": 1019,
+      "role": "Mid"
+    },
+    {
+      "hero": "Storm Spirit",
+      "winrate": 55.5,
+      "laneAdvantage": null,
+      "matches": 986,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 47.5,
+      "laneAdvantage": null,
+      "matches": 959,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Disruptor",
+      "winrate": 49.0,
+      "laneAdvantage": -2.0,
+      "matches": 953,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 59.1,
+      "laneAdvantage": null,
+      "matches": 931,
+      "role": "Support"
+    },
+    {
+      "hero": "Warlock",
+      "winrate": 55.7,
+      "laneAdvantage": -5.1,
+      "matches": 923,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 55.4,
+      "laneAdvantage": -3.2,
+      "matches": 905,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 51.5,
+      "laneAdvantage": null,
+      "matches": 888,
+      "role": "Support"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 59.1,
+      "laneAdvantage": -4.2,
+      "matches": 881,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 871,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Puck",
+      "winrate": 56.3,
+      "laneAdvantage": null,
+      "matches": 852,
+      "role": "Mid"
+    },
+    {
+      "hero": "Drow Ranger",
+      "winrate": 51.2,
+      "laneAdvantage": -8.4,
+      "matches": 852,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 52.2,
+      "laneAdvantage": -9.7,
+      "matches": 834,
+      "role": "Carry"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 54.2,
+      "laneAdvantage": 1.1,
+      "matches": 830,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 828,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 56.1,
+      "laneAdvantage": null,
+      "matches": 824,
+      "role": "Mid"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 48.3,
+      "laneAdvantage": null,
+      "matches": 818,
+      "role": "Mid"
+    },
+    {
+      "hero": "Juggernaut",
+      "winrate": 55.1,
+      "laneAdvantage": -2.9,
+      "matches": 804,
+      "role": "Carry"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 51.7,
+      "laneAdvantage": null,
+      "matches": 803,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 52.8,
+      "laneAdvantage": null,
+      "matches": 798,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 47.3,
+      "laneAdvantage": null,
+      "matches": 761,
+      "role": "Support"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 759,
+      "role": "Mid"
+    },
+    {
+      "hero": "Morphling",
+      "winrate": 59.4,
+      "laneAdvantage": -0.2,
+      "matches": 758,
+      "role": "Carry"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 58.0,
+      "laneAdvantage": null,
+      "matches": 739,
+      "role": "Support"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 44.0,
+      "laneAdvantage": null,
+      "matches": 729,
+      "role": "Mid"
+    },
+    {
+      "hero": "Templar Assassin",
+      "winrate": 61.2,
+      "laneAdvantage": -1.7,
+      "matches": 729,
+      "role": "Carry"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 55.8,
+      "laneAdvantage": -5.1,
+      "matches": 720,
+      "role": "Carry"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 52.2,
+      "laneAdvantage": -5.9,
+      "matches": 714,
+      "role": "Carry"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 52.0,
+      "laneAdvantage": null,
+      "matches": 710,
+      "role": "Support"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 51.0,
+      "laneAdvantage": -4.9,
+      "matches": 698,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 52.1,
+      "laneAdvantage": -4.3,
+      "matches": 689,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 682,
+      "role": "Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 49.7,
+      "laneAdvantage": null,
+      "matches": 680,
+      "role": "Support"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 50.8,
+      "laneAdvantage": null,
+      "matches": 668,
+      "role": "Support"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 55.1,
+      "laneAdvantage": -5.1,
+      "matches": 662,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 51.5,
+      "laneAdvantage": null,
+      "matches": 660,
+      "role": "Support"
+    },
+    {
+      "hero": "Underlord",
+      "winrate": 56.0,
+      "laneAdvantage": null,
+      "matches": 648,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 54.3,
+      "laneAdvantage": null,
+      "matches": 647,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 52.3,
+      "laneAdvantage": null,
+      "matches": 645,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Witch Doctor",
+      "winrate": 47.3,
+      "laneAdvantage": -6.7,
+      "matches": 643,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 54.6,
+      "laneAdvantage": null,
+      "matches": 636,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 52.7,
+      "laneAdvantage": null,
+      "matches": 607,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 55.9,
+      "laneAdvantage": -1.8,
+      "matches": 601,
+      "role": "Carry"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 589,
+      "role": "Support"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 53.6,
+      "laneAdvantage": -3.2,
+      "matches": 588,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Phantom Lancer",
+      "winrate": 52.3,
+      "laneAdvantage": -1.2,
+      "matches": 541,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 51.9,
+      "laneAdvantage": -1.9,
+      "matches": 534,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 49.1,
+      "laneAdvantage": null,
+      "matches": 527,
+      "role": "Support"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 522,
+      "role": "Mid"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 50.2,
+      "laneAdvantage": null,
+      "matches": 516,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 49.2,
+      "laneAdvantage": null,
+      "matches": 516,
+      "role": "Support"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 56.0,
+      "laneAdvantage": null,
+      "matches": 513,
+      "role": "Mid"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 48.4,
+      "laneAdvantage": -5.4,
+      "matches": 510,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Sand King",
+      "winrate": 54.2,
+      "laneAdvantage": null,
+      "matches": 509,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Ringmaster",
+      "winrate": 51.6,
+      "laneAdvantage": -4.0,
+      "matches": 504,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Spectre",
+      "winrate": 51.1,
+      "laneAdvantage": 0.2,
+      "matches": 501,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 54.1,
+      "laneAdvantage": 0.1,
+      "matches": 499,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 52.6,
+      "laneAdvantage": null,
+      "matches": 494,
+      "role": "Support"
+    },
+    {
+      "hero": "Timbersaw",
+      "winrate": 56.9,
+      "laneAdvantage": null,
+      "matches": 483,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 480,
+      "role": "Mid"
+    },
+    {
+      "hero": "Primal Beast",
+      "winrate": 48.4,
+      "laneAdvantage": null,
+      "matches": 479,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 47.5,
+      "laneAdvantage": -7.6,
+      "matches": 470,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 57.7,
+      "laneAdvantage": null,
+      "matches": 463,
+      "role": "Mid"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 46.6,
+      "laneAdvantage": -6.5,
+      "matches": 446,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 51.7,
+      "laneAdvantage": null,
+      "matches": 445,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Terrorblade",
+      "winrate": 56.8,
+      "laneAdvantage": -1.3,
+      "matches": 440,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 55.2,
+      "laneAdvantage": null,
+      "matches": 435,
+      "role": "Support"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 56.0,
+      "laneAdvantage": -0.5,
+      "matches": 432,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 432,
+      "role": "Mid"
+    },
+    {
+      "hero": "Meepo",
+      "winrate": 49.0,
+      "laneAdvantage": null,
+      "matches": 431,
+      "role": "Mid"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 48.7,
+      "laneAdvantage": null,
+      "matches": 431,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Phantom Assassin",
+      "winrate": 61.3,
+      "laneAdvantage": 1.7,
+      "matches": 426,
+      "role": "Carry"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 60.1,
+      "laneAdvantage": null,
+      "matches": 419,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 51.0,
+      "laneAdvantage": -7.5,
+      "matches": 414,
+      "role": "Carry"
+    },
+    {
+      "hero": "Centaur Warrunner",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 411,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Sand King",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 409,
+      "role": "Mid"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 55.9,
+      "laneAdvantage": null,
+      "matches": 404,
+      "role": "Mid"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 47.6,
+      "laneAdvantage": -3.3,
+      "matches": 403,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 395,
+      "role": "Support"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 50.4,
+      "laneAdvantage": null,
+      "matches": 393,
+      "role": "Support"
+    },
+    {
+      "hero": "Treant Protector",
+      "winrate": 48.7,
+      "laneAdvantage": -6.1,
+      "matches": 390,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 54.1,
+      "laneAdvantage": -2.0,
+      "matches": 390,
+      "role": "Carry"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 49.6,
+      "laneAdvantage": null,
+      "matches": 389,
+      "role": "Mid"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 381,
+      "role": "Support"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 371,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lich",
+      "winrate": 53.2,
+      "laneAdvantage": null,
+      "matches": 361,
+      "role": "Support"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 52.8,
+      "laneAdvantage": -2.5,
+      "matches": 354,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 51.1,
+      "laneAdvantage": -6.2,
+      "matches": 352,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 46.4,
+      "laneAdvantage": -5.2,
+      "matches": 351,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 56.3,
+      "laneAdvantage": -2.4,
+      "matches": 350,
+      "role": "Carry"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 48.0,
+      "laneAdvantage": null,
+      "matches": 348,
+      "role": "Support"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 54.3,
+      "laneAdvantage": -4.8,
+      "matches": 348,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ringmaster",
+      "winrate": 50.3,
+      "laneAdvantage": null,
+      "matches": 340,
+      "role": "Support"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 52.9,
+      "laneAdvantage": -3.5,
+      "matches": 340,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 52.0,
+      "laneAdvantage": null,
+      "matches": 333,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 50.1,
+      "laneAdvantage": null,
+      "matches": 331,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 55.9,
+      "laneAdvantage": null,
+      "matches": 324,
+      "role": "Mid"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 52.6,
+      "laneAdvantage": null,
+      "matches": 321,
+      "role": "Support"
+    },
+    {
+      "hero": "Arc Warden",
+      "winrate": 56.6,
+      "laneAdvantage": null,
+      "matches": 316,
+      "role": "Mid"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 316,
+      "role": "Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 57.0,
+      "laneAdvantage": -6.0,
+      "matches": 309,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 305,
+      "role": "Mid"
+    },
+    {
+      "hero": "Witch Doctor",
+      "winrate": 50.8,
+      "laneAdvantage": null,
+      "matches": 301,
+      "role": "Support"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 51.3,
+      "laneAdvantage": null,
+      "matches": 300,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 54.8,
+      "laneAdvantage": null,
+      "matches": 294,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Shadow Demon",
+      "winrate": 55.5,
+      "laneAdvantage": -0.8,
+      "matches": 290,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 63.3,
+      "laneAdvantage": null,
+      "matches": 289,
+      "role": "Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 54.7,
+      "laneAdvantage": null,
+      "matches": 285,
+      "role": "Support"
+    },
+    {
+      "hero": "Medusa",
+      "winrate": 53.7,
+      "laneAdvantage": -2.9,
+      "matches": 283,
+      "role": "Carry"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 282,
+      "role": "Support"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 56.8,
+      "laneAdvantage": -5.1,
+      "matches": 280,
+      "role": "Carry"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 52.0,
+      "laneAdvantage": -5.3,
+      "matches": 279,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 55.9,
+      "laneAdvantage": null,
+      "matches": 272,
+      "role": "Mid"
+    },
+    {
+      "hero": "Io",
+      "winrate": 42.6,
+      "laneAdvantage": -6.5,
+      "matches": 265,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 56.1,
+      "laneAdvantage": null,
+      "matches": 262,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 49.6,
+      "laneAdvantage": null,
+      "matches": 262,
+      "role": "Support"
+    },
+    {
+      "hero": "Primal Beast",
+      "winrate": 38.9,
+      "laneAdvantage": null,
+      "matches": 257,
+      "role": "Mid"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 49.6,
+      "laneAdvantage": -5.0,
+      "matches": 256,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Bloodseeker",
+      "winrate": 44.1,
+      "laneAdvantage": -2.9,
+      "matches": 256,
+      "role": "Carry"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 255,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 49.8,
+      "laneAdvantage": null,
+      "matches": 253,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Grimstroke",
+      "winrate": 46.8,
+      "laneAdvantage": null,
+      "matches": 248,
+      "role": "Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 48.2,
+      "laneAdvantage": null,
+      "matches": 247,
+      "role": "Support"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 49.8,
+      "laneAdvantage": null,
+      "matches": 247,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 247,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Demon",
+      "winrate": 59.0,
+      "laneAdvantage": null,
+      "matches": 244,
+      "role": "Support"
+    },
+    {
+      "hero": "Sven",
+      "winrate": 51.6,
+      "laneAdvantage": -1.0,
+      "matches": 242,
+      "role": "Carry"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 52.3,
+      "laneAdvantage": -5.8,
+      "matches": 237,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 52.6,
+      "laneAdvantage": -1.1,
+      "matches": 232,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 52.4,
+      "laneAdvantage": null,
+      "matches": 231,
+      "role": "Support"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 51.1,
+      "laneAdvantage": null,
+      "matches": 227,
+      "role": "Mid"
+    },
+    {
+      "hero": "Grimstroke",
+      "winrate": 47.3,
+      "laneAdvantage": -4.5,
+      "matches": 224,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 224,
+      "role": "Mid"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 50.2,
+      "laneAdvantage": null,
+      "matches": 223,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Disruptor",
+      "winrate": 56.8,
+      "laneAdvantage": null,
+      "matches": 222,
+      "role": "Support"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 48.4,
+      "laneAdvantage": -7.5,
+      "matches": 221,
+      "role": "Carry"
+    },
+    {
+      "hero": "Dark Seer",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 218,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 56.4,
+      "laneAdvantage": -9.6,
+      "matches": 211,
+      "role": "Carry"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 209,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 44.8,
+      "laneAdvantage": -1.5,
+      "matches": 203,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 61.9,
+      "laneAdvantage": null,
+      "matches": 202,
+      "role": "Support"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 54.3,
+      "laneAdvantage": null,
+      "matches": 199,
+      "role": "Mid"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 198,
+      "role": "Support"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 53.8,
+      "laneAdvantage": null,
+      "matches": 197,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 55.6,
+      "laneAdvantage": -6.0,
+      "matches": 196,
+      "role": "Carry"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 48.7,
+      "laneAdvantage": null,
+      "matches": 191,
+      "role": "Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 61.4,
+      "laneAdvantage": -0.2,
+      "matches": 189,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Meepo",
+      "winrate": 52.1,
+      "laneAdvantage": -5.2,
+      "matches": 186,
+      "role": "Carry"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 53.8,
+      "laneAdvantage": null,
+      "matches": 186,
+      "role": "Support"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 61.3,
+      "laneAdvantage": null,
+      "matches": 186,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 56.5,
+      "laneAdvantage": -5.8,
+      "matches": 186,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 49.5,
+      "laneAdvantage": null,
+      "matches": 184,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 48.6,
+      "laneAdvantage": null,
+      "matches": 183,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 48.6,
+      "laneAdvantage": null,
+      "matches": 183,
+      "role": "Support"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 43.1,
+      "laneAdvantage": null,
+      "matches": 181,
+      "role": "Support"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 181,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 46.9,
+      "laneAdvantage": null,
+      "matches": 177,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 54.3,
+      "laneAdvantage": null,
+      "matches": 175,
+      "role": "Mid"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 60.0,
+      "laneAdvantage": -5.4,
+      "matches": 175,
+      "role": "Carry"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 49.1,
+      "laneAdvantage": -3.4,
+      "matches": 173,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 47.4,
+      "laneAdvantage": null,
+      "matches": 171,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 54.8,
+      "laneAdvantage": null,
+      "matches": 168,
+      "role": "Mid"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 59.9,
+      "laneAdvantage": null,
+      "matches": 167,
+      "role": "Mid"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 48.2,
+      "laneAdvantage": null,
+      "matches": 164,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 163,
+      "role": "Mid"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 64.2,
+      "laneAdvantage": null,
+      "matches": 162,
+      "role": "Support"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 45.1,
+      "laneAdvantage": -4.0,
+      "matches": 162,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 160,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Naga Siren",
+      "winrate": 51.9,
+      "laneAdvantage": 2.8,
+      "matches": 160,
+      "role": "Carry"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 45.3,
+      "laneAdvantage": null,
+      "matches": 159,
+      "role": "Mid"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 158,
+      "role": "Support"
+    },
+    {
+      "hero": "Dragon Knight",
+      "winrate": 51.9,
+      "laneAdvantage": -6.3,
+      "matches": 156,
+      "role": "Carry"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 44.5,
+      "laneAdvantage": null,
+      "matches": 155,
+      "role": "Mid"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 51.0,
+      "laneAdvantage": null,
+      "matches": 155,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 59.4,
+      "laneAdvantage": null,
+      "matches": 155,
+      "role": "Support"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 52.3,
+      "laneAdvantage": null,
+      "matches": 151,
+      "role": "Support"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 52.0,
+      "laneAdvantage": null,
+      "matches": 150,
+      "role": "Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 49.7,
+      "laneAdvantage": -0.9,
+      "matches": 145,
+      "role": "Carry"
+    },
+    {
+      "hero": "Warlock",
+      "winrate": 61.8,
+      "laneAdvantage": null,
+      "matches": 144,
+      "role": "Support"
+    },
+    {
+      "hero": "Broodmother",
+      "winrate": 54.9,
+      "laneAdvantage": null,
+      "matches": 142,
+      "role": "Mid"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 45.1,
+      "laneAdvantage": -3.1,
+      "matches": 142,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 51.8,
+      "laneAdvantage": -1.4,
+      "matches": 139,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 46.8,
+      "laneAdvantage": -6.2,
+      "matches": 139,
+      "role": "Carry"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 49.6,
+      "laneAdvantage": -1.2,
+      "matches": 137,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 134,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 47.8,
+      "laneAdvantage": null,
+      "matches": 134,
+      "role": "Mid"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 59.1,
+      "laneAdvantage": null,
+      "matches": 132,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 47.7,
+      "laneAdvantage": null,
+      "matches": 132,
+      "role": "Support"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 59.2,
+      "laneAdvantage": null,
+      "matches": 130,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 49.2,
+      "laneAdvantage": null,
+      "matches": 130,
+      "role": "Support"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 52.4,
+      "laneAdvantage": -3.3,
+      "matches": 126,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lycan",
+      "winrate": 54.5,
+      "laneAdvantage": null,
+      "matches": 123,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 61.5,
+      "laneAdvantage": -6.5,
+      "matches": 122,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Io",
+      "winrate": 51.2,
+      "laneAdvantage": null,
+      "matches": 121,
+      "role": "Support"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 120,
+      "role": "Mid"
+    },
+    {
+      "hero": "Timbersaw",
+      "winrate": 55.9,
+      "laneAdvantage": null,
+      "matches": 118,
+      "role": "Mid"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 57.8,
+      "laneAdvantage": -3.8,
+      "matches": 116,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 50.0,
+      "laneAdvantage": -5.9,
+      "matches": 116,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 43.0,
+      "laneAdvantage": -3.0,
+      "matches": 114,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 113,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Troll Warlord",
+      "winrate": 53.6,
+      "laneAdvantage": -2.3,
+      "matches": 112,
+      "role": "Carry"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 59.8,
+      "laneAdvantage": null,
+      "matches": 112,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 112,
+      "role": "Mid"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 112,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 48.6,
+      "laneAdvantage": -4.6,
+      "matches": 109,
+      "role": "Carry"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 53.2,
+      "laneAdvantage": -4.9,
+      "matches": 109,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Templar Assassin",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 107,
+      "role": "Mid"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 65.1,
+      "laneAdvantage": -2.0,
+      "matches": 106,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dragon Knight",
+      "winrate": 59.4,
+      "laneAdvantage": null,
+      "matches": 106,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Chen",
+      "winrate": 55.3,
+      "laneAdvantage": -4.9,
+      "matches": 103,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 57.4,
+      "laneAdvantage": null,
+      "matches": 101,
+      "role": "Mid"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 56.4,
+      "laneAdvantage": 1.5,
+      "matches": 101,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 99,
+      "role": "Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 99,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 60.2,
+      "laneAdvantage": null,
+      "matches": 98,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 57.9,
+      "laneAdvantage": null,
+      "matches": 95,
+      "role": "Support"
+    },
+    {
+      "hero": "Dragon Knight",
+      "winrate": 45.3,
+      "laneAdvantage": null,
+      "matches": 95,
+      "role": "Mid"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 49.5,
+      "laneAdvantage": null,
+      "matches": 93,
+      "role": "Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 57.0,
+      "laneAdvantage": null,
+      "matches": 93,
+      "role": "Mid"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 53.3,
+      "laneAdvantage": -2.2,
+      "matches": 92,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Treant Protector",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 92,
+      "role": "Support"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 61.8,
+      "laneAdvantage": -3.2,
+      "matches": 89,
+      "role": "Carry"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 52.8,
+      "laneAdvantage": null,
+      "matches": 89,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 59.5,
+      "laneAdvantage": 1.1,
+      "matches": 89,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 67.0,
+      "laneAdvantage": null,
+      "matches": 88,
+      "role": "Mid"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 73.9,
+      "laneAdvantage": 0.4,
+      "matches": 88,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 48.8,
+      "laneAdvantage": -12.5,
+      "matches": 86,
+      "role": "Carry"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 42.2,
+      "laneAdvantage": null,
+      "matches": 83,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 58.0,
+      "laneAdvantage": null,
+      "matches": 81,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 40.5,
+      "laneAdvantage": null,
+      "matches": 79,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 52.6,
+      "laneAdvantage": 0.7,
+      "matches": 78,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 44.9,
+      "laneAdvantage": 0.5,
+      "matches": 78,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 78,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 52.6,
+      "laneAdvantage": null,
+      "matches": 76,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 41.9,
+      "laneAdvantage": null,
+      "matches": 74,
+      "role": "Mid"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 48.6,
+      "laneAdvantage": null,
+      "matches": 74,
+      "role": "Mid"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 74,
+      "role": "Mid"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 48.0,
+      "laneAdvantage": null,
+      "matches": 73,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 60.6,
+      "laneAdvantage": null,
+      "matches": 71,
+      "role": "Support"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 48.6,
+      "laneAdvantage": null,
+      "matches": 70,
+      "role": "Support"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 55.1,
+      "laneAdvantage": -2.0,
+      "matches": 69,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 45.6,
+      "laneAdvantage": null,
+      "matches": 68,
+      "role": "Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 52.3,
+      "laneAdvantage": null,
+      "matches": 65,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 56.9,
+      "laneAdvantage": -10.0,
+      "matches": 65,
+      "role": "Carry"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 58.5,
+      "laneAdvantage": null,
+      "matches": 65,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 64,
+      "role": "Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 56.3,
+      "laneAdvantage": null,
+      "matches": 64,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 63,
+      "role": "Support"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 63,
+      "role": "Support"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 61.7,
+      "laneAdvantage": -3.2,
+      "matches": 60,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 44.1,
+      "laneAdvantage": null,
+      "matches": 59,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 51.7,
+      "laneAdvantage": null,
+      "matches": 58,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 58.6,
+      "laneAdvantage": -1.6,
+      "matches": 58,
+      "role": "Carry"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 44.6,
+      "laneAdvantage": null,
+      "matches": 56,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 56,
+      "role": "Mid"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 38.2,
+      "laneAdvantage": null,
+      "matches": 55,
+      "role": "Support"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 50.0,
+      "laneAdvantage": -3.7,
+      "matches": 54,
+      "role": "Carry"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 54,
+      "role": "Support"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 44.2,
+      "laneAdvantage": -4.0,
+      "matches": 52,
+      "role": "Carry"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 67.3,
+      "laneAdvantage": -8.4,
+      "matches": 52,
+      "role": "Carry"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 58.8,
+      "laneAdvantage": null,
+      "matches": 51,
+      "role": "Mid"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 50,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 46.0,
+      "laneAdvantage": null,
+      "matches": 50,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 52.1,
+      "laneAdvantage": null,
+      "matches": 48,
+      "role": "Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 47.9,
+      "laneAdvantage": null,
+      "matches": 48,
+      "role": "Support"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 60.4,
+      "laneAdvantage": null,
+      "matches": 48,
+      "role": "Support"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 55.3,
+      "laneAdvantage": null,
+      "matches": 47,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 70.2,
+      "laneAdvantage": null,
+      "matches": 47,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 50.0,
+      "laneAdvantage": -5.5,
+      "matches": 46,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 56.5,
+      "laneAdvantage": -4.1,
+      "matches": 46,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 73.9,
+      "laneAdvantage": -4.8,
+      "matches": 46,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 51.1,
+      "laneAdvantage": -3.4,
+      "matches": 45,
+      "role": "Carry"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 45,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 45,
+      "role": "Mid"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 45,
+      "role": "Support"
+    },
+    {
+      "hero": "Broodmother",
+      "winrate": 52.3,
+      "laneAdvantage": -0.5,
+      "matches": 44,
+      "role": "Carry"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 61.4,
+      "laneAdvantage": null,
+      "matches": 44,
+      "role": "Support"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 56.8,
+      "laneAdvantage": null,
+      "matches": 44,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 52.3,
+      "laneAdvantage": -3.8,
+      "matches": 44,
+      "role": "Carry"
+    },
+    {
+      "hero": "Broodmother",
+      "winrate": 65.1,
+      "laneAdvantage": null,
+      "matches": 43,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 51.2,
+      "laneAdvantage": null,
+      "matches": 41,
+      "role": "Mid"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 68.3,
+      "laneAdvantage": null,
+      "matches": 41,
+      "role": "Support"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 40,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 60.5,
+      "laneAdvantage": null,
+      "matches": 38,
+      "role": "Mid"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 71.0,
+      "laneAdvantage": null,
+      "matches": 38,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Support"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Support"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 51.4,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lycan",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Mid"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 59.5,
+      "laneAdvantage": -6.3,
+      "matches": 37,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 70.3,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Mid"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 58.3,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Support"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 61.1,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 63.9,
+      "laneAdvantage": -4.8,
+      "matches": 36,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Mid"
+    },
+    {
+      "hero": "Meepo",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 35,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 73.5,
+      "laneAdvantage": -2.4,
+      "matches": 34,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 44.1,
+      "laneAdvantage": -4.9,
+      "matches": 34,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 51.5,
+      "laneAdvantage": null,
+      "matches": 33,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 57.6,
+      "laneAdvantage": -9.0,
+      "matches": 33,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 33,
+      "role": "Mid"
+    },
+    {
+      "hero": "Morphling",
+      "winrate": 60.6,
+      "laneAdvantage": null,
+      "matches": 33,
+      "role": "Mid"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Mid"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 61.3,
+      "laneAdvantage": null,
+      "matches": 31,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 58.1,
+      "laneAdvantage": 0.4,
+      "matches": 31,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 64.5,
+      "laneAdvantage": null,
+      "matches": 31,
+      "role": "Mid"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 58.1,
+      "laneAdvantage": -2.4,
+      "matches": 31,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Io",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 30,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 62.1,
+      "laneAdvantage": null,
+      "matches": 29,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 51.7,
+      "laneAdvantage": -9.0,
+      "matches": 29,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 72.4,
+      "laneAdvantage": null,
+      "matches": 29,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 28,
+      "role": "Mid"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 35.7,
+      "laneAdvantage": null,
+      "matches": 28,
+      "role": "Support"
+    },
+    {
+      "hero": "Chen",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 28,
+      "role": "Support"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 67.9,
+      "laneAdvantage": null,
+      "matches": 28,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 57.1,
+      "laneAdvantage": -0.8,
+      "matches": 28,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 37.0,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 51.9,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Support"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 63.0,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Mid"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 59.3,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Support"
+    },
+    {
+      "hero": "Bloodseeker",
+      "winrate": 59.3,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 38.5,
+      "laneAdvantage": null,
+      "matches": 26,
+      "role": "Support"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 80.8,
+      "laneAdvantage": -4.5,
+      "matches": 26,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Bloodseeker",
+      "winrate": 42.3,
+      "laneAdvantage": null,
+      "matches": 26,
+      "role": "Mid"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 44.0,
+      "laneAdvantage": null,
+      "matches": 25,
+      "role": "Mid"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 52.0,
+      "laneAdvantage": -4.0,
+      "matches": 25,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 64.0,
+      "laneAdvantage": -5.8,
+      "matches": 25,
+      "role": "Carry"
+    },
+    {
+      "hero": "Arc Warden",
+      "winrate": 70.8,
+      "laneAdvantage": -1.4,
+      "matches": 24,
+      "role": "Carry"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 62.5,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 45.8,
+      "laneAdvantage": -8.0,
+      "matches": 24,
+      "role": "Carry"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 45.8,
+      "laneAdvantage": -10.4,
+      "matches": 24,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 79.2,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 54.2,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Mid"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 50.0,
+      "laneAdvantage": -6.2,
+      "matches": 24,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 56.5,
+      "laneAdvantage": null,
+      "matches": 23,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 47.8,
+      "laneAdvantage": null,
+      "matches": 23,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 56.5,
+      "laneAdvantage": null,
+      "matches": 23,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 22,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 63.6,
+      "laneAdvantage": -5.2,
+      "matches": 22,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 31.8,
+      "laneAdvantage": null,
+      "matches": 22,
+      "role": "Mid"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 52.4,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Mid"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 47.6,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lifestealer",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 61.9,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Support"
+    },
+    {
+      "hero": "Storm Spirit",
+      "winrate": 52.4,
+      "laneAdvantage": -7.1,
+      "matches": 21,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Mid"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Mid"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 20,
+      "role": "Mid"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 25.0,
+      "laneAdvantage": null,
+      "matches": 20,
+      "role": "Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 55.0,
+      "laneAdvantage": -4.3,
+      "matches": 20,
+      "role": "Carry"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 65.0,
+      "laneAdvantage": null,
+      "matches": 20,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 20,
+      "role": "Support"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 65.0,
+      "laneAdvantage": 0.8,
+      "matches": 20,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 50.0,
+      "laneAdvantage": -10.3,
+      "matches": 20,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 70.0,
+      "laneAdvantage": 1.2,
+      "matches": 20,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 57.9,
+      "laneAdvantage": -7.0,
+      "matches": 19,
+      "role": "Carry"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 57.9,
+      "laneAdvantage": null,
+      "matches": 19,
+      "role": "Support"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 61.1,
+      "laneAdvantage": null,
+      "matches": 18,
+      "role": "Support"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 64.7,
+      "laneAdvantage": 1.9,
+      "matches": 17,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 52.9,
+      "laneAdvantage": -9.5,
+      "matches": 17,
+      "role": "Carry"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 52.9,
+      "laneAdvantage": null,
+      "matches": 17,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 31.3,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Support"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 43.8,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Mid"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 43.8,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Primal Beast",
+      "winrate": 26.7,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Support"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 73.3,
+      "laneAdvantage": 0.7,
+      "matches": 15,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Underlord",
+      "winrate": 46.7,
+      "laneAdvantage": -4.2,
+      "matches": 15,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Mid"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 66.7,
+      "laneAdvantage": -6.6,
+      "matches": 15,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 57.1,
+      "laneAdvantage": -0.8,
+      "matches": 14,
+      "role": "Carry"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 28.6,
+      "laneAdvantage": -7.5,
+      "matches": 14,
+      "role": "Carry"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 64.3,
+      "laneAdvantage": null,
+      "matches": 14,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 28.6,
+      "laneAdvantage": null,
+      "matches": 14,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Medusa",
+      "winrate": 76.9,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Support"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 23.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 61.5,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Mid"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 76.9,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Support"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 66.7,
+      "laneAdvantage": -2.6,
+      "matches": 12,
+      "role": "Carry"
+    },
+    {
+      "hero": "Naga Siren",
+      "winrate": 58.3,
+      "laneAdvantage": 1.7,
+      "matches": 12,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 58.3,
+      "laneAdvantage": null,
+      "matches": 12,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 58.3,
+      "laneAdvantage": 2.5,
+      "matches": 12,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 66.7,
+      "laneAdvantage": -4.9,
+      "matches": 12,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 12,
+      "role": "Support"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 41.7,
+      "laneAdvantage": null,
+      "matches": 12,
+      "role": "Support"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 72.7,
+      "laneAdvantage": 0.8,
+      "matches": 11,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 72.7,
+      "laneAdvantage": -2.0,
+      "matches": 11,
+      "role": "Carry"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 54.5,
+      "laneAdvantage": -3.1,
+      "matches": 11,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 72.7,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Io",
+      "winrate": 54.5,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Support"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 63.6,
+      "laneAdvantage": 2.3,
+      "matches": 11,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Mid"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 36.4,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Support"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Mid"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 70.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Mid"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 50.0,
+      "laneAdvantage": -6.0,
+      "matches": 10,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 60.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 80.0,
+      "laneAdvantage": 5.1,
+      "matches": 10,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 40.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Drow Ranger",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Mid"
+    },
+    {
+      "hero": "Underlord",
+      "winrate": 77.8,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Mid"
+    },
+    {
+      "hero": "Timbersaw",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Support"
+    },
+    {
+      "hero": "Timbersaw",
+      "winrate": 44.4,
+      "laneAdvantage": -6.6,
+      "matches": 9,
+      "role": "Carry"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Mid"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 66.7,
+      "laneAdvantage": -0.6,
+      "matches": 9,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Mid"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 44.4,
+      "laneAdvantage": 2.1,
+      "matches": 9,
+      "role": "Carry"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 55.6,
+      "laneAdvantage": -4.0,
+      "matches": 9,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 66.7,
+      "laneAdvantage": -5.1,
+      "matches": 9,
+      "role": "Carry"
+    },
+    {
+      "hero": "Juggernaut",
+      "winrate": 77.8,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 62.5,
+      "laneAdvantage": -4.6,
+      "matches": 8,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 50.0,
+      "laneAdvantage": -1.6,
+      "matches": 8,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 25.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Support"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 87.5,
+      "laneAdvantage": 1.1,
+      "matches": 8,
+      "role": "Carry"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Support"
+    },
+    {
+      "hero": "Dark Seer",
+      "winrate": 62.5,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Mid"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 62.5,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Support"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Support"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 37.5,
+      "laneAdvantage": 1.5,
+      "matches": 8,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Phantom Lancer",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 62.5,
+      "laneAdvantage": 0.1,
+      "matches": 8,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 87.5,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Medusa",
+      "winrate": 71.4,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Mid"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 85.7,
+      "laneAdvantage": 10.3,
+      "matches": 7,
+      "role": "Carry"
+    },
+    {
+      "hero": "Treant Protector",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 71.4,
+      "laneAdvantage": -3.1,
+      "matches": 7,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Shadow Demon",
+      "winrate": 85.7,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Mid"
+    },
+    {
+      "hero": "Spectre",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Phantom Assassin",
+      "winrate": 85.7,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Mid"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Support"
+    },
+    {
+      "hero": "Sven",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Sand King",
+      "winrate": 71.4,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Support"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 71.4,
+      "laneAdvantage": 0.3,
+      "matches": 7,
+      "role": "Carry"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 42.9,
+      "laneAdvantage": -7.3,
+      "matches": 7,
+      "role": "Carry"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 83.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Support"
+    },
+    {
+      "hero": "Naga Siren",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 66.7,
+      "laneAdvantage": -5.4,
+      "matches": 6,
+      "role": "Carry"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 50.0,
+      "laneAdvantage": 3.8,
+      "matches": 6,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dark Seer",
+      "winrate": 83.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Support"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Phantom Assassin",
+      "winrate": 83.3,
+      "laneAdvantage": 0.8,
+      "matches": 6,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 33.3,
+      "laneAdvantage": -8.5,
+      "matches": 6,
+      "role": "Carry"
+    },
+    {
+      "hero": "Warlock",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Storm Spirit",
+      "winrate": 16.7,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Offlane"
+    },
+    {
+      "hero": "Sand King",
+      "winrate": 66.7,
+      "laneAdvantage": 1.6,
+      "matches": 6,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Juggernaut",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    }
+  ],
+  "synergies": [
+    {
+      "hero": "Invoker",
+      "winrate": 52.4,
+      "laneAdvantage": null,
+      "matches": 2214,
+      "role": "Mid"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 56.2,
+      "laneAdvantage": -2.9,
+      "matches": 2109,
+      "role": "Support"
+    },
+    {
+      "hero": "Lifestealer",
+      "winrate": 55.5,
+      "laneAdvantage": null,
+      "matches": 1904,
+      "role": "Carry"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 56.9,
+      "laneAdvantage": null,
+      "matches": 1796,
+      "role": "Carry"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 1772,
+      "role": "Mid"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 51.3,
+      "laneAdvantage": null,
+      "matches": 1459,
+      "role": "Carry"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 54.7,
+      "laneAdvantage": -3.7,
+      "matches": 1448,
+      "role": "Support"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 52.3,
+      "laneAdvantage": null,
+      "matches": 1330,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 50.3,
+      "laneAdvantage": -3.7,
+      "matches": 1325,
+      "role": "Support"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 1222,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lich",
+      "winrate": 52.4,
+      "laneAdvantage": null,
+      "matches": 1163,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 55.4,
+      "laneAdvantage": null,
+      "matches": 1149,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 56.2,
+      "laneAdvantage": null,
+      "matches": 1141,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 53.2,
+      "laneAdvantage": null,
+      "matches": 1123,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 50.2,
+      "laneAdvantage": null,
+      "matches": 1057,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 50.6,
+      "laneAdvantage": null,
+      "matches": 1039,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 1000,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 54.4,
+      "laneAdvantage": null,
+      "matches": 957,
+      "role": "Mid"
+    },
+    {
+      "hero": "Storm Spirit",
+      "winrate": 53.4,
+      "laneAdvantage": null,
+      "matches": 956,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 53.3,
+      "laneAdvantage": -6.6,
+      "matches": 949,
+      "role": "Support"
+    },
+    {
+      "hero": "Disruptor",
+      "winrate": 54.5,
+      "laneAdvantage": null,
+      "matches": 924,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Warlock",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 923,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 54.4,
+      "laneAdvantage": null,
+      "matches": 888,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 51.6,
+      "laneAdvantage": null,
+      "matches": 864,
+      "role": "Carry"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 56.6,
+      "laneAdvantage": -2.1,
+      "matches": 858,
+      "role": "Support"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 856,
+      "role": "Mid"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 46.8,
+      "laneAdvantage": null,
+      "matches": 840,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Puck",
+      "winrate": 51.1,
+      "laneAdvantage": null,
+      "matches": 837,
+      "role": "Mid"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 52.6,
+      "laneAdvantage": null,
+      "matches": 834,
+      "role": "Carry"
+    },
+    {
+      "hero": "Juggernaut",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 833,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 822,
+      "role": "Carry"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 53.6,
+      "laneAdvantage": null,
+      "matches": 809,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 51.5,
+      "laneAdvantage": -1.3,
+      "matches": 791,
+      "role": "Support"
+    },
+    {
+      "hero": "Witch Doctor",
+      "winrate": 55.3,
+      "laneAdvantage": null,
+      "matches": 771,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 763,
+      "role": "Mid"
+    },
+    {
+      "hero": "Morphling",
+      "winrate": 47.5,
+      "laneAdvantage": null,
+      "matches": 754,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 49.2,
+      "laneAdvantage": null,
+      "matches": 750,
+      "role": "Carry"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 54.5,
+      "laneAdvantage": -1.2,
+      "matches": 748,
+      "role": "Support"
+    },
+    {
+      "hero": "Drow Ranger",
+      "winrate": 53.4,
+      "laneAdvantage": null,
+      "matches": 744,
+      "role": "Carry"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 55.4,
+      "laneAdvantage": null,
+      "matches": 736,
+      "role": "Carry"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 51.4,
+      "laneAdvantage": null,
+      "matches": 731,
+      "role": "Mid"
+    },
+    {
+      "hero": "Templar Assassin",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 716,
+      "role": "Carry"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 50.8,
+      "laneAdvantage": -1.8,
+      "matches": 712,
+      "role": "Support"
+    },
+    {
+      "hero": "Phantom Lancer",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 701,
+      "role": "Carry"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 682,
+      "role": "Mid"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 670,
+      "role": "Carry"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 55.5,
+      "laneAdvantage": -7.0,
+      "matches": 658,
+      "role": "Support"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 50.9,
+      "laneAdvantage": -2.7,
+      "matches": 643,
+      "role": "Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 51.1,
+      "laneAdvantage": null,
+      "matches": 624,
+      "role": "Carry"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 54.2,
+      "laneAdvantage": -6.1,
+      "matches": 624,
+      "role": "Support"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 55.9,
+      "laneAdvantage": -2.4,
+      "matches": 589,
+      "role": "Support"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 52.5,
+      "laneAdvantage": null,
+      "matches": 583,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 49.4,
+      "laneAdvantage": null,
+      "matches": 583,
+      "role": "Mid"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 52.9,
+      "laneAdvantage": -5.7,
+      "matches": 575,
+      "role": "Support"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 53.4,
+      "laneAdvantage": null,
+      "matches": 569,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 54.7,
+      "laneAdvantage": null,
+      "matches": 567,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 54.2,
+      "laneAdvantage": null,
+      "matches": 559,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 57.5,
+      "laneAdvantage": null,
+      "matches": 557,
+      "role": "Mid"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 55.6,
+      "laneAdvantage": -4.9,
+      "matches": 547,
+      "role": "Support"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 60.4,
+      "laneAdvantage": null,
+      "matches": 545,
+      "role": "Mid"
+    },
+    {
+      "hero": "Spectre",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 539,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 56.7,
+      "laneAdvantage": -1.8,
+      "matches": 510,
+      "role": "Support"
+    },
+    {
+      "hero": "Terrorblade",
+      "winrate": 51.3,
+      "laneAdvantage": null,
+      "matches": 505,
+      "role": "Carry"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 58.2,
+      "laneAdvantage": null,
+      "matches": 500,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ringmaster",
+      "winrate": 49.0,
+      "laneAdvantage": null,
+      "matches": 475,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Meepo",
+      "winrate": 62.5,
+      "laneAdvantage": null,
+      "matches": 464,
+      "role": "Mid"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 59.3,
+      "laneAdvantage": null,
+      "matches": 452,
+      "role": "Carry"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 54.1,
+      "laneAdvantage": null,
+      "matches": 451,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 52.2,
+      "laneAdvantage": null,
+      "matches": 448,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Phantom Assassin",
+      "winrate": 49.5,
+      "laneAdvantage": null,
+      "matches": 442,
+      "role": "Carry"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 50.5,
+      "laneAdvantage": null,
+      "matches": 440,
+      "role": "Mid"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 49.3,
+      "laneAdvantage": null,
+      "matches": 430,
+      "role": "Mid"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 55.1,
+      "laneAdvantage": -7.1,
+      "matches": 430,
+      "role": "Support"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 46.1,
+      "laneAdvantage": -7.7,
+      "matches": 425,
+      "role": "Support"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 55.1,
+      "laneAdvantage": null,
+      "matches": 423,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 49.0,
+      "laneAdvantage": -3.7,
+      "matches": 420,
+      "role": "Support"
+    },
+    {
+      "hero": "Medusa",
+      "winrate": 53.2,
+      "laneAdvantage": null,
+      "matches": 412,
+      "role": "Carry"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 52.9,
+      "laneAdvantage": -4.1,
+      "matches": 401,
+      "role": "Support"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 58.4,
+      "laneAdvantage": null,
+      "matches": 399,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Rubick",
+      "winrate": 49.4,
+      "laneAdvantage": null,
+      "matches": 397,
+      "role": "Mid"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 390,
+      "role": "Carry"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 51.8,
+      "laneAdvantage": null,
+      "matches": 386,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ringmaster",
+      "winrate": 55.4,
+      "laneAdvantage": -4.4,
+      "matches": 381,
+      "role": "Support"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 46.4,
+      "laneAdvantage": null,
+      "matches": 371,
+      "role": "Carry"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 48.9,
+      "laneAdvantage": -3.7,
+      "matches": 366,
+      "role": "Support"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 366,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Treant Protector",
+      "winrate": 53.2,
+      "laneAdvantage": null,
+      "matches": 361,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lich",
+      "winrate": 47.8,
+      "laneAdvantage": -4.3,
+      "matches": 358,
+      "role": "Support"
+    },
+    {
+      "hero": "Sand King",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 350,
+      "role": "Mid"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 55.2,
+      "laneAdvantage": null,
+      "matches": 348,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 348,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 47.3,
+      "laneAdvantage": null,
+      "matches": 338,
+      "role": "Mid"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 51.9,
+      "laneAdvantage": -1.7,
+      "matches": 337,
+      "role": "Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 52.7,
+      "laneAdvantage": null,
+      "matches": 336,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Demon",
+      "winrate": 51.5,
+      "laneAdvantage": null,
+      "matches": 332,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 52.0,
+      "laneAdvantage": -2.8,
+      "matches": 331,
+      "role": "Support"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 51.7,
+      "laneAdvantage": null,
+      "matches": 329,
+      "role": "Carry"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 325,
+      "role": "Carry"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 54.5,
+      "laneAdvantage": null,
+      "matches": 319,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 56.9,
+      "laneAdvantage": -6.3,
+      "matches": 318,
+      "role": "Support"
+    },
+    {
+      "hero": "Witch Doctor",
+      "winrate": 51.4,
+      "laneAdvantage": -2.4,
+      "matches": 317,
+      "role": "Support"
+    },
+    {
+      "hero": "Bloodseeker",
+      "winrate": 54.0,
+      "laneAdvantage": null,
+      "matches": 311,
+      "role": "Carry"
+    },
+    {
+      "hero": "Io",
+      "winrate": 51.9,
+      "laneAdvantage": null,
+      "matches": 310,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Arc Warden",
+      "winrate": 52.9,
+      "laneAdvantage": null,
+      "matches": 306,
+      "role": "Mid"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 51.0,
+      "laneAdvantage": -1.8,
+      "matches": 306,
+      "role": "Support"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 54.0,
+      "laneAdvantage": -2.5,
+      "matches": 302,
+      "role": "Support"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 54.4,
+      "laneAdvantage": null,
+      "matches": 296,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 291,
+      "role": "Mid"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 50.9,
+      "laneAdvantage": null,
+      "matches": 285,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 48.1,
+      "laneAdvantage": null,
+      "matches": 285,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Grimstroke",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 284,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 49.5,
+      "laneAdvantage": -4.4,
+      "matches": 275,
+      "role": "Support"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 50.2,
+      "laneAdvantage": null,
+      "matches": 271,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 53.8,
+      "laneAdvantage": null,
+      "matches": 266,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Demon",
+      "winrate": 55.9,
+      "laneAdvantage": -5.9,
+      "matches": 263,
+      "role": "Support"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 53.7,
+      "laneAdvantage": null,
+      "matches": 257,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 52.0,
+      "laneAdvantage": null,
+      "matches": 250,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Sven",
+      "winrate": 52.3,
+      "laneAdvantage": null,
+      "matches": 243,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 234,
+      "role": "Mid"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 57.5,
+      "laneAdvantage": -4.3,
+      "matches": 226,
+      "role": "Support"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 46.4,
+      "laneAdvantage": null,
+      "matches": 222,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 55.5,
+      "laneAdvantage": -6.0,
+      "matches": 220,
+      "role": "Support"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 52.8,
+      "laneAdvantage": -7.1,
+      "matches": 218,
+      "role": "Support"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 43.9,
+      "laneAdvantage": -4.2,
+      "matches": 214,
+      "role": "Support"
+    },
+    {
+      "hero": "Grimstroke",
+      "winrate": 61.2,
+      "laneAdvantage": -4.2,
+      "matches": 209,
+      "role": "Support"
+    },
+    {
+      "hero": "Disruptor",
+      "winrate": 49.8,
+      "laneAdvantage": -7.4,
+      "matches": 209,
+      "role": "Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 206,
+      "role": "Mid"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 57.7,
+      "laneAdvantage": null,
+      "matches": 201,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 54.0,
+      "laneAdvantage": -3.4,
+      "matches": 198,
+      "role": "Support"
+    },
+    {
+      "hero": "Naga Siren",
+      "winrate": 55.8,
+      "laneAdvantage": null,
+      "matches": 197,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 52.8,
+      "laneAdvantage": null,
+      "matches": 197,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 50.3,
+      "laneAdvantage": null,
+      "matches": 197,
+      "role": "Mid"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 45.9,
+      "laneAdvantage": -4.4,
+      "matches": 196,
+      "role": "Support"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 57.8,
+      "laneAdvantage": null,
+      "matches": 192,
+      "role": "Carry"
+    },
+    {
+      "hero": "Meepo",
+      "winrate": 59.7,
+      "laneAdvantage": null,
+      "matches": 191,
+      "role": "Carry"
+    },
+    {
+      "hero": "Warlock",
+      "winrate": 45.8,
+      "laneAdvantage": -2.3,
+      "matches": 190,
+      "role": "Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 50.3,
+      "laneAdvantage": null,
+      "matches": 189,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 54.5,
+      "laneAdvantage": 1.4,
+      "matches": 187,
+      "role": "Support"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 56.1,
+      "laneAdvantage": null,
+      "matches": 187,
+      "role": "Carry"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 52.1,
+      "laneAdvantage": -3.6,
+      "matches": 186,
+      "role": "Support"
+    },
+    {
+      "hero": "Primal Beast",
+      "winrate": 50.5,
+      "laneAdvantage": null,
+      "matches": 184,
+      "role": "Mid"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 47.8,
+      "laneAdvantage": null,
+      "matches": 182,
+      "role": "Mid"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 53.4,
+      "laneAdvantage": null,
+      "matches": 178,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 54.2,
+      "laneAdvantage": null,
+      "matches": 177,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dragon Knight",
+      "winrate": 40.3,
+      "laneAdvantage": null,
+      "matches": 176,
+      "role": "Carry"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 53.7,
+      "laneAdvantage": null,
+      "matches": 175,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 54.1,
+      "laneAdvantage": -5.5,
+      "matches": 170,
+      "role": "Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 167,
+      "role": "Mid"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 165,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 61.6,
+      "laneAdvantage": null,
+      "matches": 164,
+      "role": "Mid"
+    },
+    {
+      "hero": "Skywrath Mage",
+      "winrate": 56.2,
+      "laneAdvantage": null,
+      "matches": 162,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 47.5,
+      "laneAdvantage": null,
+      "matches": 162,
+      "role": "Mid"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 49.7,
+      "laneAdvantage": null,
+      "matches": 161,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 47.8,
+      "laneAdvantage": -2.9,
+      "matches": 159,
+      "role": "Support"
+    },
+    {
+      "hero": "Phoenix",
+      "winrate": 61.4,
+      "laneAdvantage": null,
+      "matches": 158,
+      "role": "Mid"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 58.6,
+      "laneAdvantage": null,
+      "matches": 157,
+      "role": "Mid"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 54.3,
+      "laneAdvantage": null,
+      "matches": 153,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 58.9,
+      "laneAdvantage": null,
+      "matches": 151,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 59.6,
+      "laneAdvantage": null,
+      "matches": 151,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 55.9,
+      "laneAdvantage": -2.5,
+      "matches": 145,
+      "role": "Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 53.5,
+      "laneAdvantage": null,
+      "matches": 144,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Broodmother",
+      "winrate": 61.1,
+      "laneAdvantage": null,
+      "matches": 144,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 52.8,
+      "laneAdvantage": null,
+      "matches": 144,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 48.6,
+      "laneAdvantage": -3.0,
+      "matches": 142,
+      "role": "Support"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 43.3,
+      "laneAdvantage": null,
+      "matches": 141,
+      "role": "Mid"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 49.3,
+      "laneAdvantage": -4.4,
+      "matches": 138,
+      "role": "Support"
+    },
+    {
+      "hero": "Troll Warlord",
+      "winrate": 56.5,
+      "laneAdvantage": null,
+      "matches": 138,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 44.9,
+      "laneAdvantage": -1.5,
+      "matches": 138,
+      "role": "Support"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 49.6,
+      "laneAdvantage": null,
+      "matches": 135,
+      "role": "Carry"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 134,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 60.5,
+      "laneAdvantage": -0.9,
+      "matches": 134,
+      "role": "Support"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 43.9,
+      "laneAdvantage": -7.2,
+      "matches": 130,
+      "role": "Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 64.1,
+      "laneAdvantage": null,
+      "matches": 128,
+      "role": "Carry"
+    },
+    {
+      "hero": "Alchemist",
+      "winrate": 47.2,
+      "laneAdvantage": null,
+      "matches": 125,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 55.3,
+      "laneAdvantage": null,
+      "matches": 123,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dragon Knight",
+      "winrate": 47.0,
+      "laneAdvantage": null,
+      "matches": 115,
+      "role": "Mid"
+    },
+    {
+      "hero": "Windranger",
+      "winrate": 42.1,
+      "laneAdvantage": null,
+      "matches": 114,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Chen",
+      "winrate": 59.1,
+      "laneAdvantage": null,
+      "matches": 110,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Templar Assassin",
+      "winrate": 51.8,
+      "laneAdvantage": null,
+      "matches": 110,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 60.2,
+      "laneAdvantage": null,
+      "matches": 108,
+      "role": "Carry"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 47.2,
+      "laneAdvantage": -1.9,
+      "matches": 108,
+      "role": "Support"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 49.5,
+      "laneAdvantage": -7.6,
+      "matches": 107,
+      "role": "Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 51.9,
+      "laneAdvantage": -1.9,
+      "matches": 106,
+      "role": "Support"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 44.5,
+      "laneAdvantage": null,
+      "matches": 101,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tiny",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 101,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 53.0,
+      "laneAdvantage": null,
+      "matches": 100,
+      "role": "Mid"
+    },
+    {
+      "hero": "Io",
+      "winrate": 59.6,
+      "laneAdvantage": -0.3,
+      "matches": 99,
+      "role": "Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 51.0,
+      "laneAdvantage": null,
+      "matches": 98,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 64.3,
+      "laneAdvantage": null,
+      "matches": 98,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 36.5,
+      "laneAdvantage": null,
+      "matches": 96,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Earth Spirit",
+      "winrate": 52.7,
+      "laneAdvantage": null,
+      "matches": 93,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 60.9,
+      "laneAdvantage": null,
+      "matches": 92,
+      "role": "Mid"
+    },
+    {
+      "hero": "Nature's Prophet",
+      "winrate": 46.7,
+      "laneAdvantage": null,
+      "matches": 90,
+      "role": "Mid"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 56.7,
+      "laneAdvantage": null,
+      "matches": 90,
+      "role": "Carry"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 49.4,
+      "laneAdvantage": null,
+      "matches": 89,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Nyx Assassin",
+      "winrate": 56.5,
+      "laneAdvantage": null,
+      "matches": 85,
+      "role": "Mid"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 50.6,
+      "laneAdvantage": null,
+      "matches": 85,
+      "role": "Mid"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 48.2,
+      "laneAdvantage": -3.4,
+      "matches": 85,
+      "role": "Support"
+    },
+    {
+      "hero": "Keeper of the Light",
+      "winrate": 54.3,
+      "laneAdvantage": null,
+      "matches": 81,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Treant Protector",
+      "winrate": 54.3,
+      "laneAdvantage": -2.1,
+      "matches": 81,
+      "role": "Support"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 58.8,
+      "laneAdvantage": null,
+      "matches": 80,
+      "role": "Mid"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 59.5,
+      "laneAdvantage": null,
+      "matches": 79,
+      "role": "Mid"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 52.6,
+      "laneAdvantage": -6.1,
+      "matches": 76,
+      "role": "Support"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 67.1,
+      "laneAdvantage": null,
+      "matches": 76,
+      "role": "Mid"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 45.8,
+      "laneAdvantage": -4.7,
+      "matches": 72,
+      "role": "Support"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 52.1,
+      "laneAdvantage": null,
+      "matches": 71,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 47.1,
+      "laneAdvantage": null,
+      "matches": 70,
+      "role": "Carry"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 71.0,
+      "laneAdvantage": 0.4,
+      "matches": 69,
+      "role": "Support"
+    },
+    {
+      "hero": "Earthshaker",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 66,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Timbersaw",
+      "winrate": 44.6,
+      "laneAdvantage": null,
+      "matches": 65,
+      "role": "Mid"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 46.0,
+      "laneAdvantage": null,
+      "matches": 63,
+      "role": "Mid"
+    },
+    {
+      "hero": "Spirit Breaker",
+      "winrate": 50.8,
+      "laneAdvantage": null,
+      "matches": 63,
+      "role": "Mid"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 63,
+      "role": "Mid"
+    },
+    {
+      "hero": "Winter Wyvern",
+      "winrate": 62.9,
+      "laneAdvantage": null,
+      "matches": 62,
+      "role": "Mid"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 53.2,
+      "laneAdvantage": -4.3,
+      "matches": 62,
+      "role": "Support"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 50.8,
+      "laneAdvantage": null,
+      "matches": 61,
+      "role": "Mid"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 55.9,
+      "laneAdvantage": null,
+      "matches": 59,
+      "role": "Carry"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 46.5,
+      "laneAdvantage": null,
+      "matches": 58,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 47.4,
+      "laneAdvantage": null,
+      "matches": 57,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Silencer",
+      "winrate": 46.4,
+      "laneAdvantage": null,
+      "matches": 56,
+      "role": "Mid"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 52.7,
+      "laneAdvantage": null,
+      "matches": 55,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 52.7,
+      "laneAdvantage": -6.3,
+      "matches": 55,
+      "role": "Support"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 58.2,
+      "laneAdvantage": -0.8,
+      "matches": 55,
+      "role": "Support"
+    },
+    {
+      "hero": "Pugna",
+      "winrate": 51.9,
+      "laneAdvantage": null,
+      "matches": 54,
+      "role": "Mid"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 53.7,
+      "laneAdvantage": -5.2,
+      "matches": 54,
+      "role": "Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 45.1,
+      "laneAdvantage": null,
+      "matches": 51,
+      "role": "Mid"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 39.2,
+      "laneAdvantage": -6.0,
+      "matches": 51,
+      "role": "Support"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 52.9,
+      "laneAdvantage": -2.1,
+      "matches": 51,
+      "role": "Support"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 40.0,
+      "laneAdvantage": -8.8,
+      "matches": 50,
+      "role": "Support"
+    },
+    {
+      "hero": "Pudge",
+      "winrate": 42.0,
+      "laneAdvantage": null,
+      "matches": 50,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lina",
+      "winrate": 45.8,
+      "laneAdvantage": null,
+      "matches": 48,
+      "role": "Carry"
+    },
+    {
+      "hero": "Abaddon",
+      "winrate": 48.9,
+      "laneAdvantage": null,
+      "matches": 47,
+      "role": "Carry"
+    },
+    {
+      "hero": "Mirana",
+      "winrate": 51.1,
+      "laneAdvantage": null,
+      "matches": 47,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tusk",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 46,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ogre Magi",
+      "winrate": 45.6,
+      "laneAdvantage": null,
+      "matches": 46,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 64.4,
+      "laneAdvantage": null,
+      "matches": 45,
+      "role": "Carry"
+    },
+    {
+      "hero": "Broodmother",
+      "winrate": 43.2,
+      "laneAdvantage": null,
+      "matches": 44,
+      "role": "Carry"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 51.2,
+      "laneAdvantage": -2.0,
+      "matches": 43,
+      "role": "Support"
+    },
+    {
+      "hero": "Slark",
+      "winrate": 35.7,
+      "laneAdvantage": null,
+      "matches": 42,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 58.5,
+      "laneAdvantage": null,
+      "matches": 41,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 43.9,
+      "laneAdvantage": -3.8,
+      "matches": 41,
+      "role": "Support"
+    },
+    {
+      "hero": "Doom",
+      "winrate": 47.5,
+      "laneAdvantage": null,
+      "matches": 40,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Muerta",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 39,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Snapfire",
+      "winrate": 41.0,
+      "laneAdvantage": null,
+      "matches": 39,
+      "role": "Mid"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 51.3,
+      "laneAdvantage": null,
+      "matches": 39,
+      "role": "Carry"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 38.5,
+      "laneAdvantage": -2.8,
+      "matches": 39,
+      "role": "Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 51.4,
+      "laneAdvantage": -1.2,
+      "matches": 37,
+      "role": "Support"
+    },
+    {
+      "hero": "Vengeful Spirit",
+      "winrate": 43.2,
+      "laneAdvantage": null,
+      "matches": 37,
+      "role": "Mid"
+    },
+    {
+      "hero": "Io",
+      "winrate": 75.0,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Mid"
+    },
+    {
+      "hero": "Gyrocopter",
+      "winrate": 36.1,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Weaver",
+      "winrate": 69.4,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Mid"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 30.6,
+      "laneAdvantage": null,
+      "matches": 36,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 68.6,
+      "laneAdvantage": -5.8,
+      "matches": 35,
+      "role": "Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 45.7,
+      "laneAdvantage": null,
+      "matches": 35,
+      "role": "Carry"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 35,
+      "role": "Mid"
+    },
+    {
+      "hero": "Huskar",
+      "winrate": 41.2,
+      "laneAdvantage": 3.5,
+      "matches": 34,
+      "role": "Support"
+    },
+    {
+      "hero": "Marci",
+      "winrate": 48.5,
+      "laneAdvantage": null,
+      "matches": 33,
+      "role": "Carry"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 33.3,
+      "laneAdvantage": -5.6,
+      "matches": 33,
+      "role": "Support"
+    },
+    {
+      "hero": "Bristleback",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Mid"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 53.1,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Queen of Pain",
+      "winrate": 56.3,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Sniper",
+      "winrate": 46.9,
+      "laneAdvantage": null,
+      "matches": 32,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Techies",
+      "winrate": 54.8,
+      "laneAdvantage": null,
+      "matches": 31,
+      "role": "Mid"
+    },
+    {
+      "hero": "Chen",
+      "winrate": 29.0,
+      "laneAdvantage": -4.6,
+      "matches": 31,
+      "role": "Support"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 58.1,
+      "laneAdvantage": null,
+      "matches": 31,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bloodseeker",
+      "winrate": 48.4,
+      "laneAdvantage": null,
+      "matches": 31,
+      "role": "Mid"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 46.7,
+      "laneAdvantage": -9.4,
+      "matches": 30,
+      "role": "Support"
+    },
+    {
+      "hero": "Dark Willow",
+      "winrate": 53.3,
+      "laneAdvantage": null,
+      "matches": 30,
+      "role": "Mid"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 63.3,
+      "laneAdvantage": null,
+      "matches": 30,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lycan",
+      "winrate": 48.3,
+      "laneAdvantage": null,
+      "matches": 29,
+      "role": "Mid"
+    },
+    {
+      "hero": "Arc Warden",
+      "winrate": 37.0,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Carry"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 25.9,
+      "laneAdvantage": null,
+      "matches": 27,
+      "role": "Carry"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 50.0,
+      "laneAdvantage": -1.5,
+      "matches": 26,
+      "role": "Support"
+    },
+    {
+      "hero": "Tinker",
+      "winrate": 34.6,
+      "laneAdvantage": null,
+      "matches": 26,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Morphling",
+      "winrate": 52.0,
+      "laneAdvantage": null,
+      "matches": 25,
+      "role": "Mid"
+    },
+    {
+      "hero": "Death Prophet",
+      "winrate": 58.3,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 24,
+      "role": "Mid"
+    },
+    {
+      "hero": "Storm Spirit",
+      "winrate": 47.8,
+      "laneAdvantage": null,
+      "matches": 23,
+      "role": "Carry"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 22,
+      "role": "Mid"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 52.4,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Mid"
+    },
+    {
+      "hero": "Monkey King",
+      "winrate": 28.6,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Visage",
+      "winrate": 71.4,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 47.6,
+      "laneAdvantage": null,
+      "matches": 21,
+      "role": "Mid"
+    },
+    {
+      "hero": "Largo",
+      "winrate": 55.0,
+      "laneAdvantage": null,
+      "matches": 20,
+      "role": "Mid"
+    },
+    {
+      "hero": "Undying",
+      "winrate": 63.2,
+      "laneAdvantage": null,
+      "matches": 19,
+      "role": "Mid"
+    },
+    {
+      "hero": "Jakiro",
+      "winrate": 47.4,
+      "laneAdvantage": null,
+      "matches": 19,
+      "role": "Mid"
+    },
+    {
+      "hero": "Viper",
+      "winrate": 47.4,
+      "laneAdvantage": 2.9,
+      "matches": 19,
+      "role": "Support"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 57.9,
+      "laneAdvantage": null,
+      "matches": 19,
+      "role": "Mid"
+    },
+    {
+      "hero": "Axe",
+      "winrate": 63.2,
+      "laneAdvantage": null,
+      "matches": 19,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 18,
+      "role": "Mid"
+    },
+    {
+      "hero": "Bounty Hunter",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 18,
+      "role": "Mid"
+    },
+    {
+      "hero": "Leshrac",
+      "winrate": 58.8,
+      "laneAdvantage": null,
+      "matches": 17,
+      "role": "Carry"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 76.5,
+      "laneAdvantage": null,
+      "matches": 17,
+      "role": "Mid"
+    },
+    {
+      "hero": "Void Spirit",
+      "winrate": 68.8,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 43.8,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Drow Ranger",
+      "winrate": 43.8,
+      "laneAdvantage": null,
+      "matches": 16,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 66.7,
+      "laneAdvantage": -1.1,
+      "matches": 15,
+      "role": "Support"
+    },
+    {
+      "hero": "Ember Spirit",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Carry"
+    },
+    {
+      "hero": "Bane",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 15,
+      "role": "Mid"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 64.3,
+      "laneAdvantage": -6.8,
+      "matches": 14,
+      "role": "Support"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 64.3,
+      "laneAdvantage": null,
+      "matches": 14,
+      "role": "Carry"
+    },
+    {
+      "hero": "Enchantress",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 14,
+      "role": "Mid"
+    },
+    {
+      "hero": "Clinkz",
+      "winrate": 21.4,
+      "laneAdvantage": -11.3,
+      "matches": 14,
+      "role": "Support"
+    },
+    {
+      "hero": "Zeus",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 14,
+      "role": "Carry"
+    },
+    {
+      "hero": "Dawnbreaker",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Carry"
+    },
+    {
+      "hero": "Grimstroke",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Mid"
+    },
+    {
+      "hero": "Invoker",
+      "winrate": 53.9,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Carry"
+    },
+    {
+      "hero": "Venomancer",
+      "winrate": 38.5,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Carry"
+    },
+    {
+      "hero": "Enigma",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Mid"
+    },
+    {
+      "hero": "Riki",
+      "winrate": 46.1,
+      "laneAdvantage": null,
+      "matches": 13,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 30.8,
+      "laneAdvantage": -5.7,
+      "matches": 13,
+      "role": "Support"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 25.0,
+      "laneAdvantage": -11.5,
+      "matches": 12,
+      "role": "Support"
+    },
+    {
+      "hero": "Hoodwink",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 12,
+      "role": "Carry"
+    },
+    {
+      "hero": "Outworld Destroyer",
+      "winrate": 66.7,
+      "laneAdvantage": -5.9,
+      "matches": 12,
+      "role": "Support"
+    },
+    {
+      "hero": "Slardar",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 12,
+      "role": "Carry"
+    },
+    {
+      "hero": "Pangolier",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Carry"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Carry"
+    },
+    {
+      "hero": "Medusa",
+      "winrate": 45.5,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Mid"
+    },
+    {
+      "hero": "Ancient Apparition",
+      "winrate": 45.5,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Mid"
+    },
+    {
+      "hero": "Batrider",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Carry"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 27.3,
+      "laneAdvantage": -3.3,
+      "matches": 11,
+      "role": "Support"
+    },
+    {
+      "hero": "Night Stalker",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Carry"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 45.5,
+      "laneAdvantage": -6.3,
+      "matches": 11,
+      "role": "Support"
+    },
+    {
+      "hero": "Crystal Maiden",
+      "winrate": 63.6,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Mid"
+    },
+    {
+      "hero": "Anti-Mage",
+      "winrate": 36.4,
+      "laneAdvantage": null,
+      "matches": 11,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 40.0,
+      "laneAdvantage": -6.1,
+      "matches": 10,
+      "role": "Support"
+    },
+    {
+      "hero": "Clockwerk",
+      "winrate": 40.0,
+      "laneAdvantage": null,
+      "matches": 10,
+      "role": "Mid"
+    },
+    {
+      "hero": "Legion Commander",
+      "winrate": 22.2,
+      "laneAdvantage": -3.4,
+      "matches": 9,
+      "role": "Support"
+    },
+    {
+      "hero": "Dazzle",
+      "winrate": 55.6,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Mid"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Faceless Void",
+      "winrate": 44.4,
+      "laneAdvantage": -6.9,
+      "matches": 9,
+      "role": "Support"
+    },
+    {
+      "hero": "Beastmaster",
+      "winrate": 44.4,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Lion",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 9,
+      "role": "Carry"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 55.6,
+      "laneAdvantage": -4.7,
+      "matches": 9,
+      "role": "Support"
+    },
+    {
+      "hero": "Magnus",
+      "winrate": 25.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Carry"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 37.5,
+      "laneAdvantage": -12.6,
+      "matches": 8,
+      "role": "Support"
+    },
+    {
+      "hero": "Dark Seer",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Mid"
+    },
+    {
+      "hero": "Luna",
+      "winrate": 25.0,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Shaman",
+      "winrate": 62.5,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Mid"
+    },
+    {
+      "hero": "Kunkka",
+      "winrate": 37.5,
+      "laneAdvantage": null,
+      "matches": 8,
+      "role": "Carry"
+    },
+    {
+      "hero": "Mars",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Underlord",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Mid"
+    },
+    {
+      "hero": "Chaos Knight",
+      "winrate": 57.1,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lycan",
+      "winrate": 14.3,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Carry"
+    },
+    {
+      "hero": "Lifestealer",
+      "winrate": 42.9,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Necrophos",
+      "winrate": 42.9,
+      "laneAdvantage": 0.3,
+      "matches": 7,
+      "role": "Support"
+    },
+    {
+      "hero": "Razor",
+      "winrate": 28.6,
+      "laneAdvantage": null,
+      "matches": 7,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Puck",
+      "winrate": 57.1,
+      "laneAdvantage": -7.4,
+      "matches": 7,
+      "role": "Support"
+    },
+    {
+      "hero": "Kez",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Arc Warden",
+      "winrate": 33.3,
+      "laneAdvantage": -2.5,
+      "matches": 6,
+      "role": "Support"
+    },
+    {
+      "hero": "Oracle",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    },
+    {
+      "hero": "Elder Titan",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    },
+    {
+      "hero": "Lone Druid",
+      "winrate": 50.0,
+      "laneAdvantage": -2.8,
+      "matches": 6,
+      "role": "Support"
+    },
+    {
+      "hero": "Brewmaster",
+      "winrate": 66.7,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Hard Support"
+    },
+    {
+      "hero": "Ursa",
+      "winrate": 33.3,
+      "laneAdvantage": -11.4,
+      "matches": 6,
+      "role": "Support"
+    },
+    {
+      "hero": "Omniknight",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    },
+    {
+      "hero": "Wraith King",
+      "winrate": 50.0,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Mid"
+    },
+    {
+      "hero": "Shadow Fiend",
+      "winrate": 33.3,
+      "laneAdvantage": null,
+      "matches": 6,
+      "role": "Hard Support"
+    }
+  ],
+  "hero": "Tidehunter",
+  "sourceRoleKey": "3",
+  "sourceRole": "Offlane",
+  "source": "dptoutput.txt"
+}

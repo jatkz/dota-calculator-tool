@@ -1,0 +1,17 @@
+{
+  "libraryOutput": "/home/jaredt/projects/dota-calculator-tool/dpt_matchups_synergies.json",
+  "filesImported": 1,
+  "filesFailed": 0,
+  "dryRun": false,
+  "imports": [
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tidehunter_Offlane.html",
+      "hero": "Tidehunter",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 479,
+      "synergies": 359
+    }
+  ],
+  "failures": []
+}

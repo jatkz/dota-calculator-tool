@@ -1,0 +1,212 @@
+<!DOCTYPE html><html><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="ad.size" content="width=728,height=90">
+    <title>Visit Denver: 728x90</title>
+    <link rel="stylesheet" href="css-js/style.css">
+    
+    <!-- clickTag url-->
+    <script type="text/javascript">
+      var clickTag = "https://www.denver.org";
+    </script>
+<script type="text/javascript">
+    
+  (function() {
+    var MAX_URL_PARAM_LENGTH = 34;
+    var CLICK_X_URL_KEY = 'nx';
+    var CLICK_Y_URL_KEY = 'ny';
+    var CREATIVE_DIMENSIONS_KEY = 'dim';
+    var AD_URL_PARAM = '&adurl=';
+
+    var relegateNavigation = '';
+    var urlParamMap = {};
+
+    var isNewtonTokenSet = false;
+    var isTurtleXAdClick = false;
+    var reportingIds = {};
+
+    urlParamMap[CLICK_X_URL_KEY] = null;
+    urlParamMap[CLICK_Y_URL_KEY] = null;
+    urlParamMap[CREATIVE_DIMENSIONS_KEY] = null;
+
+    var handleClickTagMessage = function(e) {
+      try {
+        var eventData = JSON.parse(e.data);
+      } catch (err) {
+        return;
+      }
+      if (eventData.isInitClickTag) {
+        if (eventData.clickTags) {
+          for (var i = 0; i < eventData.clickTags.length; i++) {
+            var clkTag = eventData.clickTags[i];
+            window[clkTag.name] = clkTag.url;
+
+            if (clkTag.eTldPlusOne) {
+              eTldPlusOnes[clkTag.url] = clkTag.eTldPlusOne;
+            }
+            if (clkTag.reportingId) {
+              reportingIds[clkTag.url] = clkTag.reportingId;
+            }
+          }
+        } else if (eventData.clickTag) {
+          window.clickTag = eventData.clickTag;
+        }
+        relegateNavigation = eventData.relegateNavigation;
+      }
+      if (isNewtonEnabled(eventData) && !isNewtonTokenSet) {
+        var newtonOt2Token = eventData.newtonOt2Token;
+        enableAttributionReportingApi(newtonOt2Token);
+      }
+      if (eventData.isTurtleXAdClick) {
+        isTurtleXAdClick = true;
+      }
+    };
+
+    var isNewtonEnabled = function(eventData) {
+      return 'newtonOt2Token' in eventData;
+    }
+
+    var enableAttributionReportingApi = function(originTrialToken) {
+      if (/Chrome/.test(window.navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.httpEquiv = 'origin-trial';
+        meta.content = String(originTrialToken);
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        isNewtonTokenSet = true;
+      }
+    };
+
+    var storeClickCoordinates = function(e) {
+      urlParamMap[CLICK_X_URL_KEY] = Math.round(e.clientX);
+      urlParamMap[CLICK_Y_URL_KEY] = Math.round(e.clientY);
+    };
+
+    var getCreativeDimensions = function() {
+      return window.innerWidth + 'x' + window.innerHeight;
+    }
+
+    var getExitClickParams = function(e) {
+      urlParamMap[CREATIVE_DIMENSIONS_KEY] = getCreativeDimensions();
+
+      var exitParams = '';
+      for (var key in urlParamMap) {
+        exitParams += '&' + key + '=';
+        if (urlParamMap[key] !== null) {
+          exitParams += urlParamMap[key];
+        }
+      }
+      return exitParams;
+    }
+
+    var appendExitClickParams = function(url) {
+      var adUrlIndex = url.toLowerCase().indexOf(AD_URL_PARAM);
+      var paramsToBeAdded = getExitClickParams();
+      if (adUrlIndex > -1 && paramsToBeAdded.length <= MAX_URL_PARAM_LENGTH) {
+        url = url.substr(0, adUrlIndex) + paramsToBeAdded +
+          url.substr(adUrlIndex);
+      };
+      return url;
+    };
+
+    if (open.call) {
+      window.open = function(open) {
+        return function(url, name, features) {
+          if (isTurtleXAdClick && !!reportingIds[url]) {
+            var message = {
+              'reportingId': reportingIds[url],
+              'clickX': urlParamMap[CLICK_X_URL_KEY],
+              'clickY': urlParamMap[CLICK_Y_URL_KEY],
+              'creativeDims': getCreativeDimensions()
+              };
+            parent.postMessage(JSON.stringify(message), '*');
+          }
+          url = appendExitClickParams(url);
+          if (relegateNavigation === 'parent') {
+            var message = {'clickTag': url, 'isPostClickTag': true};
+            parent.postMessage(JSON.stringify(message), '*');
+          } else {
+            var args = [url, name];
+            var windowFeatures = '';
+
+            if (features) {
+              windowFeatures = windowFeatures.concat(features);
+            }
+            if (isNewtonTokenSet &&
+                !!document.featurePolicy?.allowedFeatures().includes(
+                  'attribution-reporting')) {
+              if (features) {
+                if (!features.includes('attributionsrc')) {
+                  windowFeatures = windowFeatures.concat(features, ', attributionsrc');
+                }
+              } else {
+                windowFeatures = windowFeatures.concat('attributionsrc');
+              }
+            }
+
+            if (windowFeatures) {
+              args.push(windowFeatures);
+            }
+            open.apply(window,args);
+          }
+        };
+      }(window.open);
+    }
+
+    if (window.addEventListener) {
+      window.addEventListener(
+          'message', handleClickTagMessage, false);
+      window.addEventListener('mousedown', storeClickCoordinates, true);
+    } else {
+      window.attachEvent('onmessage', handleClickTagMessage);
+    }
+  })();
+    
+  </script></head>
+<body>
+    <div id="ad">
+        <div id="banner" style="visibility: visible;">
+
+          <!-- ============== Frame One ============= -->
+          <div id="frame_one" style="translate: none; rotate: none; scale: none; transform: translate(-100%, 0%) rotate(0.02865deg) rotateY(0.02865deg) rotateX(0.02865deg);">
+            <img src="images/bg1.jpg" alt="" class="bg1" style="translate: none; rotate: none; scale: none; transform-origin: 364px 45px; transform: rotate(0.00573deg) rotateY(0.00573deg) rotateX(0.00573deg);">
+            <img src="images/txt1a.png" alt="" class="txt1a txt1" style="translate: none; rotate: none; scale: none; transform: translate(0px, 0px);">
+            <img src="images/txt1b.png" alt="" class="txt1b txt1" style="translate: none; rotate: none; scale: none; transform: translate(0px, 0px);">
+          </div>
+
+          <!-- ============== Frame Two ============= -->
+          <div id="frame_two" style="translate: none; rotate: none; scale: none; transform: rotate(0.02865deg) rotateY(0.02865deg) rotateX(0.02865deg);">
+            <img src="images/bg2.jpg" alt="" class="bg2" style="translate: none; rotate: none; scale: none; transform: rotate(0.00573deg) rotateY(0.00573deg) rotateX(0.00573deg);">
+            <img src="images/txt2a.png" alt="" class="txt2a txt2" style="translate: none; rotate: none; scale: none; transform: rotate(0.0057deg) rotateY(0.00573deg) rotateX(0.00573deg); opacity: 0;">
+            <img src="images/txt2b.png" alt="" class="txt2b txt2" style="translate: none; rotate: none; scale: none; transform: rotate(0.0057deg) rotateY(0.00573deg) rotateX(0.00573deg); opacity: 0;">
+          </div>
+
+          <!-- ============== Frame Three ============= -->
+          <div id="frame_three">
+            <div class="txt3_wrap">
+              <div class="txt3" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                <img src="images/txt3.png" alt="" style="translate: none; rotate: none; scale: none; transform: translate(0px, -3968px);">
+              </div>
+            </div>
+            <div class="logo">
+              <img src="images/logo.png" alt="" style="translate: none; rotate: none; scale: none; transform: translate(0px, -6072px);">
+            </div>
+            <div class="cta_wrap">
+              <div class="cta" style="background: rgb(255, 201, 227); translate: none; rotate: none; scale: none; transform: rotate(0.0057deg) rotateY(0.00573deg) rotateX(0.00573deg);"></div>              
+            </div>
+            <img src="images/cta_text.png" alt="" class="cta_text" style="translate: none; rotate: none; scale: none; transform: translate(0px, 0px); opacity: 1; visibility: inherit;">
+            <img src="images/hover.png" alt="" class="hover" style="opacity: 0; visibility: hidden;">
+          </div>
+          
+            
+
+        </div><!-- // End Banner Div -->
+
+        <!-- Fallback & clickTag -->
+        <a href="javascript:void(0);" onclick="window.open(window.clickTag)" class="clicktag" id="clicktag"></a>
+        
+    </div> <!-- // End Ad Div -->
+
+    <script src="https://s0.2mdn.net/ads/studio/cached_libs/gsap_3.11.5_min.js"></script>
+    <script src="css-js/custom.js"></script>
+
+</body></html>

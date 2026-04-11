@@ -1,6 +1,6 @@
 {
   "libraryOutput": "/home/jaredt/projects/dota-calculator-tool/dpt_matchups_synergies.json",
-  "filesImported": 1,
+  "filesImported": 277,
   "filesFailed": 0,
   "dryRun": false,
   "imports": [
@@ -11,6 +11,2214 @@
       "role": "Offlane",
       "matchups": 479,
       "synergies": 359
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nyx_Assassin_Mid.html",
+      "hero": "Nyx Assassin",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 233,
+      "synergies": 188
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nyx_Assassin_Support.html",
+      "hero": "Nyx Assassin",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 398,
+      "synergies": 308
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Witch_Doctor_Support.html",
+      "hero": "Witch Doctor",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 405,
+      "synergies": 318
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Carry.html",
+      "hero": "Alchemist",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 441,
+      "synergies": 401
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Mid.html",
+      "hero": "Alchemist",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 280,
+      "synergies": 215
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Offlane.html",
+      "hero": "Alchemist",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 294,
+      "synergies": 256
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Support.html",
+      "hero": "Alchemist",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 262,
+      "synergies": 196
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Carry (1).html",
+      "hero": "Alchemist",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 443,
+      "synergies": 403
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Mid (1).html",
+      "hero": "Alchemist",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 282,
+      "synergies": 216
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Offlane (1).html",
+      "hero": "Alchemist",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 294,
+      "synergies": 259
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Support (1).html",
+      "hero": "Alchemist",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 263,
+      "synergies": 198
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Hard_Support.html",
+      "hero": "Alchemist",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 254,
+      "synergies": 200
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pudge_Mid.html",
+      "hero": "Pudge",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 313,
+      "synergies": 251
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pudge_Offlane.html",
+      "hero": "Pudge",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 388,
+      "synergies": 305
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pudge_Support.html",
+      "hero": "Pudge",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 454,
+      "synergies": 357
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pudge_Hard_Support.html",
+      "hero": "Pudge",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 434,
+      "synergies": 349
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Spirit_Breaker_Offlane.html",
+      "hero": "Spirit Breaker",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 335,
+      "synergies": 264
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Spirit_Breaker_Support.html",
+      "hero": "Spirit Breaker",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 472,
+      "synergies": 369
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Spirit_Breaker_Hard_Support.html",
+      "hero": "Spirit Breaker",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 325,
+      "synergies": 268
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tidehunter_Offlane (1).html",
+      "hero": "Tidehunter",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 481,
+      "synergies": 362
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Carry (2).html",
+      "hero": "Alchemist",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 443,
+      "synergies": 403
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Mid (2).html",
+      "hero": "Alchemist",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 282,
+      "synergies": 216
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Offlane (2).html",
+      "hero": "Alchemist",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 294,
+      "synergies": 259
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Support (2).html",
+      "hero": "Alchemist",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 263,
+      "synergies": 198
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Alchemist_Hard_Support (1).html",
+      "hero": "Alchemist",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 254,
+      "synergies": 200
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phoenix_Mid.html",
+      "hero": "Phoenix",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 271,
+      "synergies": 217
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phoenix_Offlane.html",
+      "hero": "Phoenix",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 332,
+      "synergies": 262
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phoenix_Support.html",
+      "hero": "Phoenix",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 366,
+      "synergies": 282
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phoenix_Hard_Support.html",
+      "hero": "Phoenix",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 369,
+      "synergies": 291
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lifestealer_Carry.html",
+      "hero": "Lifestealer",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 481,
+      "synergies": 408
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tiny_Carry.html",
+      "hero": "Tiny",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 335,
+      "synergies": 288
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tiny_Mid.html",
+      "hero": "Tiny",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 329,
+      "synergies": 256
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tiny_Offlane.html",
+      "hero": "Tiny",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 283,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tiny_Support.html",
+      "hero": "Tiny",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 373,
+      "synergies": 289
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tiny_Hard_Support.html",
+      "hero": "Tiny",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 233,
+      "synergies": 177
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Mars_Offlane.html",
+      "hero": "Mars",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 461,
+      "synergies": 353
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tusk_Offlane.html",
+      "hero": "Tusk",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 192,
+      "synergies": 155
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tusk_Support.html",
+      "hero": "Tusk",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 413,
+      "synergies": 320
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tusk_Hard_Support.html",
+      "hero": "Tusk",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 390,
+      "synergies": 307
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Doom_Carry.html",
+      "hero": "Doom",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 295,
+      "synergies": 249
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Doom_Offlane.html",
+      "hero": "Doom",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 469,
+      "synergies": 356
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Doom_Support.html",
+      "hero": "Doom",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 216,
+      "synergies": 175
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Axe_Offlane.html",
+      "hero": "Axe",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 442,
+      "synergies": 352
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earthshaker_Mid.html",
+      "hero": "Earthshaker",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 331,
+      "synergies": 253
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earthshaker_Offlane.html",
+      "hero": "Earthshaker",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 330,
+      "synergies": 273
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earthshaker_Support.html",
+      "hero": "Earthshaker",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 382,
+      "synergies": 309
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earthshaker_Hard_Support.html",
+      "hero": "Earthshaker",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 233,
+      "synergies": 181
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Legion_Commander_Offlane.html",
+      "hero": "Legion Commander",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 456,
+      "synergies": 350
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dawnbreaker_Mid.html",
+      "hero": "Dawnbreaker",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 207,
+      "synergies": 164
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dawnbreaker_Offlane.html",
+      "hero": "Dawnbreaker",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 417,
+      "synergies": 320
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Night_Stalker_Offlane.html",
+      "hero": "Night Stalker",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 434,
+      "synergies": 331
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slardar_Mid.html",
+      "hero": "Slardar",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 278,
+      "synergies": 224
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slardar_Offlane.html",
+      "hero": "Slardar",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 398,
+      "synergies": 310
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Undying_Offlane.html",
+      "hero": "Undying",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 294,
+      "synergies": 233
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Undying_Support.html",
+      "hero": "Undying",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 307,
+      "synergies": 231
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Undying_Hard_Support.html",
+      "hero": "Undying",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 359,
+      "synergies": 290
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ogre_Magi_Offlane.html",
+      "hero": "Ogre Magi",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 242,
+      "synergies": 192
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ogre_Magi_Support.html",
+      "hero": "Ogre Magi",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 315,
+      "synergies": 243
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ogre_Magi_Hard_Support.html",
+      "hero": "Ogre Magi",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 373,
+      "synergies": 293
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Huskar_Mid.html",
+      "hero": "Huskar",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 395,
+      "synergies": 300
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Huskar_Offlane.html",
+      "hero": "Huskar",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 240,
+      "synergies": 192
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bristleback_Offlane.html",
+      "hero": "Bristleback",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 406,
+      "synergies": 309
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Wraith_King_Carry.html",
+      "hero": "Wraith King",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 391,
+      "synergies": 337
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Wraith_King_Offlane.html",
+      "hero": "Wraith King",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 354,
+      "synergies": 276
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earth_Spirit_Mid.html",
+      "hero": "Earth Spirit",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 270,
+      "synergies": 211
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earth_Spirit_Support.html",
+      "hero": "Earth Spirit",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 340,
+      "synergies": 269
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Earth_Spirit_Hard_Support.html",
+      "hero": "Earth Spirit",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 233,
+      "synergies": 174
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Primal_Beast_Mid.html",
+      "hero": "Primal Beast",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 278,
+      "synergies": 226
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Primal_Beast_Offlane.html",
+      "hero": "Primal Beast",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 346,
+      "synergies": 281
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Underlord_Offlane.html",
+      "hero": "Underlord",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 392,
+      "synergies": 298
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Timbersaw_Offlane.html",
+      "hero": "Timbersaw",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 361,
+      "synergies": 274
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Treant_Protector_Support.html",
+      "hero": "Treant Protector",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 226,
+      "synergies": 173
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Treant_Protector_Hard_Support.html",
+      "hero": "Treant Protector",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 344,
+      "synergies": 282
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Kunkka_Mid.html",
+      "hero": "Kunkka",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 283,
+      "synergies": 226
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Kunkka_Offlane.html",
+      "hero": "Kunkka",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 310,
+      "synergies": 248
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Centaur_Warrunner_Offlane.html",
+      "hero": "Centaur Warrunner",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 356,
+      "synergies": 283
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Clockwerk_Support.html",
+      "hero": "Clockwerk",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 279,
+      "synergies": 224
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Clockwerk_Hard_Support.html",
+      "hero": "Clockwerk",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 272,
+      "synergies": 215
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Chaos_Knight_Carry.html",
+      "hero": "Chaos Knight",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 246,
+      "synergies": 201
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Chaos_Knight_Offlane.html",
+      "hero": "Chaos Knight",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 241,
+      "synergies": 186
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Omniknight_Offlane.html",
+      "hero": "Omniknight",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 278,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Omniknight_Hard_Support.html",
+      "hero": "Omniknight",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 273,
+      "synergies": 207
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sven_Carry.html",
+      "hero": "Sven",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 338,
+      "synergies": 285
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Largo_Offlane.html",
+      "hero": "Largo",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 295,
+      "synergies": 236
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Largo_Support.html",
+      "hero": "Largo",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 214,
+      "synergies": 168
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Largo_Hard_Support.html",
+      "hero": "Largo",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 229,
+      "synergies": 179
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dragon_Knight_Carry.html",
+      "hero": "Dragon Knight",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 284,
+      "synergies": 246
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dragon_Knight_Mid.html",
+      "hero": "Dragon Knight",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 251,
+      "synergies": 198
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dragon_Knight_Offlane.html",
+      "hero": "Dragon Knight",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 247,
+      "synergies": 191
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lycan_Offlane.html",
+      "hero": "Lycan",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 233,
+      "synergies": 193
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slark_Carry.html",
+      "hero": "Slark",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 482,
+      "synergies": 396
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slark_Mid.html",
+      "hero": "Slark",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 210,
+      "synergies": 164
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slark_Offlane.html",
+      "hero": "Slark",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 204,
+      "synergies": 171
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Slark_Support.html",
+      "hero": "Slark",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 192,
+      "synergies": 150
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Monkey_King_Carry.html",
+      "hero": "Monkey King",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 422,
+      "synergies": 355
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Monkey_King_Mid.html",
+      "hero": "Monkey King",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 343,
+      "synergies": 268
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Monkey_King_Offlane.html",
+      "hero": "Monkey King",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 187,
+      "synergies": 147
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Monkey_King_Support.html",
+      "hero": "Monkey King",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 199,
+      "synergies": 161
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Fiend_Carry.html",
+      "hero": "Shadow Fiend",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 416,
+      "synergies": 353
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Fiend_Mid.html",
+      "hero": "Shadow Fiend",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 384,
+      "synergies": 308
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ember_Spirit_Mid.html",
+      "hero": "Ember Spirit",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 440,
+      "synergies": 340
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Luna_Carry.html",
+      "hero": "Luna",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 444,
+      "synergies": 385
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Weaver_Carry.html",
+      "hero": "Weaver",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 406,
+      "synergies": 332
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Weaver_Offlane.html",
+      "hero": "Weaver",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 206,
+      "synergies": 164
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Weaver_Support.html",
+      "hero": "Weaver",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 341,
+      "synergies": 255
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Weaver_Hard_Support.html",
+      "hero": "Weaver",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 248,
+      "synergies": 206
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phantom_Assassin_Carry.html",
+      "hero": "Phantom Assassin",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 367,
+      "synergies": 310
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Hoodwink_Support.html",
+      "hero": "Hoodwink",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 392,
+      "synergies": 304
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Hoodwink_Hard_Support.html",
+      "hero": "Hoodwink",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 328,
+      "synergies": 272
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Faceless_Void_Carry.html",
+      "hero": "Faceless Void",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 434,
+      "synergies": 358
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Faceless_Void_Offlane.html",
+      "hero": "Faceless Void",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 202,
+      "synergies": 160
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sniper_Carry.html",
+      "hero": "Sniper",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 302,
+      "synergies": 249
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sniper_Mid.html",
+      "hero": "Sniper",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 407,
+      "synergies": 320
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sniper_Support.html",
+      "hero": "Sniper",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 224,
+      "synergies": 174
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Juggernaut_Carry.html",
+      "hero": "Juggernaut",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 418,
+      "synergies": 354
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ursa_Carry.html",
+      "hero": "Ursa",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 427,
+      "synergies": 361
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Drow_Ranger_Carry.html",
+      "hero": "Drow Ranger",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 417,
+      "synergies": 342
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Anti-Mage_Carry.html",
+      "hero": "Anti-Mage",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 406,
+      "synergies": 347
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Phantom_Lancer_Carry.html",
+      "hero": "Phantom Lancer",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 389,
+      "synergies": 334
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Viper_Mid.html",
+      "hero": "Viper",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 350,
+      "synergies": 266
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Viper_Offlane.html",
+      "hero": "Viper",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 313,
+      "synergies": 252
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Templar_Assassin_Carry.html",
+      "hero": "Templar Assassin",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 408,
+      "synergies": 348
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Templar_Assassin_Mid.html",
+      "hero": "Templar Assassin",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 240,
+      "synergies": 204
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Mirana_Support.html",
+      "hero": "Mirana",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 346,
+      "synergies": 268
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Mirana_Hard_Support.html",
+      "hero": "Mirana",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 281,
+      "synergies": 218
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Kez_Carry.html",
+      "hero": "Kez",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 346,
+      "synergies": 290
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Kez_Mid.html",
+      "hero": "Kez",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 306,
+      "synergies": 240
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Morphling_Carry.html",
+      "hero": "Morphling",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 413,
+      "synergies": 340
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Razor_Carry.html",
+      "hero": "Razor",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 273,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Razor_Mid.html",
+      "hero": "Razor",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 231,
+      "synergies": 180
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Razor_Offlane.html",
+      "hero": "Razor",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 379,
+      "synergies": 296
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bounty_Hunter_Support.html",
+      "hero": "Bounty Hunter",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 380,
+      "synergies": 289
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bounty_Hunter_Hard_Support.html",
+      "hero": "Bounty Hunter",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 239,
+      "synergies": 185
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Spectre_Carry.html",
+      "hero": "Spectre",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 370,
+      "synergies": 313
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Meepo_Carry.html",
+      "hero": "Meepo",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 293,
+      "synergies": 243
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Meepo_Mid.html",
+      "hero": "Meepo",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 367,
+      "synergies": 273
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Terrorblade_Carry.html",
+      "hero": "Terrorblade",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 373,
+      "synergies": 315
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Clinkz_Carry.html",
+      "hero": "Clinkz",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 356,
+      "synergies": 302
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lone_Druid_Carry.html",
+      "hero": "Lone Druid",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 234,
+      "synergies": 194
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lone_Druid_Mid.html",
+      "hero": "Lone Druid",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 268,
+      "synergies": 208
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lone_Druid_Offlane.html",
+      "hero": "Lone Druid",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 184,
+      "synergies": 151
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Gyrocopter_Carry.html",
+      "hero": "Gyrocopter",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 346,
+      "synergies": 296
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Medusa_Carry.html",
+      "hero": "Medusa",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 351,
+      "synergies": 300
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Riki_Carry.html",
+      "hero": "Riki",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 265,
+      "synergies": 218
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Riki_Mid.html",
+      "hero": "Riki",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 229,
+      "synergies": 184
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Riki_Offlane.html",
+      "hero": "Riki",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 190,
+      "synergies": 155
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bloodseeker_Carry.html",
+      "hero": "Bloodseeker",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 321,
+      "synergies": 271
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Broodmother_Mid.html",
+      "hero": "Broodmother",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 264,
+      "synergies": 209
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Naga_Siren_Carry.html",
+      "hero": "Naga Siren",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 287,
+      "synergies": 247
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Troll_Warlord_Carry.html",
+      "hero": "Troll Warlord",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 266,
+      "synergies": 221
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Rubick_Mid.html",
+      "hero": "Rubick",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 367,
+      "synergies": 284
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Rubick_Support.html",
+      "hero": "Rubick",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 489,
+      "synergies": 385
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Rubick_Hard_Support.html",
+      "hero": "Rubick",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 402,
+      "synergies": 335
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lion_Mid.html",
+      "hero": "Lion",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 289,
+      "synergies": 231
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lion_Support.html",
+      "hero": "Lion",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 423,
+      "synergies": 328
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lion_Hard_Support.html",
+      "hero": "Lion",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 469,
+      "synergies": 378
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Invoker_Mid.html",
+      "hero": "Invoker",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 477,
+      "synergies": 362
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Invoker_Support.html",
+      "hero": "Invoker",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 386,
+      "synergies": 304
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Invoker_Hard_Support.html",
+      "hero": "Invoker",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 297,
+      "synergies": 228
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Queen_of_Pain_Mid.html",
+      "hero": "Queen of Pain",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 468,
+      "synergies": 354
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Queen_of_Pain_Offlane.html",
+      "hero": "Queen of Pain",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 237,
+      "synergies": 185
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Queen_of_Pain_Support.html",
+      "hero": "Queen of Pain",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 261,
+      "synergies": 198
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Shaman_Support.html",
+      "hero": "Shadow Shaman",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 398,
+      "synergies": 300
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Shaman_Hard_Support.html",
+      "hero": "Shadow Shaman",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 445,
+      "synergies": 363
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Zeus_Mid.html",
+      "hero": "Zeus",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 365,
+      "synergies": 280
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Zeus_Support.html",
+      "hero": "Zeus",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 407,
+      "synergies": 308
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Zeus_Hard_Support.html",
+      "hero": "Zeus",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 352,
+      "synergies": 281
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lich_Support.html",
+      "hero": "Lich",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 334,
+      "synergies": 270
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lich_Hard_Support.html",
+      "hero": "Lich",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 442,
+      "synergies": 362
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Disruptor_Support.html",
+      "hero": "Disruptor",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 300,
+      "synergies": 237
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Disruptor_Hard_Support.html",
+      "hero": "Disruptor",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 429,
+      "synergies": 339
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Necrophos_Carry.html",
+      "hero": "Necrophos",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 205,
+      "synergies": 174
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Necrophos_Mid.html",
+      "hero": "Necrophos",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 408,
+      "synergies": 304
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Necrophos_Offlane.html",
+      "hero": "Necrophos",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 359,
+      "synergies": 275
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Skywrath_Mage_Mid.html",
+      "hero": "Skywrath Mage",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 281,
+      "synergies": 226
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Skywrath_Mage_Support.html",
+      "hero": "Skywrath Mage",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 391,
+      "synergies": 312
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Skywrath_Mage_Hard_Support.html",
+      "hero": "Skywrath Mage",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 331,
+      "synergies": 264
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Crystal_Maiden_Support.html",
+      "hero": "Crystal Maiden",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 299,
+      "synergies": 230
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Crystal_Maiden_Hard_Support.html",
+      "hero": "Crystal Maiden",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 414,
+      "synergies": 338
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lina_Mid.html",
+      "hero": "Lina",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 404,
+      "synergies": 312
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lina_Support.html",
+      "hero": "Lina",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 252,
+      "synergies": 198
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Lina_Hard_Support.html",
+      "hero": "Lina",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 195,
+      "synergies": 154
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Jakiro_Support.html",
+      "hero": "Jakiro",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 321,
+      "synergies": 255
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Jakiro_Hard_Support.html",
+      "hero": "Jakiro",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 422,
+      "synergies": 333
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Storm_Spirit_Mid.html",
+      "hero": "Storm Spirit",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 427,
+      "synergies": 328
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Silencer_Support.html",
+      "hero": "Silencer",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 334,
+      "synergies": 257
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Silencer_Hard_Support.html",
+      "hero": "Silencer",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 380,
+      "synergies": 303
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Witch_Doctor_Support (1).html",
+      "hero": "Witch Doctor",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 317,
+      "synergies": 264
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Witch_Doctor_Hard_Support.html",
+      "hero": "Witch Doctor",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 408,
+      "synergies": 322
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Warlock_Support.html",
+      "hero": "Warlock",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 272,
+      "synergies": 208
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Warlock_Hard_Support.html",
+      "hero": "Warlock",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 417,
+      "synergies": 327
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Keeper_of_the_Light_Mid.html",
+      "hero": "Keeper of the Light",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 360,
+      "synergies": 272
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Keeper_of_the_Light_Support.html",
+      "hero": "Keeper of the Light",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 289,
+      "synergies": 213
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Keeper_of_the_Light_Hard_Support.html",
+      "hero": "Keeper of the Light",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 215,
+      "synergies": 167
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Winter_Wyvern_Offlane.html",
+      "hero": "Winter Wyvern",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 265,
+      "synergies": 221
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Winter_Wyvern_Support.html",
+      "hero": "Winter Wyvern",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 312,
+      "synergies": 248
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Winter_Wyvern_Hard_Support.html",
+      "hero": "Winter Wyvern",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 353,
+      "synergies": 277
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Muerta_Carry.html",
+      "hero": "Muerta",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 401,
+      "synergies": 324
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Muerta_Support.html",
+      "hero": "Muerta",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 238,
+      "synergies": 185
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ringmaster_Support.html",
+      "hero": "Ringmaster",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 331,
+      "synergies": 253
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ringmaster_Hard_Support.html",
+      "hero": "Ringmaster",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 370,
+      "synergies": 291
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Puck_Mid.html",
+      "hero": "Puck",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 419,
+      "synergies": 319
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ancient_Apparition_Support.html",
+      "hero": "Ancient Apparition",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 292,
+      "synergies": 224
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Ancient_Apparition_Hard_Support.html",
+      "hero": "Ancient Apparition",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 387,
+      "synergies": 300
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Grimstroke_Support.html",
+      "hero": "Grimstroke",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 296,
+      "synergies": 233
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Grimstroke_Hard_Support.html",
+      "hero": "Grimstroke",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 311,
+      "synergies": 244
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dark_Willow_Support.html",
+      "hero": "Dark Willow",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 335,
+      "synergies": 264
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dark_Willow_Hard_Support.html",
+      "hero": "Dark Willow",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 314,
+      "synergies": 248
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Leshrac_Mid.html",
+      "hero": "Leshrac",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 396,
+      "synergies": 306
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Oracle_Support.html",
+      "hero": "Oracle",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 230,
+      "synergies": 176
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Oracle_Hard_Support.html",
+      "hero": "Oracle",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 355,
+      "synergies": 287
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Demon_Support.html",
+      "hero": "Shadow Demon",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 299,
+      "synergies": 240
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Shadow_Demon_Hard_Support.html",
+      "hero": "Shadow Demon",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 347,
+      "synergies": 266
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Tinker_Mid.html",
+      "hero": "Tinker",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 342,
+      "synergies": 276
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Outworld_Destroyer_Mid.html",
+      "hero": "Outworld Destroyer",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 362,
+      "synergies": 287
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pugna_Support.html",
+      "hero": "Pugna",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 256,
+      "synergies": 197
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pugna_Hard_Support.html",
+      "hero": "Pugna",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 271,
+      "synergies": 221
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Enchantress_Hard_Support.html",
+      "hero": "Enchantress",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 254,
+      "synergies": 205
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dark_Seer_Offlane.html",
+      "hero": "Dark Seer",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 290,
+      "synergies": 231
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Chen_Hard_Support.html",
+      "hero": "Chen",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 228,
+      "synergies": 187
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pangolier_Mid.html",
+      "hero": "Pangolier",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 420,
+      "synergies": 322
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Pangolier_Offlane.html",
+      "hero": "Pangolier",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 392,
+      "synergies": 309
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Venomancer_Offlane.html",
+      "hero": "Venomancer",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 271,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Venomancer_Support.html",
+      "hero": "Venomancer",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 406,
+      "synergies": 316
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Venomancer_Hard_Support.html",
+      "hero": "Venomancer",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 431,
+      "synergies": 350
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Void_Spirit_Mid.html",
+      "hero": "Void Spirit",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 437,
+      "synergies": 339
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Void_Spirit_Offlane.html",
+      "hero": "Void Spirit",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 277,
+      "synergies": 222
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Beastmaster_Carry.html",
+      "hero": "Beastmaster",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 335,
+      "synergies": 289
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Beastmaster_Mid.html",
+      "hero": "Beastmaster",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 325,
+      "synergies": 263
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Beastmaster_Offlane.html",
+      "hero": "Beastmaster",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 391,
+      "synergies": 303
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Magnus_Mid.html",
+      "hero": "Magnus",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 317,
+      "synergies": 245
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Magnus_Offlane.html",
+      "hero": "Magnus",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 390,
+      "synergies": 304
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Magnus_Support.html",
+      "hero": "Magnus",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 313,
+      "synergies": 248
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Magnus_Hard_Support.html",
+      "hero": "Magnus",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 273,
+      "synergies": 210
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Techies_Support.html",
+      "hero": "Techies",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 393,
+      "synergies": 299
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Techies_Hard_Support.html",
+      "hero": "Techies",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 348,
+      "synergies": 278
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Batrider_Mid.html",
+      "hero": "Batrider",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 309,
+      "synergies": 245
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Batrider_Offlane.html",
+      "hero": "Batrider",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 338,
+      "synergies": 275
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Batrider_Support.html",
+      "hero": "Batrider",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 269,
+      "synergies": 205
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Batrider_Hard_Support.html",
+      "hero": "Batrider",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 221,
+      "synergies": 177
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Windranger_Carry.html",
+      "hero": "Windranger",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 278,
+      "synergies": 232
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Windranger_Mid.html",
+      "hero": "Windranger",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 294,
+      "synergies": 239
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Windranger_Offlane.html",
+      "hero": "Windranger",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 287,
+      "synergies": 233
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Windranger_Support.html",
+      "hero": "Windranger",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 335,
+      "synergies": 252
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Windranger_Hard_Support.html",
+      "hero": "Windranger",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 246,
+      "synergies": 202
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nyx_Assassin_Mid (1).html",
+      "hero": "Nyx Assassin",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 233,
+      "synergies": 189
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nyx_Assassin_Support (1).html",
+      "hero": "Nyx Assassin",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 398,
+      "synergies": 309
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nyx_Assassin_Hard_Support.html",
+      "hero": "Nyx Assassin",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 274,
+      "synergies": 205
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sand_King_Mid.html",
+      "hero": "Sand King",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 359,
+      "synergies": 269
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Sand_King_Offlane.html",
+      "hero": "Sand King",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 363,
+      "synergies": 281
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Snapfire_Support.html",
+      "hero": "Snapfire",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 330,
+      "synergies": 266
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Snapfire_Hard_Support.html",
+      "hero": "Snapfire",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 317,
+      "synergies": 247
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nature_s_Prophet_Carry.html",
+      "hero": "Nature's Prophet",
+      "roleKey": "1",
+      "role": "Carry",
+      "matchups": 236,
+      "synergies": 200
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nature_s_Prophet_Mid.html",
+      "hero": "Nature's Prophet",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 254,
+      "synergies": 188
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nature_s_Prophet_Support.html",
+      "hero": "Nature's Prophet",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 292,
+      "synergies": 230
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Nature_s_Prophet_Hard_Support.html",
+      "hero": "Nature's Prophet",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 249,
+      "synergies": 193
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Death_Prophet_Mid.html",
+      "hero": "Death Prophet",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 297,
+      "synergies": 236
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Death_Prophet_Offlane.html",
+      "hero": "Death Prophet",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 306,
+      "synergies": 243
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Vengeful_Spirit_Offlane.html",
+      "hero": "Vengeful Spirit",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 257,
+      "synergies": 212
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Vengeful_Spirit_Support.html",
+      "hero": "Vengeful Spirit",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 290,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Vengeful_Spirit_Hard_Support.html",
+      "hero": "Vengeful Spirit",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 298,
+      "synergies": 240
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Io_Support.html",
+      "hero": "Io",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 249,
+      "synergies": 189
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Io_Hard_Support.html",
+      "hero": "Io",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 331,
+      "synergies": 256
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Marci_Mid.html",
+      "hero": "Marci",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 278,
+      "synergies": 211
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Marci_Offlane.html",
+      "hero": "Marci",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 234,
+      "synergies": 189
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Marci_Support.html",
+      "hero": "Marci",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 272,
+      "synergies": 216
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Marci_Hard_Support.html",
+      "hero": "Marci",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 275,
+      "synergies": 226
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bane_Support.html",
+      "hero": "Bane",
+      "roleKey": "4",
+      "role": "Support",
+      "matchups": 262,
+      "synergies": 201
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Bane_Hard_Support.html",
+      "hero": "Bane",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 323,
+      "synergies": 258
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Dazzle_Hard_Support.html",
+      "hero": "Dazzle",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 338,
+      "synergies": 272
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Abaddon_Hard_Support.html",
+      "hero": "Abaddon",
+      "roleKey": "5",
+      "role": "Hard Support",
+      "matchups": 282,
+      "synergies": 225
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Arc_Warden_Mid.html",
+      "hero": "Arc Warden",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 335,
+      "synergies": 264
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Visage_Mid.html",
+      "hero": "Visage",
+      "roleKey": "2",
+      "role": "Mid",
+      "matchups": 227,
+      "synergies": 189
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Visage_Offlane.html",
+      "hero": "Visage",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 247,
+      "synergies": 196
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Brewmaster_Offlane.html",
+      "hero": "Brewmaster",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 310,
+      "synergies": 237
+    },
+    {
+      "file": "/mnt/c/Users/jtoku/Downloads/dpt_Enigma_Offlane.html",
+      "hero": "Enigma",
+      "roleKey": "3",
+      "role": "Offlane",
+      "matchups": 296,
+      "synergies": 228
     }
   ],
   "failures": []

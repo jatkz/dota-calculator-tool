@@ -14,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LIBRARY_OUTPUT = REPO_ROOT / "dpt_matchups_synergies.json"
 DEFAULT_SUMMARY_OUTPUT = REPO_ROOT / "outputs" / "dpt_import_summary.json"
 DEFAULT_PATTERN = "dpt_*.html"
+DEFAULT_BATCH_SUBDIR = "dpt-batch"
 
 
 def parse_args() -> argparse.Namespace:
@@ -78,10 +79,14 @@ def unique_paths(paths: list[Path]) -> list[Path]:
 
 
 def guess_download_dirs() -> list[Path]:
-    candidates = [Path.home() / "Downloads"]
+    candidates = [
+        Path.home() / "Downloads" / DEFAULT_BATCH_SUBDIR,
+        Path.home() / "Downloads",
+    ]
     windows_users = Path("/mnt/c/Users")
     if windows_users.exists():
         for user_dir in sorted(windows_users.iterdir()):
+            candidates.append(user_dir / "Downloads" / DEFAULT_BATCH_SUBDIR)
             candidates.append(user_dir / "Downloads")
     return [path for path in unique_paths(candidates) if path.is_dir()]
 

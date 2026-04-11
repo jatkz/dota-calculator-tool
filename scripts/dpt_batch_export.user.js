@@ -23,6 +23,9 @@
   window.__dptBatchUserscriptLoaded = true;
 
   const roleNames = ["Carry", "Mid", "Offlane", "Support", "Hard Support"];
+  const roleNamesBySpecificity = [...roleNames].sort(
+    (left, right) => right.length - left.length
+  );
 
   const loadState = () => {
     try {
@@ -106,7 +109,7 @@
   const detectRoleName = () => {
     const heading = document.querySelector('[data-track-view="hero-role-stats"] h2');
     const text = clean(heading ? heading.innerText : "");
-    return roleNames.find((role) => text.endsWith(role)) || "Unknown";
+    return roleNamesBySpecificity.find((role) => text.endsWith(role)) || "Unknown";
   };
 
   const findMatchupsTab = () => {
@@ -294,13 +297,30 @@
     const skippedRoles = visibleRoleButtons.filter(
       (entry) => (entry.matchCount ?? 0) < minRoleMatches
     );
+    const heroName = detectHeroName();
     if (!roleButtons.length) {
-      throw new Error(
-        `Could not find any visible role buttons with at least ${minRoleMatches} matches.`
+      const skipRecord = {
+        hero: heroName,
+        url: normalizeHeroUrl(window.location.href),
+        reason: `No roles met the ${minRoleMatches} match threshold.`,
+        visibleRoles: skippedRoles.map((entry) => ({
+          role: entry.roleName,
+          matchCount: entry.matchCount,
+        })),
+        skippedAt: new Date().toISOString(),
+      };
+      state.skipped = state.skipped || [];
+      state.skipped.push(skipRecord);
+      saveState(state);
+      setStatus(
+        `Skipped ${heroName}<br>no roles met threshold=${minRoleMatches}`,
+        "warn"
       );
+      console.log("[dpt-batch] Skipped hero with no eligible roles", skipRecord);
+      await sleep(1200);
+      return;
     }
 
-    const heroName = detectHeroName();
     if (skippedRoles.length) {
       console.log(
         "[dpt-batch] Skipping low-sample roles",

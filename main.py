@@ -11,7 +11,7 @@ from hero_core_table_app import HeroCoreTableApp
 def main():
     root = tk.Tk()
     root.title("Dota 2 Tools")
-    root.geometry("1500x1200")
+    root.geometry("1150x1300")
 
     notebook = ttk.Notebook(root)
     notebook.pack(fill="both", expand=True)

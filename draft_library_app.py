@@ -1,10 +1,13 @@
 import json
 import os
 import re
+import subprocess
+import sys
 import tkinter as tk
 from difflib import get_close_matches
 from datetime import datetime
-from tkinter import ttk
+from tkinter import messagebox, ttk
+from urllib.parse import quote
 
 try:
     from scripts.score_dpt_draft import (
@@ -69,6 +72,7 @@ DRAFT_BUTTON_STYLE_MAP = {
         "desaturate": 0.08,
     },
 }
+DPT_HERO_URL_BASE = "https://dota2protracker.com/hero/"
 DRAFT_GRID_COLUMNS = 5
 DRAFT_AZ_GRID_COLUMNS = 10
 DRAFT_GRID_BUTTON_WIDTH = 13
@@ -259,6 +263,13 @@ class HeroDraftLibraryApp:
         self.tree_heading_tooltip_label = None
         self.tree_heading_tooltip_tree = None
         self.tree_heading_tooltip_column = None
+        self.dpt_open_link_button = None
+        self.tree_value_tooltip_window = None
+        self.tree_value_tooltip_label = None
+        self.tree_value_tooltip_tree = None
+        self.tree_value_tooltip_item = None
+        self.tree_value_tooltip_column = None
+        self.dpt_matrix_tree_layouts = {}
         self.draft_button_base_image_cache = {}
         self.draft_button_image_cache = {}
         self.draft_button_icon_missing = set()
@@ -1461,6 +1472,13 @@ class HeroDraftLibraryApp:
             tree.heading(column, text=headings[column])
             tree.column(column, width=widths[column], anchor="center" if column != "hero" else "w")
         tree.pack(fill="both", expand=True)
+        self.dpt_open_link_button = ttk.Button(
+            tab,
+            text="Open Selected on D2PT",
+            command=self._open_selected_dpt_link,
+        )
+        self.dpt_open_link_button.pack(anchor="w", pady=(6, 0))
+        self.dpt_open_link_button.state(["disabled"])
         tree.bind("<<TreeviewSelect>>", self._handle_dpt_tree_select)
         return tree
 
@@ -1486,18 +1504,102 @@ class HeroDraftLibraryApp:
         tree_frame.columnconfigure(0, weight=1)
         tree_frame.rowconfigure(0, weight=1)
         self._bind_tree_heading_tooltip(tree)
+        self._bind_tree_value_tooltip(tree)
+        tree.bind(
+            "<Configure>",
+            lambda event, selected_tree=tree: self._handle_dpt_matrix_tree_configure(selected_tree, event),
+            add="+",
+        )
         return tree
 
-    def _configure_tree_columns(self, tree, columns, headings, widths, anchors=None):
+    def _configure_tree_columns(self, tree, columns, headings, widths, anchors=None, min_widths=None, stretch_columns=None):
         tree.configure(columns=columns, displaycolumns=columns)
         anchors = anchors or {}
+        min_widths = min_widths or {}
+        stretch_columns = stretch_columns or {}
         for column in columns:
             tree.heading(column, text=headings.get(column, column))
             tree.column(
                 column,
                 width=widths.get(column, 110),
+                minwidth=min_widths.get(column, 20),
                 anchor=anchors.get(column, "center"),
+                stretch=stretch_columns.get(column, True),
             )
+
+    def _handle_dpt_matrix_tree_configure(self, tree, _event=None):
+        self._apply_dpt_matrix_tree_layout(tree)
+
+    def _apply_dpt_matrix_tree_layout(self, tree):
+        layout = self.dpt_matrix_tree_layouts.get(str(tree))
+        if not layout:
+            return
+
+        columns = layout["columns"]
+        headings = layout["headings"]
+        base_widths = layout["widths"]
+        anchors = layout["anchors"]
+        fit_to_width = bool(layout.get("fit_to_width"))
+        min_widths = layout.get("min_widths") or {}
+        stretch_columns = {column: fit_to_width for column in columns}
+        widths = (
+            self._fit_tree_columns_to_width(tree, columns, base_widths, min_widths)
+            if fit_to_width
+            else dict(base_widths)
+        )
+        self._configure_tree_columns(
+            tree,
+            columns,
+            headings,
+            widths,
+            anchors=anchors,
+            min_widths=min_widths,
+            stretch_columns=stretch_columns,
+        )
+
+    def _fit_tree_columns_to_width(self, tree, columns, base_widths, min_widths):
+        widths = {column: int(base_widths.get(column, 110)) for column in columns}
+        minimums = {column: int(min_widths.get(column, 20)) for column in columns}
+
+        available_width = max(int(tree.winfo_width()), int(tree.winfo_reqwidth() or 0))
+        available_width = max(available_width - 6, 0)
+        total_width = sum(widths.values())
+        if available_width <= 0 or total_width <= available_width:
+            return widths
+
+        slack_by_column = {
+            column: max(0, widths[column] - minimums.get(column, 20))
+            for column in columns
+        }
+        total_slack = sum(slack_by_column.values())
+        overflow = total_width - available_width
+        if total_slack <= 0:
+            return widths
+
+        if overflow >= total_slack:
+            return {column: minimums.get(column, 20) for column in columns}
+
+        adjusted = {}
+        fractional_reductions = []
+        reduced_total = 0
+        for column in columns:
+            slack = slack_by_column[column]
+            exact_reduction = (overflow * slack / total_slack) if total_slack > 0 else 0.0
+            reduction = min(slack, int(exact_reduction))
+            adjusted[column] = widths[column] - reduction
+            reduced_total += reduction
+            fractional_reductions.append((exact_reduction - reduction, column))
+
+        remaining_overflow = overflow - reduced_total
+        for _fraction, column in sorted(fractional_reductions, reverse=True):
+            if remaining_overflow <= 0:
+                break
+            if adjusted[column] <= minimums.get(column, 20):
+                continue
+            adjusted[column] -= 1
+            remaining_overflow -= 1
+
+        return adjusted
 
     def _bind_tree_heading_tooltip(self, tree):
         tree.bind(
@@ -1526,6 +1628,7 @@ class HeroDraftLibraryApp:
             self._hide_tree_heading_tooltip()
             return
 
+        self._hide_tree_value_tooltip()
         column_id = self._tree_column_from_event(tree, event.x)
         if not column_id or column_id in {"hero", "role", "draft"}:
             self._hide_tree_heading_tooltip()
@@ -1603,6 +1706,106 @@ class HeroDraftLibraryApp:
         if self.tree_heading_tooltip_tree == tree:
             self._hide_tree_heading_tooltip()
 
+    def _bind_tree_value_tooltip(self, tree):
+        tree.bind(
+            "<Motion>",
+            lambda event, selected_tree=tree: self._handle_tree_value_motion(selected_tree, event),
+            add="+",
+        )
+        tree.bind(
+            "<Leave>",
+            lambda _event: self._hide_tree_value_tooltip(),
+            add="+",
+        )
+        tree.bind(
+            "<ButtonPress-1>",
+            lambda _event: self._hide_tree_value_tooltip(),
+            add="+",
+        )
+        tree.bind(
+            "<Destroy>",
+            lambda event, selected_tree=tree: self._handle_tree_value_destroy(selected_tree, event),
+            add="+",
+        )
+
+    def _handle_tree_value_motion(self, tree, event):
+        if tree.identify_region(event.x, event.y) != "cell":
+            self._hide_tree_value_tooltip()
+            return
+
+        item_id = tree.identify_row(event.y)
+        column_id = self._tree_column_from_event(tree, event.x)
+        if not item_id or not column_id:
+            self._hide_tree_value_tooltip()
+            return
+
+        value = self._tree_cell_value(tree, item_id, column_id)
+        if not str(value).strip():
+            self._hide_tree_value_tooltip()
+            return
+
+        self._hide_tree_heading_tooltip()
+        self._show_tree_value_tooltip(tree, item_id, column_id, str(value), event.x_root, event.y_root)
+
+    def _tree_cell_value(self, tree, item_id, column_id):
+        columns = tree["columns"]
+        if isinstance(columns, str):
+            columns = tree.tk.splitlist(columns)
+        columns = list(columns)
+        if column_id not in columns:
+            return ""
+
+        values = tree.item(item_id, "values")
+        if column_id == "#0":
+            return tree.item(item_id, "text")
+
+        column_index = columns.index(column_id)
+        if column_index >= len(values):
+            return ""
+        return values[column_index]
+
+    def _show_tree_value_tooltip(self, tree, item_id, column_id, text, x_root, y_root):
+        if self.tree_value_tooltip_window is None or not self.tree_value_tooltip_window.winfo_exists():
+            self.tree_value_tooltip_window = tk.Toplevel(self.parent)
+            self.tree_value_tooltip_window.withdraw()
+            self.tree_value_tooltip_window.wm_overrideredirect(True)
+            try:
+                self.tree_value_tooltip_window.attributes("-topmost", True)
+            except tk.TclError:
+                pass
+            self.tree_value_tooltip_label = tk.Label(
+                self.tree_value_tooltip_window,
+                text="",
+                justify="left",
+                bg="#eef5ff",
+                relief="solid",
+                borderwidth=1,
+                padx=6,
+                pady=3,
+            )
+            self.tree_value_tooltip_label.pack()
+
+        if self.tree_value_tooltip_label is not None:
+            self.tree_value_tooltip_label.configure(text=text)
+
+        self.tree_value_tooltip_tree = tree
+        self.tree_value_tooltip_item = item_id
+        self.tree_value_tooltip_column = column_id
+        self.tree_value_tooltip_window.geometry(f"+{x_root + 14}+{y_root + 18}")
+        self.tree_value_tooltip_window.deiconify()
+        self.tree_value_tooltip_window.lift()
+
+    def _hide_tree_value_tooltip(self):
+        if self.tree_value_tooltip_window is not None and self.tree_value_tooltip_window.winfo_exists():
+            self.tree_value_tooltip_window.withdraw()
+        self.tree_value_tooltip_tree = None
+        self.tree_value_tooltip_item = None
+        self.tree_value_tooltip_column = None
+
+    def _handle_tree_value_destroy(self, tree, _event=None):
+        if self.tree_value_tooltip_tree == tree:
+            self._hide_tree_value_tooltip()
+
     def _build_draft_hero_button_grid(self, parent, heroes, columns=DRAFT_GRID_COLUMNS):
         for index, hero in enumerate(heroes):
             button_host = tk.Frame(
@@ -1636,7 +1839,7 @@ class HeroDraftLibraryApp:
             self.draft_hero_buttons[hero] = button
             self._apply_draft_button_visual(button, hero)
 
-        parent.grid_anchor("w")
+        parent.grid_anchor("nw")
         for column in range(columns):
             parent.columnconfigure(column, weight=0)
 
@@ -1864,14 +2067,14 @@ class HeroDraftLibraryApp:
                 category_frame.grid(
                     row=index // 2,
                     column=index % 2,
-                    sticky="nw",
+                    sticky="nsew",
                     padx=6,
                     pady=6,
                 )
                 self._build_draft_category_grid(category_frame, short_label)
 
-            self.draft_grid_body.grid_columnconfigure(0, weight=0)
-            self.draft_grid_body.grid_columnconfigure(1, weight=0)
+            self.draft_grid_body.grid_columnconfigure(0, weight=1, uniform="draft-hero-grid")
+            self.draft_grid_body.grid_columnconfigure(1, weight=1, uniform="draft-hero-grid")
 
         self._refresh_draft_button_labels()
 
@@ -2412,6 +2615,8 @@ class HeroDraftLibraryApp:
                 values=(message, "", "", "", "", "", "", "", ""),
             )
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
+            if self.dpt_open_link_button is not None:
+                self.dpt_open_link_button.state(["disabled"])
             return
 
         for index, row in enumerate(rows):
@@ -2438,6 +2643,93 @@ class HeroDraftLibraryApp:
         tree.selection_set(first_item)
         tree.focus(first_item)
         self._handle_dpt_tree_select()
+
+    def _dpt_hero_page_url(self, hero_name):
+        return f"{DPT_HERO_URL_BASE}{quote(str(hero_name or ''), safe='')}"
+
+    def _selected_dpt_candidate_row(self):
+        tree = self.draft_treeviews.get("dpt")
+        if not tree:
+            return None
+        selection = tree.selection()
+        if not selection:
+            return None
+        return self.latest_dpt_candidate_lookup.get(selection[0])
+
+    def _copy_text_to_clipboard(self, text):
+        try:
+            self.parent.clipboard_clear()
+            self.parent.clipboard_append(text)
+            self.parent.update_idletasks()
+            return True
+        except tk.TclError:
+            messagebox.showerror(
+                "Copy Failed",
+                f"Could not copy this text to clipboard:\n\n{text}",
+                parent=self.parent,
+            )
+            return False
+
+    def _is_wsl_environment(self):
+        if os.environ.get("WSL_INTEROP") or os.environ.get("WSL_DISTRO_NAME"):
+            return True
+        try:
+            with open("/proc/version", "r", encoding="utf-8") as handle:
+                return "microsoft" in handle.read().lower()
+        except OSError:
+            return False
+
+    def _open_external_url(self, url):
+        if os.name == "nt":
+            try:
+                os.startfile(url)
+                return True
+            except Exception:
+                pass
+
+        commands = []
+        if self._is_wsl_environment():
+            commands.extend(
+                [
+                    ["cmd.exe", "/c", "start", "", url],
+                    ["explorer.exe", url],
+                    ["powershell.exe", "-NoProfile", "-Command", f"Start-Process '{url}'"],
+                ]
+            )
+        elif sys.platform == "darwin":
+            commands.append(["open", url])
+        else:
+            commands.extend(
+                [
+                    ["xdg-open", url],
+                    ["gio", "open", url],
+                ]
+            )
+
+        for command in commands:
+            try:
+                subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return True
+            except OSError:
+                continue
+        return False
+
+    def _open_selected_dpt_link(self):
+        row = self._selected_dpt_candidate_row()
+        if not row:
+            self.draft_status_var.set("Select a DPT Picks row first.")
+            return None
+
+        url = self._dpt_hero_page_url(row["hero"])
+        if self._open_external_url(url):
+            self.draft_status_var.set(f"Opened D2PT for {row['hero']}.")
+            return None
+
+        if self._copy_text_to_clipboard(url):
+            self.draft_status_var.set(f"Could not open D2PT for {row['hero']}; copied link instead.")
+        else:
+            self.draft_status_var.set(f"Could not open D2PT for {row['hero']}.")
+        return None
 
     def _dpt_candidate_empty_message(self):
         return self.dpt_scores_load_error or "No DPT candidates available for the current draft."
@@ -2470,6 +2762,7 @@ class HeroDraftLibraryApp:
             rows,
             context_specs,
             empty_context_message="No enemy or ally heroes selected for DPT winrates yet.",
+            fit_to_width=True,
         )
 
     def _populate_dpt_ban_winrate_tree(self, tree, rows):
@@ -2491,27 +2784,38 @@ class HeroDraftLibraryApp:
             empty_context_message="No banned heroes selected for DPT matchup winrates yet.",
         )
 
-    def _populate_dpt_winrate_matrix_tree(self, tree, rows, context_specs, empty_context_message):
-        columns = ("hero", "role", "draft") + tuple(spec["column_id"] for spec in context_specs)
+    def _populate_dpt_winrate_matrix_tree(self, tree, rows, context_specs, empty_context_message, fit_to_width=False):
+        columns = ("hero", "draft") + tuple(spec["column_id"] for spec in context_specs)
         headings = {
             "hero": "Hero",
-            "role": "Role",
             "draft": "Draft",
         }
         widths = {
-            "hero": 180,
-            "role": 95,
-            "draft": 72,
+            "hero": 112 if fit_to_width else 180,
+            "draft": 58 if fit_to_width else 72,
         }
         anchors = {
             "hero": "w",
         }
+        min_widths = {
+            "hero": 80 if fit_to_width else 120,
+            "draft": 48 if fit_to_width else 60,
+        }
 
         for spec in context_specs:
             headings[spec["column_id"]] = spec["heading"]
-            widths[spec["column_id"]] = max(110, min(190, len(spec["heading"]) * 8))
+            widths[spec["column_id"]] = 106 if fit_to_width else max(170, min(220, len(spec["heading"]) * 8))
+            min_widths[spec["column_id"]] = 74 if fit_to_width else 120
 
-        self._configure_tree_columns(tree, columns, headings, widths, anchors)
+        self.dpt_matrix_tree_layouts[str(tree)] = {
+            "columns": columns,
+            "headings": headings,
+            "widths": widths,
+            "anchors": anchors,
+            "fit_to_width": fit_to_width,
+            "min_widths": min_widths,
+        }
+        self._apply_dpt_matrix_tree_layout(tree)
 
         for item_id in tree.get_children():
             tree.delete(item_id)
@@ -2526,21 +2830,20 @@ class HeroDraftLibraryApp:
         for row in rows:
             values = [
                 row["hero"],
-                row["role"],
                 f"{row['draft']['compositeNormalized']:.2f}",
             ]
             for spec in context_specs:
-                winrate = self._resolve_dpt_pair_winrate(
+                pair_metrics = self._resolve_dpt_pair_metrics(
                     row["hero"],
                     row["roleKey"],
                     spec["pair_group"],
                     spec["hero"],
                     spec["role_key"],
                 )
-                values.append(self._format_dpt_winrate(winrate))
+                values.append(self._format_dpt_pair_metrics(pair_metrics))
             tree.insert("", "end", values=tuple(values))
 
-    def _resolve_dpt_pair_winrate(self, candidate_hero, candidate_role_key, pair_group, target_hero, target_role_key=None):
+    def _resolve_dpt_pair_metrics(self, candidate_hero, candidate_role_key, pair_group, target_hero, target_role_key=None):
         role_data = (
             self.dpt_scores_data.get("heroes", {})
             .get(candidate_hero, {})
@@ -2553,29 +2856,68 @@ class HeroDraftLibraryApp:
             return None
 
         if target_role_key:
-            return self._extract_dpt_role_winrate(roles_payload.get(target_role_key))
+            return self._extract_dpt_role_metrics(roles_payload.get(target_role_key))
 
         weighted_rows = []
         for role_key, prior in self._get_dpt_role_priors(target_hero).items():
-            winrate = self._extract_dpt_role_winrate(roles_payload.get(role_key))
+            pair_metrics = self._extract_dpt_role_metrics(roles_payload.get(role_key))
             weight = float(prior.get("weight") or 0.0)
-            if winrate is None or weight <= 0:
+            if not pair_metrics or weight <= 0:
                 continue
-            weighted_rows.append((winrate, weight))
+            weighted_rows.append((pair_metrics, weight))
 
-        return self._weighted_average(weighted_rows)
+        return self._combine_dpt_pair_metrics(weighted_rows)
 
-    def _extract_dpt_role_winrate(self, role_payload):
+    def _extract_dpt_role_metrics(self, role_payload):
         if not isinstance(role_payload, dict):
             return None
         row_payload = role_payload.get("row", {})
-        winrate = row_payload.get("winrate")
-        if winrate is None:
-            return None
         try:
-            return float(winrate)
+            winrate = row_payload.get("winrate")
+            lane_advantage = row_payload.get("laneAdvantage")
+            matches = row_payload.get("matches")
+            return {
+                "winrate": float(winrate) if winrate is not None else None,
+                "laneAdvantage": float(lane_advantage) if lane_advantage is not None else None,
+                "matches": int(matches) if matches is not None else None,
+            }
         except (TypeError, ValueError):
             return None
+
+    def _combine_dpt_pair_metrics(self, weighted_rows):
+        if not weighted_rows:
+            return None
+
+        winrate = self._weighted_average(
+            [
+                (metrics["winrate"], weight)
+                for metrics, weight in weighted_rows
+                if metrics.get("winrate") is not None
+            ]
+        )
+        lane_advantage = self._weighted_average(
+            [
+                (metrics["laneAdvantage"], weight)
+                for metrics, weight in weighted_rows
+                if metrics.get("laneAdvantage") is not None
+            ]
+        )
+        matches = self._weighted_average(
+            [
+                (float(metrics["matches"]), weight)
+                for metrics, weight in weighted_rows
+                if metrics.get("matches") is not None
+            ]
+        )
+
+        if winrate is None and lane_advantage is None and matches is None:
+            return None
+
+        return {
+            "winrate": winrate,
+            "laneAdvantage": lane_advantage,
+            "matches": int(round(matches)) if matches is not None else None,
+        }
 
     def _get_dpt_role_priors(self, hero_name):
         hero_data = self.dpt_scores_data.get("heroes", {}).get(hero_name, {})
@@ -2609,10 +2951,28 @@ class HeroDraftLibraryApp:
             return None
         return sum(value * weight for value, weight in weighted_values) / total_weight
 
-    def _format_dpt_winrate(self, value):
+    def _format_dpt_pair_metrics(self, metrics):
+        if not metrics:
+            return "-"
+
+        parts = [
+            self._format_dpt_percent(metrics.get("winrate")),
+            self._format_optional_number(metrics.get("laneAdvantage"), digits=1),
+            self._format_dpt_matches(metrics.get("matches")),
+        ]
+        if all(part == "-" for part in parts):
+            return "-"
+        return "|".join(parts)
+
+    def _format_dpt_percent(self, value):
         if value is None:
             return "-"
-        return f"{float(value):.1f}%"
+        return f"{float(value):.1f}"
+
+    def _format_dpt_matches(self, value):
+        if value is None:
+            return "-"
+        return str(int(value))
 
     def _dpt_component_composite(self, row, component_name):
         components = row.get("components", {})
@@ -2655,13 +3015,19 @@ class HeroDraftLibraryApp:
         selection = tree.selection()
         if not selection:
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
+            if self.dpt_open_link_button is not None:
+                self.dpt_open_link_button.state(["disabled"])
             return
 
         row = self.latest_dpt_candidate_lookup.get(selection[0])
         if not row:
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
+            if self.dpt_open_link_button is not None:
+                self.dpt_open_link_button.state(["disabled"])
             return
 
+        if self.dpt_open_link_button is not None:
+            self.dpt_open_link_button.state(["!disabled"])
         self._set_readonly_text(self.dpt_detail_text, self._format_dpt_candidate_detail(row))
 
     def _format_dpt_candidate_detail(self, row):

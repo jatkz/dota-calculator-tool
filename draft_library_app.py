@@ -34,10 +34,48 @@ ATTRIBUTE_ORDER = [
     ("uni", "universal"),
 ]
 ATTRIBUTE_LABELS = {short: short.upper() for short, _ in ATTRIBUTE_ORDER}
+NON_DRAFTABLE_HEROES = {"Spirit Bear"}
+DRAFT_BUTTON_STYLE_MAP = {
+    "default": {
+        "background": "#1f1f1f",
+        "activebackground": "#2c2c2c",
+        "foreground": "#ffffff",
+        "overlay": None,
+        "blend": 0.0,
+        "desaturate": 0.0,
+    },
+    "ban": {
+        "background": "#6b727c",
+        "activebackground": "#7b8490",
+        "foreground": "#ffffff",
+        "overlay": (148, 154, 162),
+        "blend": 0.6,
+        "desaturate": 0.8,
+    },
+    "enemy": {
+        "background": "#8a133d",
+        "activebackground": "#b11c4f",
+        "foreground": "#fff3f7",
+        "overlay": (255, 64, 110),
+        "blend": 0.52,
+        "desaturate": 0.2,
+    },
+    "ally": {
+        "background": "#0f7c46",
+        "activebackground": "#18b866",
+        "foreground": "#f4fff8",
+        "overlay": (70, 255, 150),
+        "blend": 0.44,
+        "desaturate": 0.08,
+    },
+}
 DRAFT_GRID_COLUMNS = 5
+DRAFT_AZ_GRID_COLUMNS = 10
 DRAFT_GRID_BUTTON_WIDTH = 13
 DRAFT_GRID_BUTTON_HEIGHT = 2
 DRAFT_GRID_BUTTON_WRAP = 84
+DRAFT_GRID_BUTTON_PIXEL_WIDTH = 92
+DRAFT_GRID_BUTTON_PIXEL_HEIGHT = 38
 DRAFT_GRID_BUTTON_PADX = 0
 DRAFT_GRID_BUTTON_PADY = 0
 DRAFT_GRID_CELL_PADX = 0
@@ -127,6 +165,7 @@ class HeroDraftLibraryApp:
         self.app_state_path = os.path.join(self.base_dir, "app-state.json")
         self.dpt_library_path = os.path.join(self.base_dir, "dpt_matchups_synergies.json")
         self.dpt_scores_path = os.path.join(self.base_dir, "dpt_scores.json")
+        self.hero_icons_dir = os.path.join(self.base_dir, "assets", "hero-icons")
 
         self.heroes = self._load_heroes()
         self.hero_names = sorted(self.heroes.keys())
@@ -140,6 +179,17 @@ class HeroDraftLibraryApp:
         )
         self.heroes_by_attribute = {
             short: sorted([hero for hero in self.hero_names if self.hero_attributes.get(hero) == short])
+            for short, _ in ATTRIBUTE_ORDER
+        }
+        self.draft_hero_names = [
+            hero_name
+            for hero_name in self.hero_names
+            if hero_name not in NON_DRAFTABLE_HEROES
+        ]
+        self.draft_heroes_by_attribute = {
+            short: sorted(
+                [hero_name for hero_name in self.draft_hero_names if self.hero_attributes.get(hero_name) == short]
+            )
             for short, _ in ATTRIBUTE_ORDER
         }
         self.hero_match_names = {
@@ -189,6 +239,7 @@ class HeroDraftLibraryApp:
         self.ban_summary_var = tk.StringVar(value="Bans: none")
         self.enemy_summary_var = tk.StringVar(value="Enemies: none")
         self.ally_summary_var = tk.StringVar(value="Allies: none")
+        self.draft_single_grid_var = tk.BooleanVar(value=False)
         self.dpt_explorer_hero_var = tk.StringVar(value=self._default_dpt_explorer_hero())
         self.dpt_explorer_role_var = tk.StringVar(value="")
         self.dpt_explorer_filter_var = tk.StringVar(value="")
@@ -204,6 +255,13 @@ class HeroDraftLibraryApp:
         self.dpt_explorer_tree_sort_state = {}
         self.latest_dpt_candidate_rows = []
         self.latest_dpt_candidate_lookup = {}
+        self.tree_heading_tooltip_window = None
+        self.tree_heading_tooltip_label = None
+        self.tree_heading_tooltip_tree = None
+        self.tree_heading_tooltip_column = None
+        self.draft_button_base_image_cache = {}
+        self.draft_button_image_cache = {}
+        self.draft_button_icon_missing = set()
         self.scrolled_regions = []
 
         self._build_ui()
@@ -690,11 +748,18 @@ class HeroDraftLibraryApp:
         self._show_edit_selector()
 
     def _build_draft_mode(self):
+        title_row = ttk.Frame(self.draft_content)
+        title_row.pack(fill="x", pady=(0, 10))
         ttk.Label(
-            self.draft_content,
+            title_row,
             text="Draft Mode",
             font=("Arial", 16, "bold"),
-        ).pack(anchor="w", pady=(0, 10))
+        ).pack(side="left", anchor="w")
+        ttk.Button(
+            title_row,
+            text="Clear Draft",
+            command=self._clear_current_draft,
+        ).pack(side="right")
 
         ttk.Label(
             self.draft_content,
@@ -771,39 +836,27 @@ class HeroDraftLibraryApp:
         grid_frame = ttk.LabelFrame(self.draft_content, text="Hero Grid", padding=10)
         grid_frame.pack(fill="x", pady=(0, 12))
 
-        for index, (short_label, _full_label) in enumerate(ATTRIBUTE_ORDER):
-            category_frame = ttk.LabelFrame(grid_frame, text=ATTRIBUTE_LABELS[short_label], padding=8)
-            category_frame.grid(
-                row=index // 2,
-                column=index % 2,
-                sticky="nsew",
-                padx=6,
-                pady=6,
-            )
-            self._build_draft_category_grid(category_frame, short_label)
+        grid_toggle_row = ttk.Frame(grid_frame)
+        grid_toggle_row.pack(fill="x", pady=(0, 8))
+        ttk.Checkbutton(
+            grid_toggle_row,
+            text="A-Z Grid",
+            variable=self.draft_single_grid_var,
+            command=self._rebuild_draft_hero_grid,
+        ).pack(anchor="w")
 
-        grid_frame.columnconfigure(0, weight=1)
-        grid_frame.columnconfigure(1, weight=1)
+        self.draft_grid_body = ttk.Frame(grid_frame)
+        self.draft_grid_body.pack(fill="x")
+        self._rebuild_draft_hero_grid()
 
         summary_notebook = ttk.Notebook(self.draft_content)
         summary_notebook.pack(fill="both", expand=True, pady=(0, 12))
 
-        self.draft_treeviews["bans"] = self._create_summary_tree_tab(summary_notebook, "Ban Sums")
-        self.draft_treeviews["enemies"] = self._create_summary_tree_tab(summary_notebook, "Enemy Sums")
-        self.draft_treeviews["allies"] = self._create_summary_tree_tab(summary_notebook, "Ally Sums")
-        self.draft_treeviews["overall"] = self._create_summary_tree_tab(summary_notebook, "Overall")
-        self.draft_treeviews["role3"] = self._create_summary_tree_tab(summary_notebook, "Role 3 Picks")
         self.draft_treeviews["dpt"] = self._create_dpt_summary_tree_tab(summary_notebook, "DPT Picks")
-        summary_notebook.select(summary_notebook.tabs()[-1])
-
-        detail_notebook = ttk.Notebook(self.draft_content)
-        detail_notebook.pack(fill="both", expand=True, pady=(0, 12))
-
-        self.ban_detail_text = self._create_detail_text_tab(detail_notebook, "Bans")
-        self.enemy_detail_text = self._create_detail_text_tab(detail_notebook, "Enemies")
-        self.ally_detail_text = self._create_detail_text_tab(detail_notebook, "Allies")
-        self.dpt_detail_text = self._create_detail_text_tab(detail_notebook, "DPT")
-        detail_notebook.select(detail_notebook.tabs()[-1])
+        self.draft_treeviews["dpt_pick_winrates"] = self._create_dpt_matrix_tree_tab(summary_notebook, "Pick Winrates")
+        self.draft_treeviews["dpt_ban_winrates"] = self._create_dpt_matrix_tree_tab(summary_notebook, "Banned Matchups")
+        self.dpt_detail_text = self._create_detail_text_tab(summary_notebook, "DPT Detail")
+        summary_notebook.select(self.draft_treeviews["dpt"].master)
 
         save_frame = ttk.LabelFrame(self.draft_content, text="Save Draft", padding=10)
         save_frame.pack(fill="both", expand=True)
@@ -813,7 +866,6 @@ class HeroDraftLibraryApp:
         ttk.Label(name_row, text="Draft name").pack(side="left")
         ttk.Entry(name_row, textvariable=self.draft_name_var, width=36).pack(side="left", padx=(8, 12))
         ttk.Button(name_row, text="Save Draft", command=self._save_current_draft).pack(side="left", padx=(0, 6))
-        ttk.Button(name_row, text="Clear Draft", command=self._clear_current_draft).pack(side="left")
 
         ttk.Label(save_frame, textvariable=self.draft_status_var).pack(anchor="w", pady=(0, 8))
 
@@ -1412,33 +1464,416 @@ class HeroDraftLibraryApp:
         tree.bind("<<TreeviewSelect>>", self._handle_dpt_tree_select)
         return tree
 
-    def _build_draft_category_grid(self, parent, attribute_key):
-        heroes = self.heroes_by_attribute.get(attribute_key, [])
+    def _create_dpt_matrix_tree_tab(self, notebook, label):
+        tab = ttk.Frame(notebook, padding=8)
+        notebook.add(tab, text=label)
+
+        tree_frame = ttk.Frame(tab)
+        tree_frame.pack(fill="both", expand=True)
+
+        tree = ttk.Treeview(
+            tree_frame,
+            show="headings",
+            height=DRAFT_SUMMARY_TREE_HEIGHT,
+        )
+        y_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
+        x_scrollbar = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
+        tree.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
+
+        tree.grid(row=0, column=0, sticky="nsew")
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        tree_frame.columnconfigure(0, weight=1)
+        tree_frame.rowconfigure(0, weight=1)
+        self._bind_tree_heading_tooltip(tree)
+        return tree
+
+    def _configure_tree_columns(self, tree, columns, headings, widths, anchors=None):
+        tree.configure(columns=columns, displaycolumns=columns)
+        anchors = anchors or {}
+        for column in columns:
+            tree.heading(column, text=headings.get(column, column))
+            tree.column(
+                column,
+                width=widths.get(column, 110),
+                anchor=anchors.get(column, "center"),
+            )
+
+    def _bind_tree_heading_tooltip(self, tree):
+        tree.bind(
+            "<Motion>",
+            lambda event, selected_tree=tree: self._handle_tree_heading_motion(selected_tree, event),
+            add="+",
+        )
+        tree.bind(
+            "<Leave>",
+            lambda _event: self._hide_tree_heading_tooltip(),
+            add="+",
+        )
+        tree.bind(
+            "<ButtonPress-1>",
+            lambda _event: self._hide_tree_heading_tooltip(),
+            add="+",
+        )
+        tree.bind(
+            "<Destroy>",
+            lambda event, selected_tree=tree: self._handle_tree_heading_destroy(selected_tree, event),
+            add="+",
+        )
+
+    def _handle_tree_heading_motion(self, tree, event):
+        if tree.identify_region(event.x, event.y) != "heading":
+            self._hide_tree_heading_tooltip()
+            return
+
+        column_id = self._tree_column_from_event(tree, event.x)
+        if not column_id or column_id in {"hero", "role", "draft"}:
+            self._hide_tree_heading_tooltip()
+            return
+
+        heading_text = str(tree.heading(column_id).get("text", "")).strip()
+        if not heading_text:
+            self._hide_tree_heading_tooltip()
+            return
+
+        self._show_tree_heading_tooltip(tree, column_id, heading_text, event.x_root, event.y_root)
+
+    def _tree_column_from_event(self, tree, event_x):
+        display_column = tree.identify_column(event_x)
+        if not display_column:
+            return None
+        if not str(display_column).startswith("#"):
+            return display_column
+
+        try:
+            display_index = int(str(display_column)[1:]) - 1
+        except ValueError:
+            return None
+
+        display_columns = tree["displaycolumns"]
+        if display_columns == "#all":
+            columns = tree["columns"]
+        else:
+            columns = display_columns
+
+        if isinstance(columns, str):
+            columns = tree.tk.splitlist(columns)
+        columns = list(columns)
+        if display_index < 0 or display_index >= len(columns):
+            return None
+        return columns[display_index]
+
+    def _show_tree_heading_tooltip(self, tree, column_id, text, x_root, y_root):
+        if self.tree_heading_tooltip_window is None or not self.tree_heading_tooltip_window.winfo_exists():
+            self.tree_heading_tooltip_window = tk.Toplevel(self.parent)
+            self.tree_heading_tooltip_window.withdraw()
+            self.tree_heading_tooltip_window.wm_overrideredirect(True)
+            try:
+                self.tree_heading_tooltip_window.attributes("-topmost", True)
+            except tk.TclError:
+                pass
+            self.tree_heading_tooltip_label = tk.Label(
+                self.tree_heading_tooltip_window,
+                text="",
+                justify="left",
+                bg="#fff7d6",
+                relief="solid",
+                borderwidth=1,
+                padx=6,
+                pady=3,
+            )
+            self.tree_heading_tooltip_label.pack()
+
+        if self.tree_heading_tooltip_label is not None:
+            self.tree_heading_tooltip_label.configure(text=text)
+
+        self.tree_heading_tooltip_tree = tree
+        self.tree_heading_tooltip_column = column_id
+        self.tree_heading_tooltip_window.geometry(f"+{x_root + 14}+{y_root + 18}")
+        self.tree_heading_tooltip_window.deiconify()
+        self.tree_heading_tooltip_window.lift()
+
+    def _hide_tree_heading_tooltip(self):
+        if self.tree_heading_tooltip_window is not None and self.tree_heading_tooltip_window.winfo_exists():
+            self.tree_heading_tooltip_window.withdraw()
+        self.tree_heading_tooltip_tree = None
+        self.tree_heading_tooltip_column = None
+
+    def _handle_tree_heading_destroy(self, tree, _event=None):
+        if self.tree_heading_tooltip_tree == tree:
+            self._hide_tree_heading_tooltip()
+
+    def _build_draft_hero_button_grid(self, parent, heroes, columns=DRAFT_GRID_COLUMNS):
         for index, hero in enumerate(heroes):
-            button = tk.Button(
+            button_host = tk.Frame(
                 parent,
-                text=hero,
-                width=DRAFT_GRID_BUTTON_WIDTH,
-                height=DRAFT_GRID_BUTTON_HEIGHT,
+                width=DRAFT_GRID_BUTTON_PIXEL_WIDTH,
+                height=DRAFT_GRID_BUTTON_PIXEL_HEIGHT,
+                bd=0,
+                highlightthickness=0,
+            )
+            button_host.grid_propagate(False)
+            button_host.grid(
+                row=index // columns,
+                column=index % columns,
+                sticky="w",
+                padx=DRAFT_GRID_CELL_PADX,
+                pady=DRAFT_GRID_CELL_PADY,
+            )
+
+            button = tk.Button(
+                button_host,
                 wraplength=DRAFT_GRID_BUTTON_WRAP,
                 justify="center",
                 padx=DRAFT_GRID_BUTTON_PADX,
                 pady=DRAFT_GRID_BUTTON_PADY,
                 font=("Arial", 9),
+                borderwidth=1,
+                highlightthickness=0,
                 command=lambda selected_hero=hero: self._handle_draft_hero_click(selected_hero),
             )
-            button.grid(
-                row=index // DRAFT_GRID_COLUMNS,
-                column=index % DRAFT_GRID_COLUMNS,
-                sticky="w",
-                padx=DRAFT_GRID_CELL_PADX,
-                pady=DRAFT_GRID_CELL_PADY,
-            )
+            button.place(x=0, y=0, relwidth=1, relheight=1)
             self.draft_hero_buttons[hero] = button
+            self._apply_draft_button_visual(button, hero)
 
         parent.grid_anchor("w")
-        for column in range(DRAFT_GRID_COLUMNS):
+        for column in range(columns):
             parent.columnconfigure(column, weight=0)
+
+    def _get_draft_button_image(self, hero_name, state_key="default"):
+        cache_key = (hero_name, state_key)
+        cached_image = self.draft_button_image_cache.get(cache_key)
+        if cached_image is not None:
+            return cached_image
+
+        base_image = self._get_draft_button_base_image(hero_name)
+        if base_image is None:
+            return None
+        if state_key == "default":
+            self.draft_button_image_cache[cache_key] = base_image
+            return base_image
+
+        style = DRAFT_BUTTON_STYLE_MAP.get(state_key, DRAFT_BUTTON_STYLE_MAP["default"])
+        overlay = style.get("overlay")
+        if overlay is None:
+            self.draft_button_image_cache[cache_key] = base_image
+            return base_image
+
+        tinted_image = self._tint_photoimage(
+            base_image,
+            overlay_rgb=overlay,
+            blend=float(style.get("blend", 0.0) or 0.0),
+            desaturate=float(style.get("desaturate", 0.0) or 0.0),
+        )
+        self.draft_button_image_cache[cache_key] = tinted_image
+        return tinted_image
+
+    def _get_draft_button_base_image(self, hero_name):
+        cached_image = self.draft_button_base_image_cache.get(hero_name)
+        if cached_image is not None:
+            return cached_image
+        if hero_name in self.draft_button_icon_missing:
+            return None
+
+        icon_path = self._draft_button_icon_path(hero_name)
+        if not icon_path:
+            self.draft_button_icon_missing.add(hero_name)
+            return None
+
+        try:
+            source_image = tk.PhotoImage(master=self.parent, file=icon_path)
+            cropped_image = self._center_crop_photoimage(
+                source_image,
+                DRAFT_GRID_BUTTON_PIXEL_WIDTH,
+                DRAFT_GRID_BUTTON_PIXEL_HEIGHT,
+            )
+        except tk.TclError:
+            self.draft_button_icon_missing.add(hero_name)
+            return None
+
+        self.draft_button_base_image_cache[hero_name] = cropped_image
+        return cropped_image
+
+    def _draft_button_icon_path(self, hero_name):
+        filename = f"{str(hero_name).replace(' ', '_')}_icon_dota2_gameasset.png"
+        icon_path = os.path.join(self.hero_icons_dir, filename)
+        if os.path.exists(icon_path):
+            return icon_path
+        return None
+
+    def _center_crop_photoimage(self, source_image, target_width, target_height):
+        source_width = int(source_image.width())
+        source_height = int(source_image.height())
+        subsample_factor = max(
+            1,
+            min(
+                max(1, source_width // max(1, int(target_width))),
+                max(1, source_height // max(1, int(target_height))),
+            ),
+        )
+        working_image = (
+            source_image.subsample(subsample_factor, subsample_factor)
+            if subsample_factor > 1
+            else source_image
+        )
+
+        source_width = int(working_image.width())
+        source_height = int(working_image.height())
+        copy_width = min(source_width, int(target_width))
+        copy_height = min(source_height, int(target_height))
+
+        source_x0 = max(0, (source_width - copy_width) // 2)
+        source_y0 = max(0, (source_height - copy_height) // 2)
+        source_x1 = source_x0 + copy_width
+        source_y1 = source_y0 + copy_height
+
+        target_x = max(0, (int(target_width) - copy_width) // 2)
+        target_y = max(0, (int(target_height) - copy_height) // 2)
+
+        cropped_image = tk.PhotoImage(master=self.parent, width=target_width, height=target_height)
+        cropped_image.tk.call(
+            str(cropped_image),
+            "copy",
+            str(working_image),
+            "-from",
+            source_x0,
+            source_y0,
+            source_x1,
+            source_y1,
+            "-to",
+            target_x,
+            target_y,
+        )
+        return cropped_image
+
+    def _tint_photoimage(self, source_image, overlay_rgb, blend, desaturate):
+        width = int(source_image.width())
+        height = int(source_image.height())
+        tinted_image = tk.PhotoImage(master=self.parent, width=width, height=height)
+
+        row_data = []
+        for y in range(height):
+            colors = []
+            for x in range(width):
+                red, green, blue = self._photoimage_rgb(source_image.get(x, y))
+                if desaturate > 0.0:
+                    grayscale = int((0.299 * red) + (0.587 * green) + (0.114 * blue))
+                    red = int((red * (1.0 - desaturate)) + (grayscale * desaturate))
+                    green = int((green * (1.0 - desaturate)) + (grayscale * desaturate))
+                    blue = int((blue * (1.0 - desaturate)) + (grayscale * desaturate))
+
+                red = max(0, min(255, int((red * (1.0 - blend)) + (overlay_rgb[0] * blend))))
+                green = max(0, min(255, int((green * (1.0 - blend)) + (overlay_rgb[1] * blend))))
+                blue = max(0, min(255, int((blue * (1.0 - blend)) + (overlay_rgb[2] * blend))))
+                colors.append(f"#{red:02x}{green:02x}{blue:02x}")
+            row_data.append("{" + " ".join(colors) + "}")
+
+        tinted_image.put(" ".join(row_data))
+        return tinted_image
+
+    def _photoimage_rgb(self, value):
+        if isinstance(value, tuple):
+            if len(value) >= 3:
+                return int(value[0]), int(value[1]), int(value[2])
+        text = str(value or "").strip()
+        if text.startswith("#") and len(text) == 7:
+            return int(text[1:3], 16), int(text[3:5], 16), int(text[5:7], 16)
+        try:
+            red16, green16, blue16 = self.parent.winfo_rgb(text)
+            return red16 // 256, green16 // 256, blue16 // 256
+        except tk.TclError:
+            return 0, 0, 0
+
+    def _draft_button_state(self, hero_name):
+        if hero_name in self.banned_heroes:
+            return "ban"
+        if hero_name in self.enemy_assignments:
+            return "enemy"
+        if self._find_ally_role(hero_name) is not None:
+            return "ally"
+        return "default"
+
+    def _draft_button_text(self, hero_name):
+        if hero_name in self.banned_heroes:
+            return f"X {hero_name}"
+        if hero_name in self.enemy_assignments:
+            return f"E{self.enemy_assignments[hero_name]} {hero_name}"
+        ally_role = self._find_ally_role(hero_name)
+        if ally_role is not None:
+            return f"A{ally_role} {hero_name}"
+        return hero_name
+
+    def _apply_draft_button_visual(self, button, hero_name):
+        state_key = self._draft_button_state(hero_name)
+        style = DRAFT_BUTTON_STYLE_MAP.get(state_key, DRAFT_BUTTON_STYLE_MAP["default"])
+        hero_image = self._get_draft_button_image(hero_name, state_key=state_key)
+
+        button.configure(
+            text=self._draft_button_text(hero_name),
+            bg=style["background"],
+            activebackground=style["activebackground"],
+            fg=style["foreground"],
+            activeforeground=style["foreground"],
+            disabledforeground=style["foreground"],
+        )
+
+        if hero_image is not None:
+            button.configure(
+                image=hero_image,
+                compound="center",
+            )
+            button.image = hero_image
+        else:
+            button.configure(
+                image="",
+                compound="none",
+                width=DRAFT_GRID_BUTTON_WIDTH,
+                height=DRAFT_GRID_BUTTON_HEIGHT,
+            )
+            button.image = None
+
+    def _build_draft_category_grid(self, parent, attribute_key):
+        heroes = self.draft_heroes_by_attribute.get(attribute_key, [])
+        self._build_draft_hero_button_grid(parent, heroes)
+
+    def _rebuild_draft_hero_grid(self):
+        self.draft_hero_buttons = {}
+
+        for child in self.draft_grid_body.winfo_children():
+            child.destroy()
+
+        if self.draft_single_grid_var.get():
+            alphabetical_frame = ttk.LabelFrame(
+                self.draft_grid_body,
+                text="All Heroes (A-Z)",
+                padding=8,
+            )
+            alphabetical_frame.pack(fill="x")
+            self._build_draft_hero_button_grid(
+                alphabetical_frame,
+                self.draft_hero_names,
+                columns=DRAFT_AZ_GRID_COLUMNS,
+            )
+        else:
+            for index, (short_label, _full_label) in enumerate(ATTRIBUTE_ORDER):
+                category_frame = ttk.LabelFrame(
+                    self.draft_grid_body,
+                    text=ATTRIBUTE_LABELS[short_label],
+                    padding=8,
+                )
+                category_frame.grid(
+                    row=index // 2,
+                    column=index % 2,
+                    sticky="nw",
+                    padx=6,
+                    pady=6,
+                )
+                self._build_draft_category_grid(category_frame, short_label)
+
+            self.draft_grid_body.grid_columnconfigure(0, weight=0)
+            self.draft_grid_body.grid_columnconfigure(1, weight=0)
+
+        self._refresh_draft_button_labels()
 
     def _rebuild_edit_hero_grids(self):
         for attribute_key, frame in self.edit_grid_frames.items():
@@ -1698,16 +2133,7 @@ class HeroDraftLibraryApp:
 
     def _refresh_draft_button_labels(self):
         for hero_name, button in self.draft_hero_buttons.items():
-            if hero_name in self.banned_heroes:
-                button.configure(text=f"X {hero_name}")
-            elif hero_name in self.enemy_assignments:
-                button.configure(text=f"E{self.enemy_assignments[hero_name]} {hero_name}")
-            else:
-                ally_role = self._find_ally_role(hero_name)
-                if ally_role is not None:
-                    button.configure(text=f"A{ally_role} {hero_name}")
-                else:
-                    button.configure(text=hero_name)
+            self._apply_draft_button_visual(button, hero_name)
 
     def _find_ally_role(self, hero_name):
         for role, assigned_hero in self.ally_assignments.items():
@@ -1737,35 +2163,7 @@ class HeroDraftLibraryApp:
         self.ally_summary_var.set(f"Allies: {' | '.join(ally_parts) if ally_parts else 'none'}")
 
     def _refresh_detail_texts(self):
-        your_role = self.your_role_var.get()
-        banned_entries = [(hero_name, self._get_default_role(hero_name)) for hero_name in sorted(self.banned_heroes)]
-        enemy_entries = sorted(self.enemy_assignments.items(), key=lambda item: (item[1], item[0]))
-        ally_entries = sorted(self.ally_assignments.items(), key=lambda item: item[0])
-
-        self._set_readonly_text(
-            self.ban_detail_text,
-            self._format_context_entries(
-                [(hero, role) for hero, role in banned_entries],
-                your_role,
-                "Banned heroes",
-            ),
-        )
-        self._set_readonly_text(
-            self.enemy_detail_text,
-            self._format_context_entries(enemy_entries, your_role, "Enemy heroes"),
-        )
-        self._set_readonly_text(
-            self.ally_detail_text,
-            self._format_context_entries(
-                [(hero_name, role) for role, hero_name in ally_entries],
-                your_role,
-                "Allied heroes",
-            ),
-        )
-        self._set_readonly_text(
-            self.dpt_detail_text,
-            self._default_dpt_detail_text(),
-        )
+        self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
 
     def _format_context_entries(self, entries, your_role, empty_label):
         if not entries:
@@ -1810,23 +2208,10 @@ class HeroDraftLibraryApp:
         widget.configure(state="disabled")
 
     def _refresh_summary_tables(self):
-        banned_entries = [(hero_name, self._get_default_role(hero_name)) for hero_name in sorted(self.banned_heroes)]
-        enemy_entries = sorted(self.enemy_assignments.items(), key=lambda item: (item[1], item[0]))
-        ally_entries = [(hero_name, role) for role, hero_name in sorted(self.ally_assignments.items(), key=lambda item: item[0])]
-
-        self._populate_summary_tree(self.draft_treeviews["bans"], self._aggregate_entries(banned_entries))
-        self._populate_summary_tree(self.draft_treeviews["enemies"], self._aggregate_entries(enemy_entries))
-        self._populate_summary_tree(self.draft_treeviews["allies"], self._aggregate_entries(ally_entries))
-        self._populate_summary_tree(
-            self.draft_treeviews["overall"],
-            self._aggregate_entries(banned_entries + enemy_entries + ally_entries),
-        )
-        self._populate_summary_tree(
-            self.draft_treeviews["role3"],
-            self._score_candidate_role("3"),
-        )
         dpt_rows = self._score_dpt_candidates(self.your_role_var.get())
         self._populate_dpt_summary_tree(self.draft_treeviews["dpt"], dpt_rows)
+        self._populate_dpt_pick_winrate_tree(self.draft_treeviews["dpt_pick_winrates"], dpt_rows)
+        self._populate_dpt_ban_winrate_tree(self.draft_treeviews["dpt_ban_winrates"], dpt_rows)
 
     def _aggregate_entries(self, entries):
         your_role = self.your_role_var.get()
@@ -1868,7 +2253,7 @@ class HeroDraftLibraryApp:
         excluded_heroes.update(self.enemy_assignments.keys())
         excluded_heroes.update(self.ally_assignments.values())
 
-        for hero_name in self.hero_names:
+        for hero_name in self.draft_hero_names:
             if hero_name in excluded_heroes:
                 continue
             if not self._hero_has_role_content(hero_name, candidate_role):
@@ -2019,7 +2404,7 @@ class HeroDraftLibraryApp:
         self.latest_dpt_candidate_lookup = {}
 
         if not rows:
-            message = self.dpt_scores_load_error or "No DPT candidates available for the current draft."
+            message = self._dpt_candidate_empty_message()
             tree.insert(
                 "",
                 "end",
@@ -2053,6 +2438,181 @@ class HeroDraftLibraryApp:
         tree.selection_set(first_item)
         tree.focus(first_item)
         self._handle_dpt_tree_select()
+
+    def _dpt_candidate_empty_message(self):
+        return self.dpt_scores_load_error or "No DPT candidates available for the current draft."
+
+    def _populate_dpt_pick_winrate_tree(self, tree, rows):
+        context_specs = []
+        for hero_name in sorted(self.enemy_assignments):
+            context_specs.append(
+                {
+                    "column_id": f"enemy_{len(context_specs)}",
+                    "heading": f"E {hero_name}",
+                    "hero": hero_name,
+                    "role_key": None,
+                    "pair_group": "vs",
+                }
+            )
+        for ally_role, hero_name in sorted(self.ally_assignments.items(), key=lambda item: item[0]):
+            context_specs.append(
+                {
+                    "column_id": f"ally_{ally_role}",
+                    "heading": f"A {ally_role} {hero_name}",
+                    "hero": hero_name,
+                    "role_key": ally_role,
+                    "pair_group": "with",
+                }
+            )
+
+        self._populate_dpt_winrate_matrix_tree(
+            tree,
+            rows,
+            context_specs,
+            empty_context_message="No enemy or ally heroes selected for DPT winrates yet.",
+        )
+
+    def _populate_dpt_ban_winrate_tree(self, tree, rows):
+        context_specs = [
+            {
+                "column_id": f"ban_{index}",
+                "heading": hero_name,
+                "hero": hero_name,
+                "role_key": None,
+                "pair_group": "vs",
+            }
+            for index, hero_name in enumerate(sorted(self.banned_heroes))
+        ]
+
+        self._populate_dpt_winrate_matrix_tree(
+            tree,
+            rows,
+            context_specs,
+            empty_context_message="No banned heroes selected for DPT matchup winrates yet.",
+        )
+
+    def _populate_dpt_winrate_matrix_tree(self, tree, rows, context_specs, empty_context_message):
+        columns = ("hero", "role", "draft") + tuple(spec["column_id"] for spec in context_specs)
+        headings = {
+            "hero": "Hero",
+            "role": "Role",
+            "draft": "Draft",
+        }
+        widths = {
+            "hero": 180,
+            "role": 95,
+            "draft": 72,
+        }
+        anchors = {
+            "hero": "w",
+        }
+
+        for spec in context_specs:
+            headings[spec["column_id"]] = spec["heading"]
+            widths[spec["column_id"]] = max(110, min(190, len(spec["heading"]) * 8))
+
+        self._configure_tree_columns(tree, columns, headings, widths, anchors)
+
+        for item_id in tree.get_children():
+            tree.delete(item_id)
+
+        if not rows:
+            self._clear_tree_with_message(tree, self._dpt_candidate_empty_message())
+            return
+        if not context_specs:
+            self._clear_tree_with_message(tree, empty_context_message)
+            return
+
+        for row in rows:
+            values = [
+                row["hero"],
+                row["role"],
+                f"{row['draft']['compositeNormalized']:.2f}",
+            ]
+            for spec in context_specs:
+                winrate = self._resolve_dpt_pair_winrate(
+                    row["hero"],
+                    row["roleKey"],
+                    spec["pair_group"],
+                    spec["hero"],
+                    spec["role_key"],
+                )
+                values.append(self._format_dpt_winrate(winrate))
+            tree.insert("", "end", values=tuple(values))
+
+    def _resolve_dpt_pair_winrate(self, candidate_hero, candidate_role_key, pair_group, target_hero, target_role_key=None):
+        role_data = (
+            self.dpt_scores_data.get("heroes", {})
+            .get(candidate_hero, {})
+            .get("roles", {})
+            .get(candidate_role_key, {})
+        )
+        target_data = role_data.get("pairs", {}).get(pair_group, {}).get(target_hero, {})
+        roles_payload = target_data.get("roles", {})
+        if not roles_payload:
+            return None
+
+        if target_role_key:
+            return self._extract_dpt_role_winrate(roles_payload.get(target_role_key))
+
+        weighted_rows = []
+        for role_key, prior in self._get_dpt_role_priors(target_hero).items():
+            winrate = self._extract_dpt_role_winrate(roles_payload.get(role_key))
+            weight = float(prior.get("weight") or 0.0)
+            if winrate is None or weight <= 0:
+                continue
+            weighted_rows.append((winrate, weight))
+
+        return self._weighted_average(weighted_rows)
+
+    def _extract_dpt_role_winrate(self, role_payload):
+        if not isinstance(role_payload, dict):
+            return None
+        row_payload = role_payload.get("row", {})
+        winrate = row_payload.get("winrate")
+        if winrate is None:
+            return None
+        try:
+            return float(winrate)
+        except (TypeError, ValueError):
+            return None
+
+    def _get_dpt_role_priors(self, hero_name):
+        hero_data = self.dpt_scores_data.get("heroes", {}).get(hero_name, {})
+        priors = hero_data.get("rolePriors", {})
+        if isinstance(priors, dict) and priors:
+            return priors
+
+        roles = hero_data.get("roles", {})
+        sample_matches = {}
+        for role_key, role_data in roles.items():
+            if role_key not in ROLE_KEYS:
+                continue
+            composite_win = role_data.get("overall", {}).get("compositeWin", {})
+            sample_matches[role_key] = int(composite_win.get("totalMatches") or 0)
+
+        total_matches = sum(sample_matches.values())
+        return {
+            role_key: {
+                "role": roles.get(role_key, {}).get("role", self._role_label(role_key)),
+                "sampleMatches": sample_matches[role_key],
+                "weight": (sample_matches[role_key] / total_matches) if total_matches > 0 else 0.0,
+            }
+            for role_key in sample_matches
+        }
+
+    def _weighted_average(self, weighted_values):
+        if not weighted_values:
+            return None
+        total_weight = sum(weight for _value, weight in weighted_values)
+        if total_weight <= 0:
+            return None
+        return sum(value * weight for value, weight in weighted_values) / total_weight
+
+    def _format_dpt_winrate(self, value):
+        if value is None:
+            return "-"
+        return f"{float(value):.1f}%"
 
     def _dpt_component_composite(self, row, component_name):
         components = row.get("components", {})

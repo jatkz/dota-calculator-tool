@@ -3,24 +3,7 @@
 This is the recommended workflow for exporting matchup/synergy HTML from
 Dota2ProTracker in Edge and importing it into this repo.
 
-## 1. Use a dedicated download folder
-
-Recommended folder on Windows:
-
-```text
-C:\Users\jtoku\Downloads\dpt-batch
-```
-
-In Edge:
-
-1. Open `edge://settings/downloads`
-2. Set the download location to `C:\Users\jtoku\Downloads\dpt-batch`
-3. Optionally turn on "Ask me what to do with each download" if you want more control
-
-The importer now prefers `Downloads/dpt-batch` automatically when no input path
-is provided.
-
-## 2. Start the full export run
+## 1. Start the full export run
 
 Make sure the installed userscript in Edge matches:
 
@@ -48,7 +31,7 @@ The userscript will:
 - export all visible role tabs with at least `150` matches
 - skip lower-sample roles
 
-## 3. Resume after an interruption
+## 2. Resume after an interruption
 
 If the run pauses or errors, open a hero page and paste:
 
@@ -56,7 +39,7 @@ If the run pauses or errors, open a hero page and paste:
 
 This resumes from saved progress instead of starting over.
 
-## 4. Import the downloaded HTML files
+## 3. Import the downloaded HTML files
 
 From the repo root in WSL:
 
@@ -80,7 +63,7 @@ Preview only:
 .venv/bin/python scripts/import_dpt_exports.py --dry-run /mnt/c/Users/jtoku/Downloads/dpt-batch
 ```
 
-## 5. Output files
+## 4. Output files
 
 Imported data is merged into:
 

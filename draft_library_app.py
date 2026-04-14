@@ -73,12 +73,18 @@ DRAFT_BUTTON_STYLE_MAP = {
     },
 }
 DPT_HERO_URL_BASE = "https://dota2protracker.com/hero/"
-DRAFT_GRID_COLUMNS = 4
+DRAFT_DEFAULT_GRID_COLUMNS = 6
+DRAFT_GRID_COLUMNS_BY_ATTRIBUTE = {
+    "str": 6,
+    "agi": 6,
+    "int": 6,
+    "uni": 4,
+}
 DRAFT_AZ_GRID_COLUMNS = 10
-DRAFT_GRID_BUTTON_WIDTH = 13
+DRAFT_GRID_BUTTON_WIDTH = 11
 DRAFT_GRID_BUTTON_HEIGHT = 2
-DRAFT_GRID_BUTTON_WRAP = 84
-DRAFT_GRID_BUTTON_PIXEL_WIDTH = 92
+DRAFT_GRID_BUTTON_WRAP = 72
+DRAFT_GRID_BUTTON_PIXEL_WIDTH = 80
 DRAFT_GRID_BUTTON_PIXEL_HEIGHT = 38
 DRAFT_GRID_BUTTON_PADX = 0
 DRAFT_GRID_BUTTON_PADY = 0
@@ -1806,7 +1812,7 @@ class HeroDraftLibraryApp:
         if self.tree_value_tooltip_tree == tree:
             self._hide_tree_value_tooltip()
 
-    def _build_draft_hero_button_grid(self, parent, heroes, columns=DRAFT_GRID_COLUMNS):
+    def _build_draft_hero_button_grid(self, parent, heroes, columns=DRAFT_DEFAULT_GRID_COLUMNS):
         for index, hero in enumerate(heroes):
             button_host = tk.Frame(
                 parent,
@@ -2037,7 +2043,8 @@ class HeroDraftLibraryApp:
 
     def _build_draft_category_grid(self, parent, attribute_key):
         heroes = self.draft_heroes_by_attribute.get(attribute_key, [])
-        self._build_draft_hero_button_grid(parent, heroes)
+        columns = DRAFT_GRID_COLUMNS_BY_ATTRIBUTE.get(attribute_key, DRAFT_DEFAULT_GRID_COLUMNS)
+        self._build_draft_hero_button_grid(parent, heroes, columns=columns)
 
     def _rebuild_draft_hero_grid(self):
         self.draft_hero_buttons = {}

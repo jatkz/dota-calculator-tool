@@ -1,9 +1,13 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import threading
+import time
 import tkinter as tk
+from base64 import b64encode
 from difflib import get_close_matches
 from datetime import datetime
 from tkinter import messagebox, ttk
@@ -94,6 +98,24 @@ DRAFT_DETAIL_TEXT_HEIGHT = 12
 DRAFT_SUMMARY_TREE_HEIGHT = 9
 DPT_EXPLORER_SUMMARY_HEIGHT = 12
 DPT_EXPLORER_TABLE_HEIGHT = 14
+VOICE_DUPLICATE_WINDOW_SECONDS = 1.4
+VOICE_LISTEN_TIMEOUT_SECONDS = 5
+VOICE_INITIAL_SILENCE_TIMEOUT_SECONDS = 3
+VOICE_BABBLE_TIMEOUT_SECONDS = 0.6
+VOICE_END_SILENCE_TIMEOUT_MS = 240
+VOICE_END_SILENCE_TIMEOUT_AMBIGUOUS_MS = 300
+VOICE_HERO_ALIAS_OVERRIDES = {
+    "Earth Spirit": {"earth sp", "earth spirit"},
+    "Earthshaker": {"earth shaker", "shaker"},
+    "Omniknight": {"omni knight", "omni night"},
+    "Phantom Assassin": {"phantom a", "phantom assa", "phantoma assassin"},
+    "Phantom Lancer": {"phantom l", "phantom lan", "lancer"},
+    "Shadow Fiend": {"shadow fi", "fiend"},
+    "Shadow Shaman": {"shadow sha", "shaman"},
+    "Nyx Assassin": {"nyx", "niks", "nix", "nyx assa", "nyx assassin"},
+    "Venomancer": {"veno", "veno mancer", "venom ancer", "venom answer"},
+    "Spirit Breaker": {"spirit b", "spirit break", "spirit breaker"},
+}
 
 
 def _score_key(score):
@@ -218,6 +240,15 @@ class HeroDraftLibraryApp:
         }
         self.hero_match_choices = list(self.hero_match_lookup.keys())
         self.hero_compact_choices = list(self.hero_compact_lookup.keys())
+        self.draft_voice_base_aliases = {
+            hero_name: self._draft_voice_aliases_for_hero(hero_name)
+            for hero_name in self.draft_hero_names
+        }
+        self.draft_voice_alias_lookup = self._build_draft_voice_alias_lookup()
+        self.draft_voice_prefix_lookup = self._build_draft_voice_prefix_lookup(compact=False)
+        self.draft_voice_compact_prefix_lookup = self._build_draft_voice_prefix_lookup(compact=True)
+        self.draft_voice_alias_token_choices = self._build_draft_voice_alias_token_choices()
+        self.draft_voice_backend_path = shutil.which("powershell.exe")
 
         self.library_data = self._load_library_data()
         self.saved_drafts_data = self._load_saved_drafts_data()
@@ -250,6 +281,10 @@ class HeroDraftLibraryApp:
         self.enemy_summary_var = tk.StringVar(value="Enemies: none")
         self.ally_summary_var = tk.StringVar(value="Allies: none")
         self.draft_single_grid_var = tk.BooleanVar(value=False)
+        self.draft_voice_enabled_var = tk.BooleanVar(value=False)
+        self.draft_voice_status_var = tk.StringVar(value="")
+        self.dpt_candidate_filter_var = tk.StringVar(value="")
+        self.dpt_candidate_filter_status_var = tk.StringVar(value="")
         self.dpt_explorer_hero_var = tk.StringVar(value=self._default_dpt_explorer_hero())
         self.dpt_explorer_role_var = tk.StringVar(value="")
         self.dpt_explorer_filter_var = tk.StringVar(value="")
@@ -280,11 +315,20 @@ class HeroDraftLibraryApp:
         self.draft_button_image_cache = {}
         self.draft_button_icon_missing = set()
         self.scrolled_regions = []
+        self.draft_voice_toggle_button = None
+        self.draft_voice_process = None
+        self.draft_voice_thread = None
+        self.draft_voice_generation = 0
+        self.draft_voice_last_match = ""
+        self.draft_voice_last_match_at = 0.0
 
         self._build_ui()
+        self.dpt_candidate_filter_var.trace_add("write", lambda *_: self._select_dpt_candidate_from_search())
         self._bind_global_mousewheel()
+        self.parent.bind("<Destroy>", self._handle_parent_destroy, add="+")
         self._rebuild_edit_hero_grids()
         self._refresh_edit_search_results()
+        self._initialize_draft_voice_controls()
         self._refresh_draft_outputs()
 
     def _load_heroes(self):
@@ -484,10 +528,13 @@ class HeroDraftLibraryApp:
         edit_tab = ttk.Frame(notebook)
         draft_tab = ttk.Frame(notebook)
         dpt_explorer_tab = ttk.Frame(notebook)
+        self.mode_notebook = notebook
+        self.draft_mode_tab = draft_tab
         notebook.add(edit_tab, text="Edit Mode")
         notebook.add(draft_tab, text="Draft Mode")
         notebook.add(dpt_explorer_tab, text="DPT Explorer")
         notebook.select(draft_tab)
+        notebook.bind("<<NotebookTabChanged>>", self._handle_mode_tab_changed)
 
         self.edit_content = self._create_scrolled_content(edit_tab)
         self.draft_content = self._create_scrolled_content(draft_tab)
@@ -772,16 +819,33 @@ class HeroDraftLibraryApp:
             text="Draft Mode",
             font=("Arial", 16, "bold"),
         ).pack(side="left", anchor="w")
+        title_actions = ttk.Frame(title_row)
+        title_actions.pack(side="right")
+        self.draft_voice_toggle_button = tk.Checkbutton(
+            title_actions,
+            text="Mic",
+            variable=self.draft_voice_enabled_var,
+            indicatoron=False,
+            padx=8,
+            width=5,
+            command=self._handle_draft_voice_toggle,
+        )
+        self.draft_voice_toggle_button.pack(side="left", padx=(0, 8))
         ttk.Button(
-            title_row,
+            title_actions,
             text="Clear Draft",
             command=self._clear_current_draft,
-        ).pack(side="right")
+        ).pack(side="left")
 
         ttk.Label(
             self.draft_content,
             text="Set your role, choose a draft action, then click heroes to build bans, enemy picks, and allies.",
         ).pack(anchor="w", pady=(0, 12))
+        ttk.Label(
+            self.draft_content,
+            textvariable=self.draft_voice_status_var,
+            foreground="#666",
+        ).pack(anchor="w", pady=(0, 8))
 
         if self.hero_attribute_data_missing:
             ttk.Label(
@@ -1449,6 +1513,25 @@ class HeroDraftLibraryApp:
     def _create_dpt_summary_tree_tab(self, notebook, label):
         tab = ttk.Frame(notebook, padding=8)
         notebook.add(tab, text=label)
+
+        filter_row = ttk.Frame(tab)
+        filter_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(filter_row, text="Find Hero").pack(side="left")
+        ttk.Entry(
+            filter_row,
+            textvariable=self.dpt_candidate_filter_var,
+            width=24,
+        ).pack(side="left", padx=(8, 6))
+        ttk.Button(
+            filter_row,
+            text="Clear",
+            command=lambda: self.dpt_candidate_filter_var.set(""),
+        ).pack(side="left")
+        ttk.Label(
+            filter_row,
+            textvariable=self.dpt_candidate_filter_status_var,
+            foreground="#666",
+        ).pack(side="right")
 
         columns = ("hero", "role", "draft", "win", "lane", "enemy", "ally", "ban", "conf")
         tree = ttk.Treeview(tab, columns=columns, show="headings", height=DRAFT_SUMMARY_TREE_HEIGHT)
@@ -2265,6 +2348,514 @@ class HeroDraftLibraryApp:
 
         return None
 
+    def _build_draft_voice_alias_lookup(self):
+        alias_owners = {}
+        for hero_name, aliases in self.draft_voice_base_aliases.items():
+            for alias in aliases:
+                alias_owners.setdefault(alias, set()).add(hero_name)
+
+        autocomplete_aliases = set()
+        for aliases in self.draft_voice_base_aliases.values():
+            for alias in aliases:
+                autocomplete_aliases.update(self._draft_voice_autocomplete_aliases_for_alias(alias))
+
+        for autocomplete_alias in autocomplete_aliases:
+            for matching_hero in self._draft_voice_base_alias_matching_heroes(autocomplete_alias):
+                alias_owners.setdefault(autocomplete_alias, set()).add(matching_hero)
+
+        return {
+            alias: next(iter(heroes))
+            for alias, heroes in alias_owners.items()
+            if alias and len(heroes) == 1
+        }
+
+    def _draft_voice_aliases_for_hero(self, hero_name):
+        hero_text = str(hero_name or "").strip()
+        if not hero_text:
+            return set()
+
+        aliases = set()
+        normalized = _normalize_match_text(hero_text)
+        punctuation_softened = _normalize_match_text(re.sub("['\u2019]", "", hero_text))
+        display_softened = _normalize_match_text(re.sub(r"[-_/]+", " ", hero_text))
+
+        for alias in (hero_text.lower(), normalized, punctuation_softened, display_softened):
+            cleaned = str(alias or "").strip().lower()
+            if cleaned:
+                aliases.add(cleaned)
+
+        for acronym_alias in self._draft_voice_acronym_aliases_for_hero(hero_text):
+            aliases.add(acronym_alias)
+
+        for override_alias in VOICE_HERO_ALIAS_OVERRIDES.get(hero_text, set()):
+            cleaned_override = _normalize_match_text(override_alias)
+            if cleaned_override:
+                aliases.add(cleaned_override)
+
+        return aliases
+
+    def _draft_voice_acronym_aliases_for_hero(self, hero_text):
+        cleaned_text = re.sub("['\u2019]", "", str(hero_text or "").strip())
+        tokens = [token.lower() for token in re.split(r"[^A-Za-z0-9]+", cleaned_text) if token]
+        if len(tokens) < 2:
+            return set()
+
+        acronym = "".join(token[0] for token in tokens if token)
+        if len(acronym) < 2:
+            return set()
+
+        acronym_aliases = {_normalize_match_text(acronym)}
+        spaced_acronym = " ".join(acronym)
+        normalized_spaced_acronym = _normalize_match_text(spaced_acronym)
+        if normalized_spaced_acronym:
+            acronym_aliases.add(normalized_spaced_acronym)
+
+        return {alias for alias in acronym_aliases if alias}
+
+    def _draft_voice_autocomplete_aliases_for_alias(self, alias):
+        normalized = _normalize_match_text(alias)
+        tokens = [token for token in normalized.split() if token]
+        if len(tokens) < 2:
+            return set()
+
+        autocomplete_aliases = set()
+
+        first_token = tokens[0]
+        if len(first_token) >= 4:
+            autocomplete_aliases.add(first_token)
+
+        for boundary in range(2, len(tokens)):
+            boundary_phrase = " ".join(tokens[:boundary]).strip()
+            if len(boundary_phrase.replace(" ", "")) >= 4:
+                autocomplete_aliases.add(boundary_phrase)
+
+        for end_index in range(1, len(tokens)):
+            current_token = tokens[end_index]
+            if len(current_token) < 3:
+                continue
+            prefix_phrase = " ".join(tokens[:end_index] + [current_token[:3]]).strip()
+            if len(prefix_phrase.replace(" ", "")) >= 6:
+                autocomplete_aliases.add(prefix_phrase)
+
+        autocomplete_aliases.discard(normalized)
+        return autocomplete_aliases
+
+    def _build_draft_voice_prefix_lookup(self, compact=False):
+        prefix_owners = {}
+
+        for hero_name, aliases in self.draft_voice_base_aliases.items():
+            for alias in aliases:
+                alias_text = _normalize_compact_text(alias) if compact else _normalize_match_text(alias)
+                if not alias_text:
+                    continue
+
+                seen_prefixes = set()
+                for length in range(1, len(alias_text) + 1):
+                    prefix = alias_text[:length].strip()
+                    signal_length = len(prefix) if compact else len(prefix.replace(" ", ""))
+                    if not prefix or signal_length < 4 or prefix in seen_prefixes:
+                        continue
+                    seen_prefixes.add(prefix)
+                    prefix_owners.setdefault(prefix, set()).add(hero_name)
+
+        return {
+            prefix: next(iter(heroes))
+            for prefix, heroes in prefix_owners.items()
+            if len(heroes) == 1
+        }
+
+    def _build_draft_voice_alias_token_choices(self):
+        token_choices = []
+        seen = set()
+
+        for hero_name, aliases in self.draft_voice_base_aliases.items():
+            for alias in aliases:
+                tokens = tuple(token for token in _normalize_match_text(alias).split() if token)
+                if not tokens or (hero_name, tokens) in seen:
+                    continue
+                seen.add((hero_name, tokens))
+                token_choices.append((hero_name, tokens))
+
+        return token_choices
+
+    def _draft_voice_base_alias_matching_heroes(self, text):
+        normalized = _normalize_match_text(text)
+        compact = _normalize_compact_text(text)
+        if not normalized and not compact:
+            return set()
+
+        spoken_tokens = [token for token in normalized.split() if token]
+        matching_heroes = set()
+
+        for hero_name, aliases in self.draft_voice_base_aliases.items():
+            for alias in aliases:
+                alias_normalized = _normalize_match_text(alias)
+                alias_compact = _normalize_compact_text(alias)
+                if not alias_normalized and not alias_compact:
+                    continue
+
+                if normalized and alias_normalized.startswith(normalized):
+                    matching_heroes.add(hero_name)
+                    continue
+
+                if compact and alias_compact.startswith(compact):
+                    matching_heroes.add(hero_name)
+                    continue
+
+                alias_tokens = [token for token in alias_normalized.split() if token]
+                if spoken_tokens and len(spoken_tokens) <= len(alias_tokens):
+                    if all(
+                        alias_token.startswith(spoken_token)
+                        for spoken_token, alias_token in zip(spoken_tokens, alias_tokens)
+                    ):
+                        matching_heroes.add(hero_name)
+                        continue
+
+        return matching_heroes
+
+    def _match_draft_voice_prefix(self, text):
+        normalized = _normalize_match_text(text)
+        compact = _normalize_compact_text(text)
+
+        if len(normalized.replace(" ", "")) >= 4:
+            prefix_match = self.draft_voice_prefix_lookup.get(normalized)
+            if prefix_match:
+                return prefix_match
+
+        if len(compact) >= 4:
+            compact_prefix_match = self.draft_voice_compact_prefix_lookup.get(compact)
+            if compact_prefix_match:
+                return compact_prefix_match
+
+        return self._match_draft_voice_token_prefix(normalized.split())
+
+    def _match_draft_voice_token_prefix(self, spoken_tokens):
+        tokens = [token for token in spoken_tokens if token]
+        if not tokens:
+            return None
+
+        joined_length = sum(len(token) for token in tokens)
+        if len(tokens) == 1:
+            if len(tokens[0]) < 4:
+                return None
+        else:
+            if len(tokens[0]) < 3 or joined_length < 6 or any(len(token) < 2 for token in tokens):
+                return None
+
+        matching_heroes = set()
+        for hero_name, alias_tokens in self.draft_voice_alias_token_choices:
+            if len(tokens) > len(alias_tokens):
+                continue
+            if all(alias_token.startswith(spoken_token) for spoken_token, alias_token in zip(tokens, alias_tokens)):
+                matching_heroes.add(hero_name)
+
+        if len(matching_heroes) == 1:
+            return next(iter(matching_heroes))
+        return None
+
+    def _match_draft_voice_hero(self, text):
+        raw_text = str(text or "").strip()
+        if not raw_text:
+            return None
+
+        direct_match = self.draft_voice_alias_lookup.get(raw_text.lower())
+        if direct_match:
+            return direct_match
+
+        normalized = _normalize_match_text(raw_text)
+        direct_match = self.draft_voice_alias_lookup.get(normalized)
+        if direct_match:
+            return direct_match
+
+        prefix_match = self._match_draft_voice_prefix(raw_text)
+        if prefix_match in self.draft_hero_names:
+            return prefix_match
+
+        hero_name = self._match_hero_name(raw_text)
+        if hero_name in self.draft_hero_names:
+            return hero_name
+
+        tokens = normalized.split()
+        for window_size in range(min(5, len(tokens)), 0, -1):
+            for start_index in range(0, len(tokens) - window_size + 1):
+                candidate_text = " ".join(tokens[start_index:start_index + window_size])
+                prefix_match = self._match_draft_voice_prefix(candidate_text)
+                if prefix_match in self.draft_hero_names:
+                    return prefix_match
+                hero_name = self._match_hero_name(candidate_text)
+                if hero_name in self.draft_hero_names:
+                    return hero_name
+
+        return None
+
+    def _initialize_draft_voice_controls(self):
+        if self.draft_voice_backend_path:
+            self.draft_voice_status_var.set("Voice off. Hero names only.")
+            if self.draft_voice_toggle_button is not None:
+                self.draft_voice_toggle_button.configure(state="normal")
+            return
+
+        self.draft_voice_status_var.set("Voice unavailable on this machine.")
+        if self.draft_voice_toggle_button is not None:
+            self.draft_voice_toggle_button.configure(state="disabled")
+
+    def _handle_draft_voice_toggle(self):
+        if self.draft_voice_enabled_var.get():
+            self._start_draft_voice_listener()
+            return
+        self._stop_draft_voice_listener(status_text="Voice off. Hero names only.")
+
+    def _start_draft_voice_listener(self):
+        if not self.draft_voice_backend_path:
+            self.draft_voice_enabled_var.set(False)
+            self._initialize_draft_voice_controls()
+            return
+
+        if self.mode_notebook.select() != str(self.draft_mode_tab):
+            self.draft_voice_enabled_var.set(False)
+            self.draft_voice_status_var.set("Open Draft Mode first.")
+            return
+
+        self._stop_draft_voice_listener(clear_toggle=False)
+        self.draft_voice_generation += 1
+        generation = self.draft_voice_generation
+        self.draft_voice_status_var.set("Starting voice input...")
+
+        command = self._build_windows_voice_listener_command()
+        try:
+            self.draft_voice_process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+        except Exception as exc:
+            self.draft_voice_process = None
+            self.draft_voice_enabled_var.set(False)
+            self.draft_voice_status_var.set(f"Voice start failed: {exc}")
+            return
+
+        self.draft_voice_thread = threading.Thread(
+            target=self._draft_voice_listener_loop,
+            args=(self.draft_voice_process, generation),
+            name="draft-voice-listener",
+            daemon=True,
+        )
+        self.draft_voice_thread.start()
+
+    def _stop_draft_voice_listener(self, status_text=None, clear_toggle=True):
+        self.draft_voice_generation += 1
+        process = self.draft_voice_process
+        self.draft_voice_process = None
+        self.draft_voice_thread = None
+
+        if clear_toggle and self.draft_voice_enabled_var.get():
+            self.draft_voice_enabled_var.set(False)
+
+        if process is not None:
+            try:
+                process.terminate()
+            except Exception:
+                try:
+                    process.kill()
+                except Exception:
+                    pass
+
+        if status_text:
+            self.draft_voice_status_var.set(status_text)
+
+    def _build_windows_voice_listener_command(self):
+        script = self._build_windows_voice_listener_script()
+        encoded_command = b64encode(script.encode("utf-16le")).decode("ascii")
+        return [
+            self.draft_voice_backend_path,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-EncodedCommand",
+            encoded_command,
+        ]
+
+    def _build_windows_voice_listener_script(self):
+        alias_choices = sorted(self.draft_voice_alias_lookup)
+        choice_lines = []
+        for alias in alias_choices:
+            escaped_alias = alias.replace("'", "''")
+            choice_lines.append(f"$choices.Add('{escaped_alias}')")
+
+        return "\n".join(
+            [
+                "$ErrorActionPreference = 'Stop'",
+                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
+                "Add-Type -AssemblyName System.Speech",
+                "try {",
+                "    $culture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')",
+                "    $recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine($culture)",
+                "} catch {",
+                "    $recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine",
+                "    $culture = $recognizer.RecognizerInfo.Culture",
+                "}",
+                "$recognizer.MaxAlternates = 1",
+                "$choices = New-Object System.Speech.Recognition.Choices",
+                *choice_lines,
+                "$builder = New-Object System.Speech.Recognition.GrammarBuilder",
+                "$builder.Culture = $culture",
+                "$builder.Append($choices)",
+                "$choiceGrammar = New-Object System.Speech.Recognition.Grammar($builder)",
+                "$choiceGrammar.Name = 'heroes'",
+                "$recognizer.LoadGrammar($choiceGrammar)",
+                f"$recognizer.InitialSilenceTimeout = [TimeSpan]::FromSeconds({VOICE_INITIAL_SILENCE_TIMEOUT_SECONDS})",
+                f"$recognizer.BabbleTimeout = [TimeSpan]::FromSeconds({VOICE_BABBLE_TIMEOUT_SECONDS})",
+                f"$recognizer.EndSilenceTimeout = [TimeSpan]::FromMilliseconds({VOICE_END_SILENCE_TIMEOUT_MS})",
+                f"$recognizer.EndSilenceTimeoutAmbiguous = [TimeSpan]::FromMilliseconds({VOICE_END_SILENCE_TIMEOUT_AMBIGUOUS_MS})",
+                "$recognizer.SetInputToDefaultAudioDevice()",
+                "[Console]::Out.WriteLine('{\"type\":\"ready\"}')",
+                "while ($true) {",
+                "    try {",
+                f"        $result = $recognizer.Recognize([TimeSpan]::FromSeconds({VOICE_LISTEN_TIMEOUT_SECONDS}))",
+                "    } catch {",
+                "        $payload = @{ type = 'error'; message = $_.Exception.Message } | ConvertTo-Json -Compress",
+                "        [Console]::Out.WriteLine($payload)",
+                "        break",
+                "    }",
+                "    if ($null -eq $result -or [string]::IsNullOrWhiteSpace([string]$result.Text)) {",
+                "        continue",
+                "    }",
+                "    $payload = @{",
+                "        type = 'heard'",
+                "        text = [string]$result.Text",
+                "        confidence = [math]::Round([double]$result.Confidence, 3)",
+                "        grammar = [string]$result.Grammar.Name",
+                "    } | ConvertTo-Json -Compress",
+                "    [Console]::Out.WriteLine($payload)",
+                "}",
+            ]
+        )
+
+    def _draft_voice_listener_loop(self, process, generation):
+        try:
+            for line in iter(process.stdout.readline, ""):
+                if generation != self.draft_voice_generation:
+                    break
+                payload = str(line or "").strip()
+                if not payload:
+                    continue
+                try:
+                    event = json.loads(payload)
+                except json.JSONDecodeError:
+                    event = {"type": "error", "message": payload}
+                self._schedule_draft_voice_event(event, generation)
+        finally:
+            try:
+                return_code = process.wait(timeout=0.2)
+            except Exception:
+                return_code = process.poll()
+
+            if generation != self.draft_voice_generation:
+                return
+
+            stderr_text = ""
+            if process.stderr is not None:
+                try:
+                    stderr_text = process.stderr.read().strip()
+                except Exception:
+                    stderr_text = ""
+
+            if return_code not in (None, 0):
+                message = stderr_text or "Mic listener stopped unexpectedly."
+                self._schedule_draft_voice_event({"type": "error", "message": message}, generation)
+
+    def _schedule_draft_voice_event(self, event, generation):
+        try:
+            self.parent.after(0, lambda: self._handle_draft_voice_event(event, generation))
+        except tk.TclError:
+            return
+
+    def _handle_draft_voice_event(self, event, generation):
+        if generation != self.draft_voice_generation:
+            return
+
+        event_type = str(event.get("type", "")).strip().lower()
+        if event_type == "ready":
+            self.draft_voice_status_var.set("Listening for hero names.")
+            return
+
+        if event_type == "heard":
+            raw_text = str(event.get("text", "")).strip()
+            grammar_name = str(event.get("grammar", "")).strip().lower()
+            hero_name = None
+            if grammar_name == "heroes":
+                hero_name = (
+                    self.draft_voice_alias_lookup.get(raw_text.lower())
+                    or self.draft_voice_alias_lookup.get(_normalize_match_text(raw_text))
+                )
+            if hero_name is None:
+                hero_name = self._match_draft_voice_hero(raw_text)
+            if not hero_name:
+                self.draft_voice_status_var.set(f'No hero match for "{raw_text}".')
+                return
+            self._apply_draft_voice_hero(hero_name, raw_text=raw_text, confidence=event.get("confidence"))
+            return
+
+        message = str(event.get("message", "")).strip() or "Mic listener stopped."
+        self._stop_draft_voice_listener(status_text=f"Voice error: {message}")
+
+    def _apply_draft_voice_hero(self, hero_name, raw_text="", confidence=None):
+        now = time.monotonic()
+        if (
+            hero_name == self.draft_voice_last_match
+            and (now - self.draft_voice_last_match_at) < VOICE_DUPLICATE_WINDOW_SECONDS
+        ):
+            self.draft_voice_status_var.set(f"Ignored quick repeat: {hero_name}.")
+            return
+
+        self.draft_voice_last_match = hero_name
+        self.draft_voice_last_match_at = now
+        self._handle_draft_hero_click(hero_name)
+
+        action_label = self._draft_action_label()
+        confidence_value = ""
+        if confidence not in (None, ""):
+            try:
+                confidence_value = f" ({float(confidence):.2f})"
+            except (TypeError, ValueError):
+                confidence_value = ""
+
+        if raw_text and _normalize_match_text(raw_text) != _normalize_match_text(hero_name):
+            self.draft_voice_status_var.set(
+                f'"{raw_text}" -> {hero_name}{confidence_value}. Applied {action_label}.'
+            )
+            return
+
+        self.draft_voice_status_var.set(f"{hero_name}{confidence_value}. Applied {action_label}.")
+
+    def _draft_action_label(self):
+        action = self.draft_action_var.get()
+        if action == "ban":
+            return "ban"
+        if action == "enemy":
+            return "enemy pick"
+        if action.startswith("ally:"):
+            role = action.split(":", 1)[1]
+            return f"ally role {role}"
+        return action or "draft action"
+
+    def _handle_mode_tab_changed(self, _event=None):
+        if self.mode_notebook.select() == str(self.draft_mode_tab):
+            return
+        if self.draft_voice_enabled_var.get():
+            self._stop_draft_voice_listener(
+                status_text="Voice paused outside Draft Mode."
+            )
+
+    def _handle_parent_destroy(self, event):
+        if event.widget is not self.parent:
+            return
+        self._stop_draft_voice_listener(clear_toggle=False)
+
     def _queue_library_save(self):
         if self.library_save_after_id is not None:
             self.parent.after_cancel(self.library_save_after_id)
@@ -2420,8 +3011,112 @@ class HeroDraftLibraryApp:
     def _refresh_summary_tables(self):
         dpt_rows = self._score_dpt_candidates(self.your_role_var.get())
         self._populate_dpt_summary_tree(self.draft_treeviews["dpt"], dpt_rows)
+        self._select_dpt_candidate_from_search()
         self._populate_dpt_pick_winrate_tree(self.draft_treeviews["dpt_pick_winrates"], dpt_rows)
         self._populate_dpt_ban_winrate_tree(self.draft_treeviews["dpt_ban_winrates"], dpt_rows)
+
+    def _select_dpt_candidate_from_search(self):
+        tree = self.draft_treeviews.get("dpt")
+        if not tree:
+            return
+
+        query = self.dpt_candidate_filter_var.get().strip()
+        total_count = len(self.latest_dpt_candidate_rows)
+        if not query:
+            self.dpt_candidate_filter_status_var.set(f"{total_count} heroes" if total_count else "")
+            return
+
+        match = self._find_dpt_candidate_search_match(query)
+        if not match:
+            self.dpt_candidate_filter_status_var.set(f'No close match for "{query}"')
+            return
+
+        item_id, row, match_label = match
+        if item_id not in tree.get_children():
+            self.dpt_candidate_filter_status_var.set(f'No close match for "{query}"')
+            return
+
+        tree.selection_set(item_id)
+        tree.focus(item_id)
+        tree.see(item_id)
+        self._handle_dpt_tree_select()
+        self.dpt_candidate_filter_status_var.set(f"{match_label}: {row['hero']}")
+
+    def _find_dpt_candidate_search_match(self, query):
+        tree = self.draft_treeviews.get("dpt")
+        if not tree:
+            return None
+
+        normalized_query = _normalize_match_text(query)
+        compact_query = _normalize_compact_text(query)
+        lowered_query = str(query or "").strip().lower()
+        if not lowered_query and not normalized_query and not compact_query:
+            return None
+
+        candidates = []
+        for item_id in tree.get_children():
+            row = self.latest_dpt_candidate_lookup.get(item_id)
+            if not row:
+                continue
+            hero_name = str(row.get("hero", "") or "")
+            normalized_hero = self.hero_match_names.get(hero_name, _normalize_match_text(hero_name))
+            compact_hero = _normalize_compact_text(hero_name)
+            candidates.append((item_id, row, hero_name, normalized_hero, compact_hero))
+
+        if not candidates:
+            return None
+
+        for item_id, row, hero_name, normalized_hero, compact_hero in candidates:
+            if lowered_query == hero_name.lower():
+                return item_id, row, "Selected"
+            if normalized_query and normalized_query == normalized_hero:
+                return item_id, row, "Selected"
+            if compact_query and compact_query == compact_hero:
+                return item_id, row, "Selected"
+
+        matched_hero = self._match_hero_name(query)
+        if matched_hero:
+            for item_id, row, hero_name, _normalized_hero, _compact_hero in candidates:
+                if hero_name == matched_hero:
+                    return item_id, row, "Selected"
+
+        partial_matches = []
+        for item_id, row, hero_name, normalized_hero, compact_hero in candidates:
+            scores = []
+            if lowered_query and lowered_query in hero_name.lower():
+                scores.append((hero_name.lower().find(lowered_query), len(hero_name)))
+            if normalized_query and normalized_query in normalized_hero:
+                scores.append((normalized_hero.find(normalized_query), len(normalized_hero)))
+            if compact_query and compact_query in compact_hero:
+                scores.append((compact_hero.find(compact_query), len(compact_hero)))
+            if scores:
+                best_score = min(scores)
+                partial_matches.append((best_score[0], best_score[1], item_id, row))
+
+        if partial_matches:
+            partial_matches.sort(key=lambda item: (item[0], item[1], item[3]["hero"]))
+            _position, _length, item_id, row = partial_matches[0]
+            return item_id, row, "Selected"
+
+        normalized_choices = [normalized_hero for _item_id, _row, _hero_name, normalized_hero, _compact_hero in candidates if normalized_hero]
+        if normalized_query and normalized_choices:
+            close_normalized = get_close_matches(normalized_query, normalized_choices, n=1, cutoff=0.52)
+            if close_normalized:
+                target_normalized = close_normalized[0]
+                for item_id, row, _hero_name, normalized_hero, _compact_hero in candidates:
+                    if normalized_hero == target_normalized:
+                        return item_id, row, "Closest"
+
+        compact_choices = [compact_hero for _item_id, _row, _hero_name, _normalized_hero, compact_hero in candidates if compact_hero]
+        if compact_query and compact_choices:
+            close_compact = get_close_matches(compact_query, compact_choices, n=1, cutoff=0.6)
+            if close_compact:
+                target_compact = close_compact[0]
+                for item_id, row, _hero_name, _normalized_hero, compact_hero in candidates:
+                    if compact_hero == target_compact:
+                        return item_id, row, "Closest"
+
+        return None
 
     def _aggregate_entries(self, entries):
         your_role = self.your_role_var.get()
@@ -2739,6 +3434,9 @@ class HeroDraftLibraryApp:
         return None
 
     def _dpt_candidate_empty_message(self):
+        filter_text = self.dpt_candidate_filter_var.get().strip()
+        if filter_text and self.latest_dpt_candidate_rows:
+            return f'No heroes match "{filter_text}".'
         return self.dpt_scores_load_error or "No DPT candidates available for the current draft."
 
     def _populate_dpt_pick_winrate_tree(self, tree, rows):

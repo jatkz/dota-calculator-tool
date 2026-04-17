@@ -5,6 +5,7 @@
 // @description  Export Dota2ProTracker hero matchup HTML for many heroes in sequence.
 // @match        https://dota2protracker.com/hero/*
 // @grant        none
+// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -12,6 +13,8 @@
 
   const STORAGE_KEY = "dpt_batch_export_state_v1";
   const HEROES_URL = "https://dota2protracker.com/heroes";
+  const META_URL = "https://dota2protracker.com/meta";
+  const HOME_URL = "https://dota2protracker.com/";
   const STATUS_ID = "dpt-batch-status";
   const DEFAULT_MIN_ROLE_MATCHES = 150;
   const WAIT_TIMEOUT_MS = 30000;
@@ -21,6 +24,7 @@
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const clean = (value) => String(value || "").replace(/\s+/g, " ").trim();
   window.__dptBatchUserscriptLoaded = true;
+  document.documentElement.setAttribute("data-dpt-batch-userscript-loaded", "true");
 
   const roleNames = ["Carry", "Mid", "Offlane", "Support", "Hard Support"];
   const roleNamesBySpecificity = [...roleNames].sort(
@@ -180,6 +184,23 @@
     throw new Error("Timed out waiting for matchup and synergy rows to load.");
   };
 
+  const waitForHeroPageReady = async () => {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < WAIT_TIMEOUT_MS) {
+      const heroHeading = document.querySelector('[data-track-view="hero-role-stats"] h2');
+      const hasMatchupsTab = Boolean(findMatchupsTab());
+      const roleButtons = findRoleButtons();
+
+      if ((heroHeading && roleButtons.length > 0) || hasMatchupsTab) {
+        return;
+      }
+
+      await sleep(POLL_MS);
+    }
+
+    throw new Error("Timed out waiting for the hero page controls to render.");
+  };
+
   const waitForRoleView = async (roleName, previousSignature = null) => {
     const startedAt = Date.now();
     while (Date.now() - startedAt < WAIT_TIMEOUT_MS) {
@@ -219,19 +240,59 @@
 
   const normalizeHeroUrl = (url) => {
     const parsed = new URL(url, window.location.origin);
-    return `${parsed.origin}${parsed.pathname}`;
+    const normalizedPath = parsed.pathname.replace(/\/+$/, "");
+    return `${parsed.origin}${normalizedPath || "/"}`;
   };
 
-  const fetchHeroQueue = async () => {
-    const response = await fetch(HEROES_URL, { credentials: "include" });
-    const markup = await response.text();
-    const parsed = new DOMParser().parseFromString(markup, "text/html");
-
-    const urls = [...parsed.querySelectorAll('a[href^="/hero/"]')]
-      .map((anchor) => normalizeHeroUrl(anchor.href))
+  const extractHeroUrls = (documentRoot, baseUrl) =>
+    [...documentRoot.querySelectorAll('a[href*="/hero/"]')]
+      .map((anchor) => anchor.getAttribute("href"))
+      .filter(Boolean)
+      .map((href) => normalizeHeroUrl(new URL(href, baseUrl).href))
       .filter((url) => /^https:\/\/dota2protracker\.com\/hero\/[^/]+$/.test(url));
 
-    return [...new Set(urls)];
+  const fetchHeroQueue = async () => {
+    const sources = [HEROES_URL, META_URL, HOME_URL];
+    const combined = [];
+
+    for (const sourceUrl of sources) {
+      try {
+        const response = await fetch(sourceUrl, { credentials: "include" });
+        if (!response.ok) {
+          console.warn("[dpt-batch] Failed to fetch hero queue source", {
+            sourceUrl,
+            status: response.status,
+          });
+          continue;
+        }
+
+        const markup = await response.text();
+        const parsed = new DOMParser().parseFromString(markup, "text/html");
+        const urls = extractHeroUrls(parsed, sourceUrl);
+
+        console.log("[dpt-batch] Hero queue source result", {
+          sourceUrl,
+          heroLinksFound: urls.length,
+        });
+
+        if (urls.length) {
+          combined.push(...urls);
+        }
+      } catch (error) {
+        console.warn("[dpt-batch] Error while fetching hero queue source", {
+          sourceUrl,
+          error: String(error),
+        });
+      }
+    }
+
+    const deduped = [...new Set(combined)];
+    if (!deduped.length) {
+      throw new Error(
+        "Could not build the hero queue. No hero links were found on /heroes, /meta, or /."
+      );
+    }
+    return deduped;
   };
 
   const getCurrentHeroUrl = () => normalizeHeroUrl(window.location.href);
@@ -460,6 +521,8 @@
         return;
       }
 
+      await waitForHeroPageReady();
+
       if (state.mode === "single" || state.mode === "all") {
         await exportAllRolesForCurrentHero(state);
       } else {
@@ -495,9 +558,19 @@
     }
   };
 
-  window.addEventListener("load", () => {
+  let bootScheduled = false;
+  const boot = () => {
+    if (bootScheduled) return;
+    bootScheduled = true;
     setTimeout(() => {
       run().catch((error) => console.error("[dpt-batch] Unhandled error", error));
     }, 1000);
-  });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+    window.addEventListener("load", boot, { once: true });
+  } else {
+    boot();
+  }
 })();

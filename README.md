@@ -151,3 +151,7 @@ or levels.
 - for changes you can say "a few things" then what the changes are then end with "display again"
 - you will need to correct the talent level manually. and possibly aghamins
 - when you are done say "save the spell to spell library" or you can save it manually faster
+
+.venv/bin/python scripts/import_dpt_exports.py --dry-run /mnt/c/Users/jtoku/Downloads/dpt-batch
+.venv/bin/python scripts/import_dpt_exports.py /mnt/c/Users/jtoku/Downloads/dpt-batch
+.venv/bin/python scripts/generate_dpt_scores.py

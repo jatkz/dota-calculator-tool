@@ -44,8 +44,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-row-matches",
         type=int,
+        default=40,
+        help="Ignore pair rows below this number of matches. Default: 30",
+    )
+    parser.add_argument(
+        "--full-weight-row-matches",
+        type=int,
         default=150,
-        help="Ignore pair rows below this number of matches. Default: 150",
+        help="Rows below this match count receive an extra low-sample taper before reaching full weight. Default: 150",
+    )
+    parser.add_argument(
+        "--low-match-weight-floor",
+        type=float,
+        default=0.5,
+        help="Relative row weight applied at the minimum match threshold before tapering up to full weight. Default: 0.5",
     )
     parser.add_argument(
         "--reliability-k",
@@ -56,7 +68,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--lane-missing-penalty",
         type=float,
-        default=0.65,
+        default=0.85,
         help="Confidence and lane-signal penalty when laneAdvantage is missing. Default: 0.65",
     )
     return parser.parse_args()
@@ -122,6 +134,25 @@ def build_score_object(
     return round_score_object(payload)
 
 
+def low_sample_weight(
+    matches: int,
+    *,
+    min_row_matches: int,
+    full_weight_row_matches: int,
+    low_match_weight_floor: float,
+) -> float:
+    if matches < min_row_matches:
+        return 0.0
+
+    min_weight = max(0.0, min(1.0, low_match_weight_floor))
+    if full_weight_row_matches <= min_row_matches or matches >= full_weight_row_matches:
+        return 1.0
+
+    progress = (matches - min_row_matches) / (full_weight_row_matches - min_row_matches)
+    progress = max(0.0, min(1.0, progress))
+    return min_weight + ((1.0 - min_weight) * progress)
+
+
 def score_row(
     row: dict,
     *,
@@ -130,6 +161,8 @@ def score_row(
     lane_win_weight: float,
     lane_adv_weight: float,
     min_row_matches: int,
+    full_weight_row_matches: int,
+    low_match_weight_floor: float,
 ) -> dict | None:
     matches = int(row.get("matches") or 0)
     winrate = row.get("winrate")
@@ -137,6 +170,13 @@ def score_row(
         return None
 
     reliability = matches / (matches + reliability_k) if matches > 0 else 0.0
+    sample_weight = low_sample_weight(
+        matches,
+        min_row_matches=min_row_matches,
+        full_weight_row_matches=full_weight_row_matches,
+        low_match_weight_floor=low_match_weight_floor,
+    )
+    effective_reliability = reliability * sample_weight
     win_edge = float(winrate) - 50.0
     lane_value = row.get("laneAdvantage")
     has_lane = lane_value is not None
@@ -145,12 +185,14 @@ def score_row(
 
     return {
         "matches": matches,
-        "winRaw": win_edge * reliability,
+        "winRaw": win_edge * effective_reliability,
         "laneRaw": (lane_win_weight * win_edge + lane_adv_weight * lane_edge)
-        * reliability
+        * effective_reliability
         * lane_factor,
-        "reliability": reliability,
-        "laneConfidence": reliability * lane_factor,
+        "reliability": effective_reliability,
+        "baseReliability": reliability,
+        "sampleWeight": sample_weight,
+        "laneConfidence": effective_reliability * lane_factor,
         "hasLane": has_lane,
     }
 
@@ -159,6 +201,8 @@ def compute_overall_from_rows(
     rows: list[dict],
     *,
     min_row_matches: int,
+    full_weight_row_matches: int,
+    low_match_weight_floor: float,
     reliability_k: float,
     lane_missing_penalty: float,
     lane_win_weight: float,
@@ -174,6 +218,8 @@ def compute_overall_from_rows(
             lane_win_weight=lane_win_weight,
             lane_adv_weight=lane_adv_weight,
             min_row_matches=min_row_matches,
+            full_weight_row_matches=full_weight_row_matches,
+            low_match_weight_floor=low_match_weight_floor,
         )
         for row in rows
     ]
@@ -230,6 +276,8 @@ def build_pair_entry(
     scored_row: dict,
 ) -> dict:
     return {
+        "sampleWeight": round(float(scored_row.get("sampleWeight") or 0.0), 4),
+        "baseReliability": round(float(scored_row.get("baseReliability") or 0.0), 4),
         "win": round_score_object(
             {
                 "raw": scored_row["winRaw"],
@@ -338,6 +386,8 @@ def main() -> int:
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
         "config": {
             "minRowMatches": args.min_row_matches,
+            "fullWeightRowMatches": args.full_weight_row_matches,
+            "lowMatchWeightFloor": args.low_match_weight_floor,
             "reliabilityK": args.reliability_k,
             "laneMissingPenalty": args.lane_missing_penalty,
             "overallWeights": {
@@ -387,6 +437,8 @@ def main() -> int:
             matchup_win, matchup_lane = compute_overall_from_rows(
                 matchup_rows,
                 min_row_matches=args.min_row_matches,
+                full_weight_row_matches=args.full_weight_row_matches,
+                low_match_weight_floor=args.low_match_weight_floor,
                 reliability_k=args.reliability_k,
                 lane_missing_penalty=args.lane_missing_penalty,
                 lane_win_weight=MATCHUP_LANE_WIN_WEIGHT,
@@ -397,6 +449,8 @@ def main() -> int:
             synergy_win, synergy_lane = compute_overall_from_rows(
                 synergy_rows,
                 min_row_matches=args.min_row_matches,
+                full_weight_row_matches=args.full_weight_row_matches,
+                low_match_weight_floor=args.low_match_weight_floor,
                 reliability_k=args.reliability_k,
                 lane_missing_penalty=args.lane_missing_penalty,
                 lane_win_weight=SYNERGY_LANE_WIN_WEIGHT,
@@ -457,6 +511,8 @@ def main() -> int:
                         lane_win_weight=lane_win_weight,
                         lane_adv_weight=lane_adv_weight,
                         min_row_matches=args.min_row_matches,
+                        full_weight_row_matches=args.full_weight_row_matches,
+                        low_match_weight_floor=args.low_match_weight_floor,
                     )
                     if scored_row is None:
                         continue

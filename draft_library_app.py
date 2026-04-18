@@ -285,6 +285,14 @@ class HeroDraftLibraryApp:
         self.draft_voice_status_var = tk.StringVar(value="")
         self.dpt_candidate_filter_var = tk.StringVar(value="")
         self.dpt_candidate_filter_status_var = tk.StringVar(value="")
+        self.dpt_matrix_filter_vars = {
+            "dpt_pick_winrates": tk.StringVar(value=""),
+            "dpt_ban_winrates": tk.StringVar(value=""),
+        }
+        self.dpt_matrix_filter_status_vars = {
+            "dpt_pick_winrates": tk.StringVar(value=""),
+            "dpt_ban_winrates": tk.StringVar(value=""),
+        }
         self.dpt_explorer_hero_var = tk.StringVar(value=self._default_dpt_explorer_hero())
         self.dpt_explorer_role_var = tk.StringVar(value="")
         self.dpt_explorer_filter_var = tk.StringVar(value="")
@@ -324,6 +332,8 @@ class HeroDraftLibraryApp:
 
         self._build_ui()
         self.dpt_candidate_filter_var.trace_add("write", lambda *_: self._select_dpt_candidate_from_search())
+        for tree_key, filter_var in self.dpt_matrix_filter_vars.items():
+            filter_var.trace_add("write", lambda *_args, key=tree_key: self._select_dpt_matrix_row_from_search(key))
         self._bind_global_mousewheel()
         self.parent.bind("<Destroy>", self._handle_parent_destroy, add="+")
         self._rebuild_edit_hero_grids()
@@ -934,8 +944,16 @@ class HeroDraftLibraryApp:
         summary_notebook.pack(fill="both", expand=True, pady=(0, 12))
 
         self.draft_treeviews["dpt"] = self._create_dpt_summary_tree_tab(summary_notebook, "DPT Picks")
-        self.draft_treeviews["dpt_pick_winrates"] = self._create_dpt_matrix_tree_tab(summary_notebook, "Pick Winrates")
-        self.draft_treeviews["dpt_ban_winrates"] = self._create_dpt_matrix_tree_tab(summary_notebook, "Banned Matchups")
+        self.draft_treeviews["dpt_pick_winrates"] = self._create_dpt_matrix_tree_tab(
+            summary_notebook,
+            "Pick Winrates",
+            "dpt_pick_winrates",
+        )
+        self.draft_treeviews["dpt_ban_winrates"] = self._create_dpt_matrix_tree_tab(
+            summary_notebook,
+            "Banned Matchups",
+            "dpt_ban_winrates",
+        )
         self.dpt_detail_text = self._create_detail_text_tab(summary_notebook, "DPT Detail")
         summary_notebook.select(self.draft_treeviews["dpt"].master)
 
@@ -1558,7 +1576,14 @@ class HeroDraftLibraryApp:
             "conf": 72,
         }
         for column in columns:
-            tree.heading(column, text=headings[column])
+            tree.heading(
+                column,
+                text=headings[column],
+                command=lambda selected_column=column, selected_tree=tree: self._handle_dpt_explorer_tree_sort(
+                    selected_tree,
+                    selected_column,
+                ),
+            )
             tree.column(column, width=widths[column], anchor="center" if column != "hero" else "w")
         tree.pack(fill="both", expand=True)
         self.dpt_open_link_button = ttk.Button(
@@ -1571,9 +1596,31 @@ class HeroDraftLibraryApp:
         tree.bind("<<TreeviewSelect>>", self._handle_dpt_tree_select)
         return tree
 
-    def _create_dpt_matrix_tree_tab(self, notebook, label):
+    def _create_dpt_matrix_tree_tab(self, notebook, label, tree_key):
         tab = ttk.Frame(notebook, padding=8)
         notebook.add(tab, text=label)
+
+        filter_var = self.dpt_matrix_filter_vars.get(tree_key)
+        status_var = self.dpt_matrix_filter_status_vars.get(tree_key)
+        if filter_var is not None and status_var is not None:
+            filter_row = ttk.Frame(tab)
+            filter_row.pack(fill="x", pady=(0, 6))
+            ttk.Label(filter_row, text="Find Hero").pack(side="left")
+            ttk.Entry(
+                filter_row,
+                textvariable=filter_var,
+                width=24,
+            ).pack(side="left", padx=(8, 6))
+            ttk.Button(
+                filter_row,
+                text="Clear",
+                command=lambda key=tree_key: self.dpt_matrix_filter_vars[key].set(""),
+            ).pack(side="left")
+            ttk.Label(
+                filter_row,
+                textvariable=status_var,
+                foreground="#666",
+            ).pack(side="right")
 
         tree_frame = ttk.Frame(tab)
         tree_frame.pack(fill="both", expand=True)
@@ -3013,7 +3060,9 @@ class HeroDraftLibraryApp:
         self._populate_dpt_summary_tree(self.draft_treeviews["dpt"], dpt_rows)
         self._select_dpt_candidate_from_search()
         self._populate_dpt_pick_winrate_tree(self.draft_treeviews["dpt_pick_winrates"], dpt_rows)
+        self._select_dpt_matrix_row_from_search("dpt_pick_winrates")
         self._populate_dpt_ban_winrate_tree(self.draft_treeviews["dpt_ban_winrates"], dpt_rows)
+        self._select_dpt_matrix_row_from_search("dpt_ban_winrates")
 
     def _select_dpt_candidate_from_search(self):
         tree = self.draft_treeviews.get("dpt")
@@ -3115,6 +3164,106 @@ class HeroDraftLibraryApp:
                 for item_id, row, _hero_name, _normalized_hero, compact_hero in candidates:
                     if compact_hero == target_compact:
                         return item_id, row, "Closest"
+
+        return None
+
+    def _select_dpt_matrix_row_from_search(self, tree_key):
+        tree = self.draft_treeviews.get(tree_key)
+        filter_var = self.dpt_matrix_filter_vars.get(tree_key)
+        status_var = self.dpt_matrix_filter_status_vars.get(tree_key)
+        if not tree or filter_var is None or status_var is None:
+            return
+
+        query = filter_var.get().strip()
+        candidates = self._dpt_matrix_search_candidates(tree)
+        total_count = len(candidates)
+        if not query:
+            status_var.set(f"{total_count} heroes" if total_count else "")
+            return
+
+        match = self._find_dpt_matrix_search_match(candidates, query)
+        if not match:
+            status_var.set(f'No close match for "{query}"')
+            return
+
+        item_id, hero_name, match_label = match
+        if item_id not in tree.get_children():
+            status_var.set(f'No close match for "{query}"')
+            return
+
+        tree.selection_set(item_id)
+        tree.focus(item_id)
+        tree.see(item_id)
+        status_var.set(f"{match_label}: {hero_name}")
+
+    def _dpt_matrix_search_candidates(self, tree):
+        candidates = []
+        for item_id in tree.get_children():
+            hero_name = str(tree.set(item_id, "hero") or "").strip()
+            draft_value = str(tree.set(item_id, "draft") or "").strip()
+            if not hero_name or not draft_value:
+                continue
+            normalized_hero = self.hero_match_names.get(hero_name, _normalize_match_text(hero_name))
+            compact_hero = _normalize_compact_text(hero_name)
+            candidates.append((item_id, hero_name, normalized_hero, compact_hero))
+        return candidates
+
+    def _find_dpt_matrix_search_match(self, candidates, query):
+        normalized_query = _normalize_match_text(query)
+        compact_query = _normalize_compact_text(query)
+        lowered_query = str(query or "").strip().lower()
+        if not lowered_query and not normalized_query and not compact_query:
+            return None
+
+        for item_id, hero_name, normalized_hero, compact_hero in candidates:
+            if lowered_query == hero_name.lower():
+                return item_id, hero_name, "Selected"
+            if normalized_query and normalized_query == normalized_hero:
+                return item_id, hero_name, "Selected"
+            if compact_query and compact_query == compact_hero:
+                return item_id, hero_name, "Selected"
+
+        matched_hero = self._match_hero_name(query)
+        if matched_hero:
+            for item_id, hero_name, _normalized_hero, _compact_hero in candidates:
+                if hero_name == matched_hero:
+                    return item_id, hero_name, "Selected"
+
+        partial_matches = []
+        for item_id, hero_name, normalized_hero, compact_hero in candidates:
+            scores = []
+            if lowered_query and lowered_query in hero_name.lower():
+                scores.append((hero_name.lower().find(lowered_query), len(hero_name)))
+            if normalized_query and normalized_query in normalized_hero:
+                scores.append((normalized_hero.find(normalized_query), len(normalized_hero)))
+            if compact_query and compact_query in compact_hero:
+                scores.append((compact_hero.find(compact_query), len(compact_hero)))
+            if scores:
+                best_score = min(scores)
+                partial_matches.append((best_score[0], best_score[1], item_id, hero_name))
+
+        if partial_matches:
+            partial_matches.sort(key=lambda item: (item[0], item[1], item[3]))
+            _position, _length, item_id, hero_name = partial_matches[0]
+            return item_id, hero_name, "Selected"
+
+        normalized_choices = [normalized_hero for _item_id, _hero_name, normalized_hero, _compact_hero in candidates if normalized_hero]
+        if normalized_query and normalized_choices:
+            close_normalized = get_close_matches(normalized_query, normalized_choices, n=1, cutoff=0.52)
+            if close_normalized:
+                target_normalized = close_normalized[0]
+                for item_id, hero_name, normalized_hero, _compact_hero in candidates:
+                    if normalized_hero == target_normalized:
+                        return item_id, hero_name, "Closest"
+
+        compact_choices = [compact_hero for _item_id, _hero_name, _normalized_hero, compact_hero in candidates if compact_hero]
+        if compact_query and compact_choices:
+            close_compact = get_close_matches(compact_query, compact_choices, n=1, cutoff=0.6)
+            if close_compact:
+                target_compact = close_compact[0]
+                for item_id, hero_name, _normalized_hero, compact_hero in candidates:
+                    if compact_hero == target_compact:
+                        return item_id, hero_name, "Closest"
 
         return None
 
@@ -3341,6 +3490,7 @@ class HeroDraftLibraryApp:
                 ),
             )
 
+        self._apply_dpt_explorer_tree_sort(tree)
         first_item = tree.get_children()[0]
         tree.selection_set(first_item)
         tree.focus(first_item)
@@ -3561,7 +3711,9 @@ class HeroDraftLibraryApp:
             return None
 
         if target_role_key:
-            return self._extract_dpt_role_metrics(roles_payload.get(target_role_key))
+            exact_metrics = self._extract_dpt_role_metrics(roles_payload.get(target_role_key))
+            if exact_metrics:
+                return exact_metrics
 
         weighted_rows = []
         for role_key, prior in self._get_dpt_role_priors(target_hero).items():

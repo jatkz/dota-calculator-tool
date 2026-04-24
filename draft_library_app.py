@@ -77,6 +77,7 @@ DRAFT_BUTTON_STYLE_MAP = {
     },
 }
 DPT_HERO_URL_BASE = "https://dota2protracker.com/hero/"
+LIQUIPEDIA_HERO_URL_BASE = "https://liquipedia.net/dota2/"
 DRAFT_DEFAULT_GRID_COLUMNS = 6
 DRAFT_GRID_COLUMNS_BY_ATTRIBUTE = {
     "str": 6,
@@ -95,7 +96,7 @@ DRAFT_GRID_BUTTON_PADY = 0
 DRAFT_GRID_CELL_PADX = 0
 DRAFT_GRID_CELL_PADY = 0
 DRAFT_DETAIL_TEXT_HEIGHT = 12
-DRAFT_SUMMARY_TREE_HEIGHT = 9
+DRAFT_SUMMARY_TREE_HEIGHT = 13
 DPT_EXPLORER_SUMMARY_HEIGHT = 12
 DPT_EXPLORER_TABLE_HEIGHT = 14
 VOICE_DUPLICATE_WINDOW_SECONDS = 1.4
@@ -104,6 +105,42 @@ VOICE_INITIAL_SILENCE_TIMEOUT_SECONDS = 3
 VOICE_BABBLE_TIMEOUT_SECONDS = 0.6
 VOICE_END_SILENCE_TIMEOUT_MS = 240
 VOICE_END_SILENCE_TIMEOUT_AMBIGUOUS_MS = 300
+DRAFT_ACTION_HOTKEYS = {
+    "1": "ally:1",
+    "2": "ally:2",
+    "3": "ally:3",
+    "4": "ally:4",
+    "5": "ally:5",
+    "6": "enemy",
+    "7": "ban",
+}
+DRAFT_ACTION_BUTTON_COLORS = {
+    "default": {
+        "background": "#f0f0f0",
+        "activebackground": "#e2e2e2",
+        "foreground": "#111111",
+    },
+    "ban": {
+        "background": "#6b727c",
+        "activebackground": "#7b8490",
+        "foreground": "#ffffff",
+    },
+    "enemy": {
+        "background": "#8a133d",
+        "activebackground": "#b11c4f",
+        "foreground": "#fff3f7",
+    },
+    "ally": {
+        "background": "#0f7c46",
+        "activebackground": "#18b866",
+        "foreground": "#f4fff8",
+    },
+    "disabled": {
+        "background": "#d7d7d7",
+        "activebackground": "#d7d7d7",
+        "foreground": "#7a7a7a",
+    },
+}
 VOICE_HERO_ALIAS_OVERRIDES = {
     "Earth Spirit": {"earth sp", "earth spirit"},
     "Earthshaker": {"earth shaker", "shaker"},
@@ -303,6 +340,7 @@ class HeroDraftLibraryApp:
         self.search_results = []
         self.draft_hero_buttons = {}
         self.draft_treeviews = {}
+        self.draft_action_buttons = {}
         self.ally_mode_buttons = {}
         self.dpt_explorer_trees = {}
         self.dpt_explorer_tree_sort_state = {}
@@ -313,6 +351,7 @@ class HeroDraftLibraryApp:
         self.tree_heading_tooltip_tree = None
         self.tree_heading_tooltip_column = None
         self.dpt_open_link_button = None
+        self.liquipedia_open_link_button = None
         self.tree_value_tooltip_window = None
         self.tree_value_tooltip_label = None
         self.tree_value_tooltip_tree = None
@@ -331,10 +370,12 @@ class HeroDraftLibraryApp:
         self.draft_voice_last_match_at = 0.0
 
         self._build_ui()
+        self.draft_action_var.trace_add("write", lambda *_: self._refresh_draft_action_buttons())
         self.dpt_candidate_filter_var.trace_add("write", lambda *_: self._select_dpt_candidate_from_search())
         for tree_key, filter_var in self.dpt_matrix_filter_vars.items():
             filter_var.trace_add("write", lambda *_args, key=tree_key: self._select_dpt_matrix_row_from_search(key))
         self._bind_global_mousewheel()
+        self._bind_draft_hotkeys()
         self.parent.bind("<Destroy>", self._handle_parent_destroy, add="+")
         self._rebuild_edit_hero_grids()
         self._refresh_edit_search_results()
@@ -576,6 +617,11 @@ class HeroDraftLibraryApp:
         self.parent.bind_all("<MouseWheel>", self._handle_global_mousewheel, add="+")
         self.parent.bind_all("<Button-4>", self._handle_global_mousewheel, add="+")
         self.parent.bind_all("<Button-5>", self._handle_global_mousewheel, add="+")
+
+    def _bind_draft_hotkeys(self):
+        for digit in DRAFT_ACTION_HOTKEYS:
+            self.parent.bind_all(f"<KeyPress-{digit}>", self._handle_draft_hotkey, add="+")
+            self.parent.bind_all(f"<KeyPress-KP_{digit}>", self._handle_draft_hotkey, add="+")
 
     def _handle_global_mousewheel(self, event):
         region = self._find_scroll_region(event.widget)
@@ -853,6 +899,11 @@ class HeroDraftLibraryApp:
         ).pack(anchor="w", pady=(0, 12))
         ttk.Label(
             self.draft_content,
+            text="Hotkeys: 1-5 allies, 6 enemy, 7 bans.",
+            foreground="#666",
+        ).pack(anchor="w", pady=(0, 8))
+        ttk.Label(
+            self.draft_content,
             textvariable=self.draft_voice_status_var,
             foreground="#666",
         ).pack(anchor="w", pady=(0, 8))
@@ -885,7 +936,7 @@ class HeroDraftLibraryApp:
         action_frame = ttk.LabelFrame(controls_frame, text="Draft Action", padding=6)
         action_frame.pack(side="left", fill="x", expand=True)
 
-        tk.Radiobutton(
+        ban_button = tk.Radiobutton(
             action_frame,
             text="Bans",
             value="ban",
@@ -893,9 +944,12 @@ class HeroDraftLibraryApp:
             indicatoron=False,
             padx=6,
             width=7,
-        ).pack(side="left", padx=(0, 2))
+            borderwidth=2,
+        )
+        ban_button.pack(side="left", padx=(0, 2))
+        self.draft_action_buttons["ban"] = ban_button
 
-        tk.Radiobutton(
+        enemy_button = tk.Radiobutton(
             action_frame,
             text="Enemy",
             value="enemy",
@@ -903,7 +957,10 @@ class HeroDraftLibraryApp:
             indicatoron=False,
             padx=6,
             width=7,
-        ).pack(side="left", padx=(0, 2))
+            borderwidth=2,
+        )
+        enemy_button.pack(side="left", padx=(0, 2))
+        self.draft_action_buttons["enemy"] = enemy_button
 
         for role in ROLE_KEYS:
             button = tk.Radiobutton(
@@ -914,9 +971,11 @@ class HeroDraftLibraryApp:
                 indicatoron=False,
                 padx=10,
                 width=8,
+                borderwidth=2,
             )
             button.pack(side="left", padx=(0, 6))
             self.ally_mode_buttons[role] = button
+            self.draft_action_buttons[f"ally:{role}"] = button
 
         pools_frame = ttk.Frame(self.draft_content)
         pools_frame.pack(fill="x", pady=(0, 12))
@@ -1551,9 +1610,10 @@ class HeroDraftLibraryApp:
             foreground="#666",
         ).pack(side="right")
 
-        columns = ("hero", "role", "draft", "win", "lane", "enemy", "ally", "ban", "conf")
+        columns = ("rank", "hero", "role", "draft", "win", "lane", "enemy", "ally", "ban", "conf")
         tree = ttk.Treeview(tab, columns=columns, show="headings", height=DRAFT_SUMMARY_TREE_HEIGHT)
         headings = {
+            "rank": "#",
             "hero": "Hero",
             "role": "Role",
             "draft": "Draft",
@@ -1565,15 +1625,16 @@ class HeroDraftLibraryApp:
             "conf": "Conf",
         }
         widths = {
-            "hero": 180,
-            "role": 95,
-            "draft": 72,
-            "win": 72,
-            "lane": 72,
-            "enemy": 72,
-            "ally": 72,
-            "ban": 72,
-            "conf": 72,
+            "rank": 44,
+            "hero": 170,
+            "role": 90,
+            "draft": 70,
+            "win": 70,
+            "lane": 70,
+            "enemy": 70,
+            "ally": 70,
+            "ban": 70,
+            "conf": 70,
         }
         for column in columns:
             tree.heading(
@@ -1586,13 +1647,22 @@ class HeroDraftLibraryApp:
             )
             tree.column(column, width=widths[column], anchor="center" if column != "hero" else "w")
         tree.pack(fill="both", expand=True)
+        link_button_row = ttk.Frame(tab)
+        link_button_row.pack(anchor="w", pady=(6, 0))
         self.dpt_open_link_button = ttk.Button(
-            tab,
+            link_button_row,
             text="Open Selected on D2PT",
             command=self._open_selected_dpt_link,
         )
-        self.dpt_open_link_button.pack(anchor="w", pady=(6, 0))
+        self.dpt_open_link_button.pack(side="left")
         self.dpt_open_link_button.state(["disabled"])
+        self.liquipedia_open_link_button = ttk.Button(
+            link_button_row,
+            text="Open Selected on Liquipedia",
+            command=self._open_selected_liquipedia_link,
+        )
+        self.liquipedia_open_link_button.pack(side="left", padx=(8, 0))
+        self.liquipedia_open_link_button.state(["disabled"])
         tree.bind("<<TreeviewSelect>>", self._handle_dpt_tree_select)
         return tree
 
@@ -2898,6 +2968,38 @@ class HeroDraftLibraryApp:
                 status_text="Voice paused outside Draft Mode."
             )
 
+    def _handle_draft_hotkey(self, event):
+        digit = self._normalize_draft_hotkey(getattr(event, "keysym", ""))
+        if not digit or not self._draft_hotkeys_enabled_for_widget(event.widget):
+            return None
+
+        action = DRAFT_ACTION_HOTKEYS[digit]
+        if action.startswith("ally:") and action.endswith(self.your_role_var.get()):
+            self.draft_status_var.set(
+                f"Ally role {self.your_role_var.get()} is your slot, so hotkey {digit} is unavailable."
+            )
+            return "break"
+
+        self.draft_action_var.set(action)
+        self.draft_status_var.set(f"Draft action set to {self._draft_action_label()}.")
+        return "break"
+
+    def _normalize_draft_hotkey(self, keysym):
+        if keysym in DRAFT_ACTION_HOTKEYS:
+            return keysym
+        if keysym.startswith("KP_"):
+            keypad_digit = keysym[3:]
+            if keypad_digit in DRAFT_ACTION_HOTKEYS:
+                return keypad_digit
+        return None
+
+    def _draft_hotkeys_enabled_for_widget(self, widget):
+        if widget is None or not self.parent.winfo_viewable():
+            return False
+        if self.mode_notebook.select() != str(self.draft_mode_tab):
+            return False
+        return widget.winfo_class() not in {"Entry", "TEntry", "Text", "Listbox", "Spinbox", "TCombobox"}
+
     def _handle_parent_destroy(self, event):
         if event.widget is not self.parent:
             return
@@ -2965,11 +3067,37 @@ class HeroDraftLibraryApp:
         return self._ensure_hero_record(hero_name).get("default_role", "1")
 
     def _refresh_draft_outputs(self):
+        self._refresh_draft_action_buttons()
         self._refresh_ally_mode_buttons()
         self._refresh_draft_button_labels()
         self._refresh_pool_summary_labels()
         self._refresh_detail_texts()
         self._refresh_summary_tables()
+
+    def _refresh_draft_action_buttons(self):
+        selected_action = self.draft_action_var.get()
+        for action, button in self.draft_action_buttons.items():
+            palette_key = "ally" if action.startswith("ally:") else action
+            palette = DRAFT_ACTION_BUTTON_COLORS.get(palette_key, DRAFT_ACTION_BUTTON_COLORS["default"])
+            is_selected = action == selected_action
+            is_disabled = button.cget("state") == "disabled"
+
+            if is_disabled:
+                applied = DRAFT_ACTION_BUTTON_COLORS["disabled"]
+            elif is_selected:
+                applied = palette
+            else:
+                applied = DRAFT_ACTION_BUTTON_COLORS["default"]
+
+            button.configure(
+                background=applied["background"],
+                activebackground=applied["activebackground"],
+                foreground=applied["foreground"],
+                activeforeground=applied["foreground"],
+                disabledforeground=DRAFT_ACTION_BUTTON_COLORS["disabled"]["foreground"],
+                selectcolor=applied["background"],
+                relief="sunken" if is_selected else "raised",
+            )
 
     def _refresh_ally_mode_buttons(self):
         your_role = self.your_role_var.get()
@@ -2978,6 +3106,7 @@ class HeroDraftLibraryApp:
                 button.configure(state="disabled")
             else:
                 button.configure(state="normal")
+        self._refresh_draft_action_buttons()
 
     def _refresh_draft_button_labels(self):
         for hero_name, button in self.draft_hero_buttons.items():
@@ -3463,11 +3592,13 @@ class HeroDraftLibraryApp:
                 "",
                 "end",
                 iid="empty",
-                values=(message, "", "", "", "", "", "", "", ""),
+                values=("", message, "", "", "", "", "", "", "", ""),
             )
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
             if self.dpt_open_link_button is not None:
                 self.dpt_open_link_button.state(["disabled"])
+            if self.liquipedia_open_link_button is not None:
+                self.liquipedia_open_link_button.state(["disabled"])
             return
 
         for index, row in enumerate(rows):
@@ -3478,6 +3609,7 @@ class HeroDraftLibraryApp:
                 "end",
                 iid=item_id,
                 values=(
+                    str(index + 1),
                     row["hero"],
                     row["role"],
                     f"{row['draft']['compositeNormalized']:.2f}",
@@ -3498,6 +3630,10 @@ class HeroDraftLibraryApp:
 
     def _dpt_hero_page_url(self, hero_name):
         return f"{DPT_HERO_URL_BASE}{quote(str(hero_name or ''), safe='')}"
+
+    def _liquipedia_hero_page_url(self, hero_name):
+        page_name = str(hero_name or "").strip().replace(" ", "_")
+        return f"{LIQUIPEDIA_HERO_URL_BASE}{quote(page_name, safe='')}"
 
     def _selected_dpt_candidate_row(self):
         tree = self.draft_treeviews.get("dpt")
@@ -3581,6 +3717,23 @@ class HeroDraftLibraryApp:
             self.draft_status_var.set(f"Could not open D2PT for {row['hero']}; copied link instead.")
         else:
             self.draft_status_var.set(f"Could not open D2PT for {row['hero']}.")
+        return None
+
+    def _open_selected_liquipedia_link(self):
+        row = self._selected_dpt_candidate_row()
+        if not row:
+            self.draft_status_var.set("Select a DPT Picks row first.")
+            return None
+
+        url = self._liquipedia_hero_page_url(row["hero"])
+        if self._open_external_url(url):
+            self.draft_status_var.set(f"Opened Liquipedia for {row['hero']}.")
+            return None
+
+        if self._copy_text_to_clipboard(url):
+            self.draft_status_var.set(f"Could not open Liquipedia for {row['hero']}; copied link instead.")
+        else:
+            self.draft_status_var.set(f"Could not open Liquipedia for {row['hero']}.")
         return None
 
     def _dpt_candidate_empty_message(self):
@@ -3874,6 +4027,8 @@ class HeroDraftLibraryApp:
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
             if self.dpt_open_link_button is not None:
                 self.dpt_open_link_button.state(["disabled"])
+            if self.liquipedia_open_link_button is not None:
+                self.liquipedia_open_link_button.state(["disabled"])
             return
 
         row = self.latest_dpt_candidate_lookup.get(selection[0])
@@ -3881,10 +4036,14 @@ class HeroDraftLibraryApp:
             self._set_readonly_text(self.dpt_detail_text, self._default_dpt_detail_text())
             if self.dpt_open_link_button is not None:
                 self.dpt_open_link_button.state(["disabled"])
+            if self.liquipedia_open_link_button is not None:
+                self.liquipedia_open_link_button.state(["disabled"])
             return
 
         if self.dpt_open_link_button is not None:
             self.dpt_open_link_button.state(["!disabled"])
+        if self.liquipedia_open_link_button is not None:
+            self.liquipedia_open_link_button.state(["!disabled"])
         self._set_readonly_text(self.dpt_detail_text, self._format_dpt_candidate_detail(row))
 
     def _format_dpt_candidate_detail(self, row):

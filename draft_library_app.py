@@ -4,13 +4,14 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import tkinter as tk
 from base64 import b64encode
 from difflib import get_close_matches
 from datetime import datetime
-from tkinter import messagebox, ttk
+from tkinter import filedialog, font as tkfont, messagebox, ttk
 from urllib.parse import quote
 
 try:
@@ -25,6 +26,20 @@ except Exception as exc:  # pragma: no cover - fallback keeps the UI usable.
     score_dpt_candidate = None
     finalize_dpt_candidate_normalization = None
     DPT_SCORER_IMPORT_ERROR = str(exc)
+
+try:
+    from scripts.detect_draft_bans import detect_banned_heroes as detect_banned_heroes_from_screenshot
+    DRAFT_BAN_DETECT_IMPORT_ERROR = None
+except Exception as exc:  # pragma: no cover - fallback keeps the UI usable.
+    detect_banned_heroes_from_screenshot = None
+    DRAFT_BAN_DETECT_IMPORT_ERROR = str(exc)
+
+try:
+    from PIL import ImageGrab
+    DRAFT_CLIPBOARD_IMAGE_IMPORT_ERROR = None
+except Exception as exc:  # pragma: no cover - fallback keeps the UI usable.
+    ImageGrab = None
+    DRAFT_CLIPBOARD_IMAGE_IMPORT_ERROR = str(exc)
 
 
 ROLE_KEYS = ["1", "2", "3", "4", "5"]
@@ -99,6 +114,25 @@ DRAFT_DETAIL_TEXT_HEIGHT = 12
 DRAFT_SUMMARY_TREE_HEIGHT = 13
 DPT_EXPLORER_SUMMARY_HEIGHT = 12
 DPT_EXPLORER_TABLE_HEIGHT = 14
+DPT_MATRIX_HEADER_HEIGHT = 28
+DPT_MATRIX_ROW_HEIGHT = 28
+DPT_MATRIX_COLOR_MIN = 40.0
+DPT_MATRIX_COLOR_MID = 50.0
+DPT_MATRIX_COLOR_MAX = 60.0
+DPT_MATRIX_COLOR_STEP = 0.5
+DPT_MATRIX_LANE_MIN = -10.0
+DPT_MATRIX_LANE_MID = 0.0
+DPT_MATRIX_LANE_MAX = 10.0
+DPT_MATRIX_TRAFFIC_RED = (203, 86, 86)
+DPT_MATRIX_TRAFFIC_YELLOW = (233, 205, 92)
+DPT_MATRIX_TRAFFIC_GREEN = (84, 173, 107)
+DPT_MATRIX_HEADER_BG = "#f2f4f7"
+DPT_MATRIX_ROW_BG = "#ffffff"
+DPT_MATRIX_ROW_ALT_BG = "#f8fafc"
+DPT_MATRIX_DRAFT_BG = "#eef3f8"
+DPT_MATRIX_EMPTY_BG = "#ebedf0"
+DPT_MATRIX_GRID_COLOR = "#d2d7de"
+DPT_MATRIX_SELECTION_COLOR = "#2a78d1"
 VOICE_DUPLICATE_WINDOW_SECONDS = 1.4
 VOICE_LISTEN_TIMEOUT_SECONDS = 5
 VOICE_INITIAL_SILENCE_TIMEOUT_SECONDS = 3
@@ -222,6 +256,605 @@ def _normalize_compact_text(text):
 
 def _timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _rgb_to_hex(rgb):
+    return "#{:02x}{:02x}{:02x}".format(*rgb)
+
+
+def _blend_rgb(start_rgb, end_rgb, ratio):
+    ratio = max(0.0, min(1.0, float(ratio)))
+    return tuple(
+        int(round(start + ((end - start) * ratio)))
+        for start, end in zip(start_rgb, end_rgb)
+    )
+
+
+def _quantize_range_value(value, minimum, maximum, step):
+    clamped = max(float(minimum), min(float(maximum), float(value)))
+    step_count = round((clamped - float(minimum)) / float(step))
+    return float(minimum) + (step_count * float(step))
+
+
+def _traffic_scale_color(value):
+    bucketed = _quantize_range_value(
+        value,
+        DPT_MATRIX_COLOR_MIN,
+        DPT_MATRIX_COLOR_MAX,
+        DPT_MATRIX_COLOR_STEP,
+    )
+    if bucketed <= DPT_MATRIX_COLOR_MID:
+        ratio = (bucketed - DPT_MATRIX_COLOR_MIN) / (DPT_MATRIX_COLOR_MID - DPT_MATRIX_COLOR_MIN)
+        return _blend_rgb(DPT_MATRIX_TRAFFIC_RED, DPT_MATRIX_TRAFFIC_YELLOW, ratio)
+
+    ratio = (bucketed - DPT_MATRIX_COLOR_MID) / (DPT_MATRIX_COLOR_MAX - DPT_MATRIX_COLOR_MID)
+    return _blend_rgb(DPT_MATRIX_TRAFFIC_YELLOW, DPT_MATRIX_TRAFFIC_GREEN, ratio)
+
+
+def _lane_scale_color(value):
+    bucketed = _quantize_range_value(
+        value,
+        DPT_MATRIX_LANE_MIN,
+        DPT_MATRIX_LANE_MAX,
+        DPT_MATRIX_COLOR_STEP,
+    )
+    if bucketed <= DPT_MATRIX_LANE_MID:
+        ratio = (bucketed - DPT_MATRIX_LANE_MIN) / (DPT_MATRIX_LANE_MID - DPT_MATRIX_LANE_MIN)
+        return _blend_rgb(DPT_MATRIX_TRAFFIC_RED, DPT_MATRIX_TRAFFIC_YELLOW, ratio)
+
+    ratio = (bucketed - DPT_MATRIX_LANE_MID) / (DPT_MATRIX_LANE_MAX - DPT_MATRIX_LANE_MID)
+    return _blend_rgb(DPT_MATRIX_TRAFFIC_YELLOW, DPT_MATRIX_TRAFFIC_GREEN, ratio)
+
+
+def _metric_text_color(rgb):
+    brightness = (0.299 * rgb[0]) + (0.587 * rgb[1]) + (0.114 * rgb[2])
+    return "#111111" if brightness >= 160 else "#ffffff"
+
+
+def _pair_metric_color(metric_name, metric_value):
+    if metric_value is None:
+        return None
+
+    if metric_name == "laneAdvantage":
+        return _lane_scale_color(float(metric_value))
+    return _traffic_scale_color(float(metric_value))
+
+
+# Treeview can only style full rows, so the DPT matrix tabs render their split-color cells on canvas.
+class DptMatrixView(ttk.Frame):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
+        self.columns = ()
+        self.headings = {}
+        self.base_widths = {}
+        self.anchors = {}
+        self.min_widths = {}
+        self.fit_to_width = False
+        self.rows = []
+        self.row_lookup = {}
+        self.row_order = []
+        self.selected_item_id = None
+        self.message = ""
+        self.current_widths = {}
+        self.column_spans = []
+
+        self.header_font = tkfont.nametofont("TkHeadingFont")
+        self.body_font = tkfont.nametofont("TkDefaultFont")
+        self.metric_font = self.body_font.copy()
+        self.metric_font.configure(weight="bold")
+
+        self.header_canvas = tk.Canvas(
+            self,
+            height=DPT_MATRIX_HEADER_HEIGHT,
+            highlightthickness=0,
+            bd=0,
+            bg=DPT_MATRIX_HEADER_BG,
+        )
+        self.body_canvas = tk.Canvas(
+            self,
+            highlightthickness=0,
+            bd=0,
+            bg=DPT_MATRIX_ROW_BG,
+        )
+        self.v_scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.body_canvas.yview)
+        self.h_scrollbar = ttk.Scrollbar(self, orient="horizontal", command=self._xview)
+        self.body_canvas.configure(
+            yscrollcommand=self.v_scrollbar.set,
+            xscrollcommand=self._handle_body_xscroll,
+        )
+
+        self.header_canvas.grid(row=0, column=0, sticky="ew")
+        self.body_canvas.grid(row=1, column=0, sticky="nsew")
+        self.v_scrollbar.grid(row=1, column=1, sticky="ns")
+        self.h_scrollbar.grid(row=2, column=0, sticky="ew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        self.header_canvas.bind("<Configure>", lambda _event: self.render(), add="+")
+        self.body_canvas.bind("<Configure>", lambda _event: self.render(), add="+")
+
+        self.header_canvas.bind(
+            "<Motion>",
+            self._handle_header_motion,
+            add="+",
+        )
+        self.header_canvas.bind(
+            "<Leave>",
+            lambda _event: self.app._hide_tree_heading_tooltip(),
+            add="+",
+        )
+        self.header_canvas.bind(
+            "<ButtonPress-1>",
+            lambda _event: self.app._hide_tree_heading_tooltip(),
+            add="+",
+        )
+        self.header_canvas.bind(
+            "<Destroy>",
+            lambda event: self.app._handle_tree_heading_destroy(self.header_canvas, event),
+            add="+",
+        )
+        self.header_canvas.bind("<MouseWheel>", self._handle_mousewheel, add="+")
+        self.header_canvas.bind("<Button-4>", self._handle_mousewheel, add="+")
+        self.header_canvas.bind("<Button-5>", self._handle_mousewheel, add="+")
+
+        self.body_canvas.bind(
+            "<Motion>",
+            self._handle_body_motion,
+            add="+",
+        )
+        self.body_canvas.bind(
+            "<Leave>",
+            lambda _event: self.app._hide_tree_value_tooltip(),
+            add="+",
+        )
+        self.body_canvas.bind(
+            "<ButtonPress-1>",
+            self._handle_body_click,
+            add="+",
+        )
+        self.body_canvas.bind(
+            "<Destroy>",
+            lambda event: self.app._handle_tree_value_destroy(self.body_canvas, event),
+            add="+",
+        )
+        self.body_canvas.bind("<MouseWheel>", self._handle_mousewheel, add="+")
+        self.body_canvas.bind("<Button-4>", self._handle_mousewheel, add="+")
+        self.body_canvas.bind("<Button-5>", self._handle_mousewheel, add="+")
+
+    def configure_layout(self, columns, headings, widths, anchors=None, fit_to_width=False, min_widths=None):
+        self.columns = tuple(columns)
+        self.headings = dict(headings)
+        self.base_widths = dict(widths)
+        self.anchors = dict(anchors or {})
+        self.fit_to_width = bool(fit_to_width)
+        self.min_widths = dict(min_widths or {})
+        self.render()
+
+    def set_matrix_rows(self, rows, message=""):
+        previous_selected_hero = ""
+        if self.selected_item_id in self.row_lookup:
+            previous_selected_hero = str(
+                self.row_lookup[self.selected_item_id].get("values", {}).get("hero", "")
+            ).strip()
+
+        self.rows = list(rows)
+        self.row_lookup = {
+            row["item_id"]: row
+            for row in self.rows
+        }
+        self.row_order = [row["item_id"] for row in self.rows]
+        self.message = str(message or "")
+        self.selected_item_id = None
+        if previous_selected_hero:
+            for row in self.rows:
+                if str(row.get("values", {}).get("hero", "")).strip() == previous_selected_hero:
+                    self.selected_item_id = row["item_id"]
+                    break
+        self.render()
+
+    def get_children(self):
+        return tuple(self.row_order)
+
+    def set(self, item_id, column_id, value=None):
+        if value is not None:
+            return ""
+        row = self.row_lookup.get(item_id)
+        if not row:
+            return ""
+        return str(row.get("values", {}).get(column_id, ""))
+
+    def selection(self):
+        if self.selected_item_id and self.selected_item_id in self.row_lookup:
+            return (self.selected_item_id,)
+        return ()
+
+    def selection_set(self, item_id):
+        if item_id in self.row_lookup:
+            self.selected_item_id = item_id
+            self.render()
+
+    def focus(self, item_id):
+        self.selection_set(item_id)
+
+    def see(self, item_id):
+        if item_id not in self.row_lookup or not self.row_order:
+            return
+
+        row_index = self.row_order.index(item_id)
+        total_height = len(self.row_order) * DPT_MATRIX_ROW_HEIGHT
+        if total_height <= 0:
+            return
+
+        visible_height = max(int(self.body_canvas.winfo_height()), DPT_MATRIX_ROW_HEIGHT)
+        row_top = row_index * DPT_MATRIX_ROW_HEIGHT
+        row_bottom = row_top + DPT_MATRIX_ROW_HEIGHT
+        current_top = float(self.body_canvas.canvasy(0))
+        current_bottom = current_top + visible_height
+
+        if row_top < current_top:
+            self.body_canvas.yview_moveto(max(0.0, row_top / total_height))
+        elif row_bottom > current_bottom:
+            offset = max(0.0, row_bottom - visible_height)
+            self.body_canvas.yview_moveto(min(1.0, offset / total_height))
+
+    def render(self):
+        self.header_canvas.delete("all")
+        self.body_canvas.delete("all")
+        self.column_spans = []
+
+        if not self.columns:
+            return
+
+        self.current_widths = self._resolved_widths()
+        total_width = sum(self.current_widths.get(column, 0) for column in self.columns)
+        x_cursor = 0
+        for column in self.columns:
+            column_width = self.current_widths.get(column, 0)
+            self.column_spans.append((column, x_cursor, x_cursor + column_width))
+            self._draw_header_cell(column, x_cursor, x_cursor + column_width)
+            x_cursor += column_width
+
+        self.header_canvas.configure(scrollregion=(0, 0, max(total_width, 1), DPT_MATRIX_HEADER_HEIGHT))
+
+        if self.message:
+            self.body_canvas.create_text(
+                12,
+                12,
+                text=self.message,
+                anchor="nw",
+                fill="#666666",
+                font=self.body_font,
+                width=max(total_width - 24, 180),
+            )
+            total_height = max(DPT_MATRIX_ROW_HEIGHT, int(self.body_canvas.winfo_height() or DPT_MATRIX_ROW_HEIGHT))
+        else:
+            for row_index, row in enumerate(self.rows):
+                y0 = row_index * DPT_MATRIX_ROW_HEIGHT
+                y1 = y0 + DPT_MATRIX_ROW_HEIGHT
+                self._draw_row(row, row_index, y0, y1, total_width)
+            total_height = max(len(self.rows) * DPT_MATRIX_ROW_HEIGHT, 1)
+
+        self.body_canvas.configure(scrollregion=(0, 0, max(total_width, 1), total_height))
+        self.header_canvas.xview_moveto(self.body_canvas.xview()[0])
+
+    def _resolved_widths(self):
+        widths = {column: int(self.base_widths.get(column, 110)) for column in self.columns}
+        if not self.fit_to_width:
+            return widths
+
+        available_width = max(int(self.body_canvas.winfo_width()), int(self.body_canvas.winfo_reqwidth() or 0))
+        available_width = max(available_width - 6, 0)
+        total_width = sum(widths.values())
+        if available_width <= 0:
+            return widths
+
+        if total_width > available_width:
+            return self.app._fit_tree_columns_to_width(
+                self.body_canvas,
+                self.columns,
+                widths,
+                self.min_widths,
+            )
+
+        if total_width < available_width and self.columns:
+            extra = available_width - total_width
+            base_extra, remainder = divmod(extra, len(self.columns))
+            for index, column in enumerate(self.columns):
+                widths[column] += base_extra + (1 if index < remainder else 0)
+
+        return widths
+
+    def _draw_header_cell(self, column_id, x0, x1):
+        self.header_canvas.create_rectangle(
+            x0,
+            0,
+            x1,
+            DPT_MATRIX_HEADER_HEIGHT,
+            fill=DPT_MATRIX_HEADER_BG,
+            outline=DPT_MATRIX_GRID_COLOR,
+        )
+        text_value = self._truncate_text(
+            self.headings.get(column_id, column_id),
+            max(12, (x1 - x0) - 12),
+            self.header_font,
+        )
+        anchor = "w" if self.anchors.get(column_id) == "w" else "center"
+        text_x = x0 + 6 if anchor == "w" else (x0 + x1) / 2
+        self.header_canvas.create_text(
+            text_x,
+            DPT_MATRIX_HEADER_HEIGHT / 2,
+            text=text_value,
+            anchor=anchor,
+            fill="#111111",
+            font=self.header_font,
+        )
+
+    def _draw_row(self, row, row_index, y0, y1, total_width):
+        row_fill = DPT_MATRIX_ROW_ALT_BG if row_index % 2 else DPT_MATRIX_ROW_BG
+        self.body_canvas.create_rectangle(
+            0,
+            y0,
+            total_width,
+            y1,
+            fill=row_fill,
+            outline="",
+        )
+
+        for column_id, x0, x1 in self.column_spans:
+            if column_id == "hero":
+                self._draw_text_cell(
+                    x0,
+                    y0,
+                    x1,
+                    y1,
+                    row_fill,
+                    row["values"].get(column_id, ""),
+                    anchor="w",
+                )
+                continue
+
+            if column_id == "draft":
+                self._draw_text_cell(
+                    x0,
+                    y0,
+                    x1,
+                    y1,
+                    DPT_MATRIX_DRAFT_BG,
+                    row["values"].get(column_id, ""),
+                    anchor="center",
+                )
+                continue
+
+            self._draw_metric_cell(
+                x0,
+                y0,
+                x1,
+                y1,
+                row.get("metrics", {}).get(column_id),
+            )
+
+        if row["item_id"] == self.selected_item_id:
+            self.body_canvas.create_rectangle(
+                1,
+                y0 + 1,
+                max(total_width - 1, 1),
+                max(y1 - 1, y0 + 1),
+                outline=DPT_MATRIX_SELECTION_COLOR,
+                width=2,
+            )
+
+    def _draw_text_cell(self, x0, y0, x1, y1, fill, text, anchor):
+        self.body_canvas.create_rectangle(
+            x0,
+            y0,
+            x1,
+            y1,
+            fill=fill,
+            outline=DPT_MATRIX_GRID_COLOR,
+        )
+        display_text = self._truncate_text(text, max(12, (x1 - x0) - 12), self.body_font)
+        text_x = x0 + 6 if anchor == "w" else (x0 + x1) / 2
+        self.body_canvas.create_text(
+            text_x,
+            (y0 + y1) / 2,
+            text=display_text,
+            anchor=anchor,
+            fill="#111111",
+            font=self.body_font,
+        )
+
+    def _draw_metric_cell(self, x0, y0, x1, y1, metrics):
+        if not metrics:
+            self.body_canvas.create_rectangle(
+                x0,
+                y0,
+                x1,
+                y1,
+                fill=DPT_MATRIX_EMPTY_BG,
+                outline=DPT_MATRIX_GRID_COLOR,
+            )
+            self.body_canvas.create_text(
+                (x0 + x1) / 2,
+                (y0 + y1) / 2,
+                text="-",
+                fill="#666666",
+                font=self.metric_font,
+            )
+            return
+
+        midpoint = x0 + ((x1 - x0) / 2)
+        winrate = metrics.get("winrate")
+        lane_advantage = metrics.get("laneAdvantage")
+
+        winrate_rgb = _pair_metric_color("winrate", winrate)
+        lane_rgb = _pair_metric_color("laneAdvantage", lane_advantage)
+        winrate_fill = _rgb_to_hex(winrate_rgb) if winrate_rgb else DPT_MATRIX_EMPTY_BG
+        lane_fill = _rgb_to_hex(lane_rgb) if lane_rgb else DPT_MATRIX_EMPTY_BG
+        winrate_text = self.app._format_dpt_percent(winrate)
+        lane_text = self.app._format_optional_number(lane_advantage, digits=1)
+
+        self.body_canvas.create_rectangle(
+            x0,
+            y0,
+            midpoint,
+            y1,
+            fill=winrate_fill,
+            outline="",
+        )
+        self.body_canvas.create_rectangle(
+            midpoint,
+            y0,
+            x1,
+            y1,
+            fill=lane_fill,
+            outline="",
+        )
+        self.body_canvas.create_rectangle(
+            x0,
+            y0,
+            x1,
+            y1,
+            outline=DPT_MATRIX_GRID_COLOR,
+        )
+        self.body_canvas.create_line(
+            midpoint,
+            y0,
+            midpoint,
+            y1,
+            fill=DPT_MATRIX_GRID_COLOR,
+        )
+
+        self.body_canvas.create_text(
+            x0 + ((midpoint - x0) / 2),
+            (y0 + y1) / 2,
+            text=winrate_text,
+            fill=_metric_text_color(winrate_rgb) if winrate_rgb else "#666666",
+            font=self.metric_font,
+        )
+        self.body_canvas.create_text(
+            midpoint + ((x1 - midpoint) / 2),
+            (y0 + y1) / 2,
+            text=lane_text,
+            fill=_metric_text_color(lane_rgb) if lane_rgb else "#666666",
+            font=self.metric_font,
+        )
+
+    def _truncate_text(self, text, max_width, font):
+        text_value = str(text or "")
+        if max_width <= 0 or font.measure(text_value) <= max_width:
+            return text_value
+
+        ellipsis = "..."
+        available_width = max_width - font.measure(ellipsis)
+        if available_width <= 0:
+            return ellipsis
+
+        truncated = text_value
+        while truncated and font.measure(truncated) > available_width:
+            truncated = truncated[:-1]
+        return f"{truncated}{ellipsis}" if truncated else ellipsis
+
+    def _column_span_at(self, canvas_x):
+        for column_id, x0, x1 in self.column_spans:
+            if x0 <= canvas_x <= x1:
+                return column_id, x0, x1
+        return None, None, None
+
+    def _row_at(self, canvas_y):
+        if self.message or not self.rows:
+            return None
+        row_index = int(canvas_y // DPT_MATRIX_ROW_HEIGHT)
+        if row_index < 0 or row_index >= len(self.rows):
+            return None
+        return self.rows[row_index]
+
+    def _handle_body_xscroll(self, first, last):
+        self.h_scrollbar.set(first, last)
+        try:
+            self.header_canvas.xview_moveto(first)
+        except tk.TclError:
+            return
+
+    def _xview(self, *args):
+        self.header_canvas.xview(*args)
+        self.body_canvas.xview(*args)
+
+    def _handle_header_motion(self, event):
+        column_id, _x0, _x1 = self._column_span_at(self.header_canvas.canvasx(event.x))
+        if not column_id:
+            self.app._hide_tree_heading_tooltip()
+            return
+
+        heading_text = str(self.headings.get(column_id, "")).strip()
+        if not heading_text:
+            self.app._hide_tree_heading_tooltip()
+            return
+
+        self.app._hide_tree_value_tooltip()
+        self.app._show_tree_heading_tooltip(
+            self.header_canvas,
+            column_id,
+            heading_text,
+            event.x_root,
+            event.y_root,
+        )
+
+    def _handle_body_motion(self, event):
+        column_id, _x0, _x1 = self._column_span_at(self.body_canvas.canvasx(event.x))
+        row = self._row_at(self.body_canvas.canvasy(event.y))
+        if not row or not column_id:
+            self.app._hide_tree_value_tooltip()
+            return
+
+        self.app._hide_tree_heading_tooltip()
+        tooltip_text = self._tooltip_text_for_cell(row, column_id)
+        if not tooltip_text:
+            self.app._hide_tree_value_tooltip()
+            return
+
+        self.app._show_tree_value_tooltip(
+            self.body_canvas,
+            row["item_id"],
+            column_id,
+            tooltip_text,
+            event.x_root,
+            event.y_root,
+        )
+
+    def _handle_body_click(self, event):
+        self.app._hide_tree_heading_tooltip()
+        self.app._hide_tree_value_tooltip()
+        row = self._row_at(self.body_canvas.canvasy(event.y))
+        if row:
+            self.selection_set(row["item_id"])
+
+    def _tooltip_text_for_cell(self, row, column_id):
+        if column_id in {"hero", "draft"}:
+            return str(row["values"].get(column_id, "")).strip()
+
+        heading_text = str(self.headings.get(column_id, column_id)).strip()
+        metrics = row.get("metrics", {}).get(column_id)
+        if not metrics:
+            return f"{heading_text}\nNo DPT pair data"
+
+        winrate_text = self.app._format_dpt_percent(metrics.get("winrate"))
+        lane_text = self.app._format_optional_number(metrics.get("laneAdvantage"), digits=1)
+        return (
+            f"{heading_text}\n"
+            f"Winrate: {winrate_text + '%' if winrate_text != '-' else '-'}\n"
+            f"Lane advantage: {lane_text}\n"
+            f"Matches: {self.app._format_dpt_matches(metrics.get('matches'))}"
+        )
+
+    def _handle_mousewheel(self, event):
+        units = self.app._mousewheel_units(event)
+        if not units:
+            return None
+        if not self.app._widget_can_scroll(self.body_canvas, units):
+            return None
+        self.body_canvas.yview_scroll(units, "units")
+        return "break"
 
 
 class HeroDraftLibraryApp:
@@ -684,7 +1317,7 @@ class HeroDraftLibraryApp:
         return canvas
 
     def _is_inner_scrollable_widget(self, widget):
-        return widget.winfo_class() in {"Text", "Listbox", "Treeview"}
+        return widget.winfo_class() in {"Text", "Listbox", "Treeview", "Canvas"}
 
     def _widget_can_scroll(self, widget, units):
         try:
@@ -887,6 +1520,16 @@ class HeroDraftLibraryApp:
             command=self._handle_draft_voice_toggle,
         )
         self.draft_voice_toggle_button.pack(side="left", padx=(0, 8))
+        ttk.Button(
+            title_actions,
+            text="Import Bans PNG",
+            command=self._import_bans_from_screenshot,
+        ).pack(side="left", padx=(0, 8))
+        ttk.Button(
+            title_actions,
+            text="Import Clipboard",
+            command=self._import_bans_from_clipboard,
+        ).pack(side="left", padx=(0, 8))
         ttk.Button(
             title_actions,
             text="Clear Draft",
@@ -1692,31 +2335,9 @@ class HeroDraftLibraryApp:
                 foreground="#666",
             ).pack(side="right")
 
-        tree_frame = ttk.Frame(tab)
-        tree_frame.pack(fill="both", expand=True)
-
-        tree = ttk.Treeview(
-            tree_frame,
-            show="headings",
-            height=DRAFT_SUMMARY_TREE_HEIGHT,
-        )
-        y_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
-        x_scrollbar = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
-        tree.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
-
-        tree.grid(row=0, column=0, sticky="nsew")
-        y_scrollbar.grid(row=0, column=1, sticky="ns")
-        x_scrollbar.grid(row=1, column=0, sticky="ew")
-        tree_frame.columnconfigure(0, weight=1)
-        tree_frame.rowconfigure(0, weight=1)
-        self._bind_tree_heading_tooltip(tree)
-        self._bind_tree_value_tooltip(tree)
-        tree.bind(
-            "<Configure>",
-            lambda event, selected_tree=tree: self._handle_dpt_matrix_tree_configure(selected_tree, event),
-            add="+",
-        )
-        return tree
+        view = DptMatrixView(tab, self)
+        view.pack(fill="both", expand=True)
+        return view
 
     def _configure_tree_columns(self, tree, columns, headings, widths, anchors=None, min_widths=None, stretch_columns=None):
         tree.configure(columns=columns, displaycolumns=columns)
@@ -3815,31 +4436,29 @@ class HeroDraftLibraryApp:
             widths[spec["column_id"]] = 106 if fit_to_width else max(170, min(220, len(spec["heading"]) * 8))
             min_widths[spec["column_id"]] = 74 if fit_to_width else 120
 
-        self.dpt_matrix_tree_layouts[str(tree)] = {
-            "columns": columns,
-            "headings": headings,
-            "widths": widths,
-            "anchors": anchors,
-            "fit_to_width": fit_to_width,
-            "min_widths": min_widths,
-        }
-        self._apply_dpt_matrix_tree_layout(tree)
-
-        for item_id in tree.get_children():
-            tree.delete(item_id)
+        tree.configure_layout(
+            columns,
+            headings,
+            widths,
+            anchors=anchors,
+            fit_to_width=fit_to_width,
+            min_widths=min_widths,
+        )
 
         if not rows:
-            self._clear_tree_with_message(tree, self._dpt_candidate_empty_message())
+            tree.set_matrix_rows([], message=self._dpt_candidate_empty_message())
             return
         if not context_specs:
-            self._clear_tree_with_message(tree, empty_context_message)
+            tree.set_matrix_rows([], message=empty_context_message)
             return
 
-        for row in rows:
-            values = [
-                row["hero"],
-                f"{row['draft']['compositeNormalized']:.2f}",
-            ]
+        matrix_rows = []
+        for index, row in enumerate(rows):
+            values = {
+                "hero": row["hero"],
+                "draft": f"{row['draft']['compositeNormalized']:.2f}",
+            }
+            metrics_by_column = {}
             for spec in context_specs:
                 pair_metrics = self._resolve_dpt_pair_metrics(
                     row["hero"],
@@ -3848,8 +4467,18 @@ class HeroDraftLibraryApp:
                     spec["hero"],
                     spec["role_key"],
                 )
-                values.append(self._format_dpt_pair_metrics(pair_metrics))
-            tree.insert("", "end", values=tuple(values))
+                values[spec["column_id"]] = self._format_dpt_pair_metrics(pair_metrics)
+                metrics_by_column[spec["column_id"]] = pair_metrics
+
+            matrix_rows.append(
+                {
+                    "item_id": f"matrix-{index}",
+                    "values": values,
+                    "metrics": metrics_by_column,
+                }
+            )
+
+        tree.set_matrix_rows(matrix_rows)
 
     def _resolve_dpt_pair_metrics(self, candidate_hero, candidate_role_key, pair_group, target_hero, target_role_key=None):
         role_data = (
@@ -4233,6 +4862,144 @@ class HeroDraftLibraryApp:
         self.draft_notes_text.delete("1.0", tk.END)
         self.draft_status_var.set("Draft cleared.")
         self._refresh_draft_outputs()
+
+    def _apply_imported_bans(self, result, source_label, dialog_title):
+        detected_heroes = []
+        for hero_name in result.get("bannedHeroes", []):
+            if hero_name in self.draft_hero_names and hero_name not in detected_heroes:
+                detected_heroes.append(hero_name)
+
+        if not detected_heroes:
+            message = f"No banned heroes were detected in {source_label}."
+            self.draft_status_var.set(message)
+            messagebox.showinfo(dialog_title, message, parent=self.parent)
+            return False
+
+        new_ban_count = 0
+        for hero_name in detected_heroes:
+            if hero_name not in self.banned_heroes:
+                new_ban_count += 1
+            self._remove_hero_from_draft_state(hero_name)
+            self.banned_heroes.add(hero_name)
+
+        self._refresh_draft_outputs()
+        self.draft_status_var.set(
+            f"Imported {len(detected_heroes)} banned heroes from {source_label} ({new_ban_count} new)."
+        )
+        return True
+
+    def _import_bans_from_screenshot_path(self, screenshot_path, source_label, dialog_title):
+        if detect_banned_heroes_from_screenshot is None:
+            problem = DRAFT_BAN_DETECT_IMPORT_ERROR or "Draft screenshot ban detector is unavailable."
+            self.draft_status_var.set(problem)
+            messagebox.showerror(dialog_title, problem, parent=self.parent)
+            return False
+
+        try:
+            result = detect_banned_heroes_from_screenshot(screenshot_path, self.dataset_path)
+        except Exception as exc:
+            message = f"Could not detect bans from {source_label}: {exc}"
+            self.draft_status_var.set(message)
+            messagebox.showerror(dialog_title, message, parent=self.parent)
+            return False
+
+        return self._apply_imported_bans(result, source_label, dialog_title)
+
+    def _import_bans_from_screenshot(self):
+        screenshots_dir = os.path.join(self.base_dir, "draftscreenshots")
+        initial_dir = screenshots_dir if os.path.isdir(screenshots_dir) else self.base_dir
+        screenshot_path = filedialog.askopenfilename(
+            parent=self.parent,
+            title="Select a Dota draft screenshot",
+            initialdir=initial_dir,
+            filetypes=(
+                ("PNG images", "*.png"),
+                ("All files", "*.*"),
+            ),
+        )
+        if not screenshot_path:
+            return
+        self._import_bans_from_screenshot_path(
+            screenshot_path,
+            os.path.basename(screenshot_path),
+            "Import Bans PNG",
+        )
+
+    def _powershell_clipboard_image_to_temp_png(self):
+        powershell_path = shutil.which("powershell.exe") or shutil.which("powershell")
+        if not powershell_path:
+            return None
+
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+        temp_file.close()
+        temp_path = temp_file.name
+        escaped_path = temp_path.replace("'", "''")
+        command = (
+            "$ErrorActionPreference = 'Stop'; "
+            "Add-Type -AssemblyName System.Windows.Forms; "
+            "Add-Type -AssemblyName System.Drawing; "
+            "$image = [System.Windows.Forms.Clipboard]::GetImage(); "
+            "if ($null -eq $image) { throw 'Clipboard does not contain an image.' }; "
+            "try { $image.Save("
+            f"'{escaped_path}', [System.Drawing.Imaging.ImageFormat]::Png"
+            ") } finally { $image.Dispose() }"
+        )
+
+        completed = subprocess.run(
+            [powershell_path, "-NoProfile", "-STA", "-Command", command],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0 or not os.path.exists(temp_path) or os.path.getsize(temp_path) <= 0:
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            details = completed.stderr.strip() or completed.stdout.strip() or "Clipboard does not contain an image."
+            raise RuntimeError(details)
+        return temp_path
+
+    def _clipboard_image_to_temp_png(self):
+        if ImageGrab is not None:
+            clipboard_payload = ImageGrab.grabclipboard()
+            if clipboard_payload is not None and hasattr(clipboard_payload, "save"):
+                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                temp_file.close()
+                clipboard_payload.save(temp_file.name, "PNG")
+                return temp_file.name
+
+        temp_path = self._powershell_clipboard_image_to_temp_png()
+        if temp_path:
+            return temp_path
+
+        if ImageGrab is None and DRAFT_CLIPBOARD_IMAGE_IMPORT_ERROR:
+            raise RuntimeError(
+                "Clipboard image import requires Pillow or Windows PowerShell support. "
+                f"Pillow import failed: {DRAFT_CLIPBOARD_IMAGE_IMPORT_ERROR}"
+            )
+        raise RuntimeError("Clipboard does not contain an image screenshot.")
+
+    def _import_bans_from_clipboard(self):
+        try:
+            screenshot_path = self._clipboard_image_to_temp_png()
+        except Exception as exc:
+            message = f"Could not read a screenshot image from the clipboard: {exc}"
+            self.draft_status_var.set(message)
+            messagebox.showerror("Import Clipboard", message, parent=self.parent)
+            return
+
+        try:
+            self._import_bans_from_screenshot_path(
+                screenshot_path,
+                "clipboard screenshot",
+                "Import Clipboard",
+            )
+        finally:
+            try:
+                os.unlink(screenshot_path)
+            except OSError:
+                pass
 
     def _refresh_saved_drafts_listbox(self, selected_name=None):
         self.saved_drafts_listbox.delete(0, tk.END)

@@ -29,6 +29,65 @@ ITEM_PICKER_BUTTON_PIXEL_HEIGHT = 56
 ITEM_PICKER_BUTTON_WRAP = 154
 MAX_ATTRIBUTE_BONUS_POINTS = 7
 ATTRIBUTE_BONUS_PER_POINT = 2
+INVOKER_ORB_MAX_LEVEL = 8
+INVOKER_SCEPTER_ORB_BONUS = 1
+INVOKER_SCEPTER_ITEM_NAME = "Aghanim's Scepter"
+INVOKER_ORB_ORDER = ("quas", "wex", "exort")
+INVOKER_ORB_LABELS = {
+    "quas": "Quas",
+    "wex": "Wex",
+    "exort": "Exort",
+}
+INVOKER_SCEPTER_CHOICES = ("None", "Quas", "Wex", "Exort")
+INVOKER_SPELL_DEFAULT_ORBS = {
+    "Cold Snap": "quas",
+    "Ghost Walk": "quas",
+    "Ice Wall": "quas",
+    "E. M. P.": "wex",
+    "Tornado": "wex",
+    "Alacrity": ("wex", "exort"),
+    "Sun Strike": "exort",
+    "Forge Spirit": ("quas", "exort"),
+    "Chaos Meteor": ("wex", "exort"),
+    "Deafening Blast": ("quas", "wex", "exort"),
+}
+INVOKER_SPELL_METRIC_ORBS = {
+    "Ghost Walk": {
+        "moveSpeedChange": "wex",
+        "selfHealthRegenBonus": "quas",
+        "enemyMoveSpeedSlow": "quas",
+        "manaRegenBonus": "quas",
+    },
+    "Ice Wall": {
+        "moveSpeedSlow": "quas",
+        "wallDuration": "quas",
+        "damagePerSecond": "exort",
+    },
+    "Alacrity": {
+        "attackSpeedBonus": "wex",
+        "attackDamageBonus": "exort",
+    },
+    "Forge Spirit": {
+        "numberOfSpirits": ("quas", "exort"),
+        "maxHealth": "quas",
+        "duration": "quas",
+        "attackRange": "exort",
+        "maxMana": "exort",
+        "attackDamage": "exort",
+        "armor": "exort",
+    },
+    "Chaos Meteor": {
+        "travelDistance": "wex",
+        "mainDamagePerInterval": "exort",
+        "burnDamagePerSecond": "exort",
+    },
+    "Deafening Blast": {
+        "knockbackDuration": "quas",
+        "knockbackDistance": "quas",
+        "disarmDuration": "wex",
+        "damage": "exort",
+    },
+}
 DISPLAY_STAT_ORDER = [
     "health",
     "mana",
@@ -375,6 +434,8 @@ class DatasetHeroApp:
         self.skill_option_map = {}
         self.skill_option_values = []
         self.skill_picker_window = None
+        self.invoker_scepter_orb_var = tk.StringVar(value="None")
+        self.invoker_scepter_status_var = tk.StringVar(value="")
         self.talent_choice_vars = {tier: tk.StringVar(value="Left") for tier in TALENT_TIERS}
         self.talent_left_text_vars = {tier: tk.StringVar(value="") for tier in TALENT_TIERS}
         self.talent_right_text_vars = {tier: tk.StringVar(value="") for tier in TALENT_TIERS}
@@ -405,6 +466,7 @@ class DatasetHeroApp:
         self.hero_picker_image_cache = {}
         self.hero_picker_icon_missing = set()
         self.hero_search_var.trace_add("write", lambda *_: self._refresh_hero_grid())
+        self.invoker_scepter_orb_var.trace_add("write", lambda *_: self.recalculate())
         self.item_search_var = tk.StringVar(value="")
         self.item_filter_status_var = tk.StringVar(value="")
         self.item_picker_window = None
@@ -496,6 +558,18 @@ class DatasetHeroApp:
         ttk.Button(skill_header, text="Auto Fill To Level", command=self._auto_fill_skill_build).pack(side="right")
         ttk.Button(skill_header, text="Clear", command=self._clear_skill_build).pack(side="right", padx=(0, 8))
 
+        self.invoker_scepter_frame = ttk.Frame(skill_frame)
+        ttk.Label(self.invoker_scepter_frame, text="Invoker Scepter Orb").pack(side="left", padx=(0, 6))
+        self.invoker_scepter_combo = ttk.Combobox(
+            self.invoker_scepter_frame,
+            textvariable=self.invoker_scepter_orb_var,
+            values=INVOKER_SCEPTER_CHOICES,
+            state="readonly",
+            width=8,
+        )
+        self.invoker_scepter_combo.pack(side="left", padx=(0, 10))
+        ttk.Label(self.invoker_scepter_frame, textvariable=self.invoker_scepter_status_var, foreground="#666").pack(side="left")
+
         self.skill_build_grid = ttk.Frame(skill_frame)
         self.skill_build_grid.pack(fill="x", padx=8, pady=(0, 8))
         self.skill_build_buttons = []
@@ -581,7 +655,7 @@ class DatasetHeroApp:
         self.ability_tree.heading("duration", text="Duration")
         self.ability_tree.heading("notes", text="Effects")
         self.ability_tree.column("#0", width=190, anchor="w")
-        self.ability_tree.column("level", width=45, anchor="center")
+        self.ability_tree.column("level", width=72, anchor="center")
         self.ability_tree.column("type", width=70, anchor="center")
         self.ability_tree.column("damage", width=110, anchor="e")
         self.ability_tree.column("cooldown", width=65, anchor="e")
@@ -1139,6 +1213,10 @@ class DatasetHeroApp:
     def _inventory_networth(self):
         return sum(self._item_cost_value(item_name) for item_name in self._selected_item_names())
 
+    def _inventory_has_aghanims_scepter(self, item_names=None):
+        item_names = self._selected_item_names() if item_names is None else item_names
+        return INVOKER_SCEPTER_ITEM_NAME in item_names
+
     def _inventory_slot_text(self, slot_index):
         item_name = self.inventory_vars[slot_index].get().strip()
         if not item_name:
@@ -1154,6 +1232,7 @@ class DatasetHeroApp:
             button.configure(text=self._inventory_slot_text(index))
         networth = self._inventory_networth()
         self.inventory_networth_var.set(f"Inventory networth: {_format_number(networth)}g")
+        self._refresh_invoker_scepter_controls()
 
     def _clear_inventory_slot(self, slot_index):
         if 0 <= slot_index < len(self.inventory_vars):
@@ -1332,6 +1411,28 @@ class DatasetHeroApp:
         abilities = hero_data.get("abilities", [])
         return abilities if isinstance(abilities, list) else []
 
+    def _is_invoker_hero(self, hero_data=None):
+        if hero_data is None:
+            _hero_name, hero_data = self._selected_hero_data()
+        return str(hero_data.get("name", "") or "").strip().lower() == "invoker"
+
+    def _invoker_orb_key_for_ability(self, ability):
+        name = str(ability.get("name", "") or "").strip().lower()
+        return name if name in INVOKER_ORB_ORDER else None
+
+    def _invoker_orb_indices(self, hero_data):
+        indices = {}
+        for index, ability in enumerate(self._hero_abilities(hero_data)):
+            orb = self._invoker_orb_key_for_ability(ability)
+            if orb:
+                indices[orb] = index
+        return indices
+
+    def _invoker_scepter_orb_key(self):
+        variable = getattr(self, "invoker_scepter_orb_var", None)
+        selected = str(variable.get() if variable is not None else "None").strip().lower()
+        return selected if selected in INVOKER_ORB_ORDER else None
+
     def _ability_max_level(self, ability):
         max_level = 1
         for payload in (ability.get("values", {}),):
@@ -1354,6 +1455,14 @@ class DatasetHeroApp:
             return labels[index]
         return str(index + 1)
 
+    def _skill_record_max_level(self, record, abilities):
+        if "max_level" in record:
+            return int(record["max_level"])
+        index = int(record.get("index", -1))
+        if 0 <= index < len(abilities):
+            return self._ability_max_level(abilities[index])
+        return 1
+
     def _is_free_innate_ability(self, ability, index):
         type_text = str(ability.get("type", "") or "").strip().lower()
         slot_text = str(ability.get("slot", ability.get("abilitySlot", "")) or "").strip().lower()
@@ -1363,6 +1472,23 @@ class DatasetHeroApp:
 
     def _build_skill_option_records(self, hero_data):
         records = []
+        if self._is_invoker_hero(hero_data):
+            orb_indices = self._invoker_orb_indices(hero_data)
+            for orb in INVOKER_ORB_ORDER:
+                index = orb_indices.get(orb)
+                if index is None:
+                    continue
+                ability = self._hero_abilities(hero_data)[index]
+                label = str(ability.get("name") or INVOKER_ORB_LABELS[orb])
+                records.append({
+                    "label": label,
+                    "kind": "invoker_orb",
+                    "index": index,
+                    "orb": orb,
+                    "max_level": INVOKER_ORB_MAX_LEVEL,
+                })
+            return records
+
         for index, ability in enumerate(self._hero_abilities(hero_data)):
             name = str(ability.get("name") or f"Ability {index + 1}").strip()
             if not name:
@@ -1475,6 +1601,31 @@ class DatasetHeroApp:
         self._refresh_skill_build_buttons()
         self.recalculate()
 
+    def _refresh_invoker_scepter_controls(self):
+        frame = getattr(self, "invoker_scepter_frame", None)
+        if frame is None:
+            return
+
+        _hero_name, hero_data = self._selected_hero_data()
+        if not self._is_invoker_hero(hero_data):
+            if frame.winfo_ismapped():
+                frame.pack_forget()
+            return
+
+        if not frame.winfo_ismapped():
+            frame.pack(fill="x", padx=8, pady=(0, 8), before=self.skill_build_grid)
+
+        selected_items = self._selected_item_names()
+        has_scepter = self._inventory_has_aghanims_scepter(selected_items)
+        selected_orb = self._invoker_scepter_orb_key()
+        if has_scepter and selected_orb:
+            status = f"{INVOKER_SCEPTER_ITEM_NAME}: +{INVOKER_SCEPTER_ORB_BONUS} {INVOKER_ORB_LABELS[selected_orb]} point"
+        elif has_scepter:
+            status = f"{INVOKER_SCEPTER_ITEM_NAME}: choose Quas, Wex, or Exort for +{INVOKER_SCEPTER_ORB_BONUS}"
+        else:
+            status = f"Add {INVOKER_SCEPTER_ITEM_NAME} to inventory to activate the chosen +{INVOKER_SCEPTER_ORB_BONUS} orb point."
+        self.invoker_scepter_status_var.set(status)
+
     def _talent_text(self, hero_data, tier, side):
         talents = hero_data.get("talents", {})
         if not isinstance(talents, dict):
@@ -1497,6 +1648,7 @@ class DatasetHeroApp:
         self.skill_option_map = {record["label"]: record for record in records}
         self.skill_option_values = [""] + [record["label"] for record in records]
         self._refresh_skill_build_buttons()
+        self._refresh_invoker_scepter_controls()
         self._refresh_talent_texts(hero_data)
 
         action_values = [ACTION_EMPTY, ACTION_AUTO_ATTACK, ACTION_STOP]
@@ -1529,20 +1681,27 @@ class DatasetHeroApp:
         _hero_name, hero_data = self._selected_hero_data()
         abilities = self._hero_abilities(hero_data)
         ability_labels = []
-        for index, ability in enumerate(abilities):
-            if self._is_free_innate_ability(ability, index):
-                continue
-            if self._ability_max_level(ability) <= 1:
-                continue
-            label = f"{self._ability_slot_label(index)}: {ability.get('name')}"
-            if label in self.skill_option_map:
-                ability_labels.append(label)
+        if self._is_invoker_hero(hero_data):
+            ability_labels = [
+                record["label"]
+                for record in self.skill_option_map.values()
+                if record.get("kind") == "invoker_orb"
+            ]
+        else:
+            for index, ability in enumerate(abilities):
+                if self._is_free_innate_ability(ability, index):
+                    continue
+                if self._ability_max_level(ability) <= 1:
+                    continue
+                label = f"{self._ability_slot_label(index)}: {ability.get('name')}"
+                if label in self.skill_option_map:
+                    ability_labels.append(label)
 
         learned = {label: 0 for label in ability_labels}
         max_by_label = {}
         for label in ability_labels:
             record = self.skill_option_map[label]
-            max_by_label[label] = self._ability_max_level(abilities[record["index"]])
+            max_by_label[label] = self._skill_record_max_level(record, abilities)
 
         self._syncing_skill_build = True
         for build_var in self.skill_build_vars:
@@ -1560,7 +1719,7 @@ class DatasetHeroApp:
                         learned[candidate] += 1
                         break
             if not chosen:
-                chosen = "Attribute Bonus (+2 all)"
+                chosen = "" if self._is_invoker_hero(hero_data) else "Attribute Bonus (+2 all)"
             self.skill_build_vars[level_index].set(chosen)
         self._syncing_skill_build = False
         self._refresh_skill_build_buttons()
@@ -1594,11 +1753,70 @@ class DatasetHeroApp:
 
         return selected_talent_ids, selected_talent_labels
 
-    def _get_skill_build_state(self, hero_data=None, level=None):
+    def _get_invoker_skill_build_state(self, hero_data, level, item_names=None):
+        abilities = self._hero_abilities(hero_data)
+        ability_levels = [0 for _ in abilities]
+        for index, ability in enumerate(abilities):
+            if self._is_free_innate_ability(ability, index):
+                ability_levels[index] = 1
+
+        selected_talent_ids, selected_talent_labels = self._get_active_talents(hero_data, int(level))
+        orb_indices = self._invoker_orb_indices(hero_data)
+        base_orb_points = {orb: 0 for orb in INVOKER_ORB_ORDER}
+        max_slots = max(0, min(MAX_SKILL_BUILD_LEVEL, int(level)))
+
+        for build_var in self.skill_build_vars[:max_slots]:
+            record = self.skill_option_map.get(build_var.get())
+            if not record or record.get("kind") != "invoker_orb":
+                continue
+            orb = record.get("orb")
+            if orb in base_orb_points and base_orb_points[orb] < INVOKER_ORB_MAX_LEVEL:
+                base_orb_points[orb] += 1
+
+        scepter_orb = None
+        item_names = item_names if item_names is not None else self._selected_item_names()
+        if self._inventory_has_aghanims_scepter(item_names):
+            scepter_orb = self._invoker_scepter_orb_key()
+
+        effective_orb_levels = dict(base_orb_points)
+        if scepter_orb in effective_orb_levels:
+            effective_orb_levels[scepter_orb] = min(
+                INVOKER_ORB_MAX_LEVEL + INVOKER_SCEPTER_ORB_BONUS,
+                effective_orb_levels[scepter_orb] + INVOKER_SCEPTER_ORB_BONUS,
+            )
+
+        for orb, index in orb_indices.items():
+            if 0 <= index < len(ability_levels):
+                ability_levels[index] = effective_orb_levels.get(orb, 0)
+
+        for index, ability in enumerate(abilities):
+            name = str(ability.get("name", "") or "").strip()
+            required_orbs = INVOKER_SPELL_DEFAULT_ORBS.get(name)
+            if not required_orbs:
+                continue
+            if isinstance(required_orbs, str):
+                required_orbs = (required_orbs,)
+            levels = [effective_orb_levels.get(orb, 0) for orb in required_orbs]
+            ability_levels[index] = max(levels) if levels and all(level > 0 for level in levels) else 0
+
+        return {
+            "ability_levels": ability_levels,
+            "selected_talent_ids": selected_talent_ids,
+            "selected_talent_labels": selected_talent_labels,
+            "attribute_bonus_points": 0,
+            "invoker_orb_points": base_orb_points,
+            "invoker_orb_levels": effective_orb_levels,
+            "invoker_scepter_orb": scepter_orb,
+        }
+
+    def _get_skill_build_state(self, hero_data=None, level=None, item_names=None):
         if hero_data is None:
             _hero_name, hero_data = self._selected_hero_data()
         if level is None:
             level = self._parse_level()
+        if self._is_invoker_hero(hero_data):
+            return self._get_invoker_skill_build_state(hero_data, level, item_names=item_names)
+
         abilities = self._hero_abilities(hero_data)
         ability_levels = [0 for _ in abilities]
         max_levels = [self._ability_max_level(ability) for ability in abilities]
@@ -1951,6 +2169,37 @@ class DatasetHeroApp:
             return 0.45 * (modifiers["strength"] + modifiers["agility"] + modifiers["intelligence"])
         return 0.0
 
+    def _raw_ability_metric_value(self, ability, metric_key, default=None):
+        entry = self._ability_metric_entry(ability, metric_key)
+        if not entry:
+            return default
+        values = entry.get("values")
+        if isinstance(values, list) and values:
+            return values[0]
+        if "value" in entry:
+            return entry.get("value")
+        return default
+
+    def _collect_invoker_orb_modifiers(self, hero_data, skill_state):
+        modifiers = _empty_modifiers()
+        if not self._is_invoker_hero(hero_data):
+            return modifiers
+
+        orb_levels = skill_state.get("invoker_orb_levels", {})
+        orb_indices = self._invoker_orb_indices(hero_data)
+        abilities = self._hero_abilities(hero_data)
+        for orb, stat_name, metric_key in (
+            ("quas", "strength", "strBonusPerLevel"),
+            ("wex", "agility", "agiBonus"),
+            ("exort", "intelligence", "intBonus"),
+        ):
+            index = orb_indices.get(orb)
+            if index is None or index >= len(abilities):
+                continue
+            per_level = _to_float(self._raw_ability_metric_value(abilities[index], metric_key, default=1.0), default=1.0)
+            modifiers[stat_name] += per_level * _to_float(orb_levels.get(orb), default=0.0)
+        return modifiers
+
     def _compute_stats_for(self, hero_name, hero_data, level, item_names=None, skill_state=None, apply_adjustments=False):
         item_names = item_names if item_names is not None else []
         skill_state = skill_state if isinstance(skill_state, dict) else {
@@ -1966,10 +2215,12 @@ class DatasetHeroApp:
 
         item_modifiers, selected_items = self._collect_item_modifiers_from_names(item_names)
         talent_modifiers, applied_talent_labels = self._collect_skill_talent_modifiers(hero_data, skill_state)
+        invoker_orb_modifiers = self._collect_invoker_orb_modifiers(hero_data, skill_state)
 
         total_modifiers = _empty_modifiers()
         _merge_modifiers(total_modifiers, item_modifiers)
         _merge_modifiers(total_modifiers, talent_modifiers)
+        _merge_modifiers(total_modifiers, invoker_orb_modifiers)
 
         manual_attribute_points, build_attribute_points, total_attribute_points = self._resolve_attribute_bonus_points(skill_state)
         attribute_bonus_total = total_attribute_points * ATTRIBUTE_BONUS_PER_POINT
@@ -2142,8 +2393,8 @@ class DatasetHeroApp:
     def _calculate_stats(self):
         hero_name, hero_data = self._selected_hero_data()
         level = self._parse_level()
-        skill_state = self._get_skill_build_state(hero_data, level)
         selected_items = self._selected_item_names()
+        skill_state = self._get_skill_build_state(hero_data, level, item_names=selected_items)
         stats = self._compute_stats_for(
             hero_name,
             hero_data,
@@ -2154,10 +2405,23 @@ class DatasetHeroApp:
         )
 
         attribute_summary = stats.get("attribute_bonus", {})
-        self.attribute_bonus_summary_var.set(
-            f"Attribute bonus: {attribute_summary.get('total', 0)}/{MAX_ATTRIBUTE_BONUS_POINTS} level-slot points "
-            f"(+{attribute_summary.get('flat', 0)} to each stat)"
-        )
+        if self._is_invoker_hero(hero_data):
+            orb_levels = skill_state.get("invoker_orb_levels", {})
+            base_orbs = skill_state.get("invoker_orb_points", {})
+            orb_parts = []
+            for orb in INVOKER_ORB_ORDER:
+                base_level = base_orbs.get(orb, 0)
+                effective_level = orb_levels.get(orb, base_level)
+                if effective_level != base_level:
+                    orb_parts.append(f"{INVOKER_ORB_LABELS[orb]} {base_level}+{effective_level - base_level}/{INVOKER_ORB_MAX_LEVEL + INVOKER_SCEPTER_ORB_BONUS}")
+                else:
+                    orb_parts.append(f"{INVOKER_ORB_LABELS[orb]} {base_level}/{INVOKER_ORB_MAX_LEVEL}")
+            self.attribute_bonus_summary_var.set(f"Invoker orbs: {', '.join(orb_parts)} | no attribute bonus slots")
+        else:
+            self.attribute_bonus_summary_var.set(
+                f"Attribute bonus: {attribute_summary.get('total', 0)}/{MAX_ATTRIBUTE_BONUS_POINTS} level-slot points "
+                f"(+{attribute_summary.get('flat', 0)} to each stat)"
+            )
         networth_text = f"{_format_number(stats.get('inventory_networth', 0))}g"
         item_summary = (
             f"{', '.join(stats['selected_items'])} ({networth_text})"
@@ -2196,9 +2460,41 @@ class DatasetHeroApp:
                 return metric
         return None
 
+    def _invoker_metric_orb_selector(self, ability, metric_key):
+        name = str(ability.get("name", "") or "").strip()
+        metric_overrides = INVOKER_SPELL_METRIC_ORBS.get(name, {})
+        return metric_overrides.get(metric_key, INVOKER_SPELL_DEFAULT_ORBS.get(name))
+
+    def _invoker_metric_level_for_ability(self, ability, metric_key, ability_level):
+        current_skill_state = getattr(self, "current_skill_state", {})
+        orb_levels = current_skill_state.get("invoker_orb_levels", {}) if isinstance(current_skill_state, dict) else {}
+        if not orb_levels:
+            return ability_level
+
+        selector = self._invoker_metric_orb_selector(ability, metric_key)
+        if not selector:
+            return ability_level
+        if isinstance(selector, str):
+            return int(max(0, min(INVOKER_ORB_MAX_LEVEL + INVOKER_SCEPTER_ORB_BONUS, _to_float(orb_levels.get(selector)))))
+
+        levels = [
+            int(max(0, min(INVOKER_ORB_MAX_LEVEL + INVOKER_SCEPTER_ORB_BONUS, _to_float(orb_levels.get(orb)))))
+            for orb in selector
+        ]
+        return min(levels) if levels else ability_level
+
     def _ability_metric_value(self, ability, metric_key, ability_level, selected_talent_ids=None, default=None):
         if ability_level <= 0:
             return default
+        invoker_metric_level = self._invoker_metric_level_for_ability(ability, metric_key, ability_level)
+        if invoker_metric_level <= 0:
+            return default
+        if str(ability.get("name", "") or "").strip() == "Sun Strike" and metric_key in {"damage", "baseDamage"}:
+            base_damage = _to_float(self._raw_ability_metric_value(ability, "baseDamage", default=0.0), default=0.0)
+            damage_bonus = _to_float(self._raw_ability_metric_value(ability, "damageBonusPerLevel", default=0.0), default=0.0)
+            return base_damage + (damage_bonus * invoker_metric_level)
+        ability_level = invoker_metric_level
+
         entry = self._ability_metric_entry(ability, metric_key)
         if not entry:
             return default
@@ -2260,6 +2556,8 @@ class DatasetHeroApp:
             "silenceDuration",
             "rootDuration",
             "buffDuration",
+            "burnDuration",
+            "wallDuration",
             "maxChannelTime",
         ):
             value = self._ability_metric_value(ability, key, ability_level, selected_talents, default=None)
@@ -2307,13 +2605,26 @@ class DatasetHeroApp:
             payload["uses_attack_damage"] = True
             payload["notes"].append(f"{_format_number(factor * 100)}% attack")
 
+        ability_name = str(ability.get("name", "") or "").strip()
         attack_damage_bonus = self._ability_metric_value(ability, "attackDamageBonus", ability_level, selected_talents, default=None)
         if attack_damage_bonus is not None:
-            payload["instant"] += _to_float(attack_damage_bonus)
-            payload["notes"].append(f"+{_format_number(attack_damage_bonus)} attack bonus")
+            if ability_name == "Alacrity":
+                payload["notes"].append(f"+{_format_number(attack_damage_bonus)} attack damage buff")
+            else:
+                payload["instant"] += _to_float(attack_damage_bonus)
+                payload["notes"].append(f"+{_format_number(attack_damage_bonus)} attack bonus")
 
         if instant_factor is None:
-            for key in ("damage", "firstDamage", "damageDealt", "totalDamage", "baseDamage", "maxDamage"):
+            for key in (
+                "damage",
+                "firstDamage",
+                "damageDealt",
+                "totalDamage",
+                "baseDamage",
+                "maxDamage",
+                "damagePerProc",
+                "mainDamagePerInterval",
+            ):
                 value = self._ability_metric_value(ability, key, ability_level, selected_talents, default=None)
                 if value is not None:
                     payload["instant"] += _to_float(value)
@@ -2331,15 +2642,26 @@ class DatasetHeroApp:
             payload["instant"] += _to_float(instance_damage) * instances
             payload["notes"].append(f"{_format_number(instance_damage)} x {_format_number(instances)}")
 
-        dps = self._ability_metric_value(ability, "damagePerSecond", ability_level, selected_talents, default=None)
-        if dps is not None:
-            duration = self._duration_for_ability(ability, ability_level)
-            payload["dot_dps"] = _to_float(dps)
-            payload["dot_duration"] = duration
-            payload["notes"].append(f"{_format_number(dps)}/s")
+        for dps_key in ("damagePerSecond", "burnDamagePerSecond"):
+            dps = self._ability_metric_value(ability, dps_key, ability_level, selected_talents, default=None)
+            if dps is not None:
+                duration = self._duration_for_ability(ability, ability_level)
+                payload["dot_dps"] = _to_float(dps)
+                payload["dot_duration"] = duration
+                payload["notes"].append(f"{_format_number(dps)}/s")
+                break
 
         payload["damage_type"] = self._infer_ability_damage_type(ability, payload)
         return payload
+
+    def _invoker_scaling_text(self, ability):
+        selector = INVOKER_SPELL_DEFAULT_ORBS.get(str(ability.get("name", "") or "").strip())
+        orb_levels = self.current_skill_state.get("invoker_orb_levels", {})
+        if not selector or not orb_levels:
+            return ""
+        if isinstance(selector, str):
+            selector = (selector,)
+        return "/".join(f"{INVOKER_ORB_LABELS[orb][0]}{int(_to_float(orb_levels.get(orb)))}" for orb in selector)
 
     def _refresh_ability_tree(self):
         for row_id in self.ability_tree.get_children():
@@ -2357,6 +2679,19 @@ class DatasetHeroApp:
         for index, ability in enumerate(abilities):
             level = ability_levels[index] if index < len(ability_levels) else 0
             max_level = self._ability_max_level(ability)
+            level_text = f"{level}/{max_level}"
+            invoker_scaling = ""
+            if self._is_invoker_hero(hero_data):
+                orb = self._invoker_orb_key_for_ability(ability)
+                if orb:
+                    scepter_orb = self.current_skill_state.get("invoker_scepter_orb")
+                    max_level = INVOKER_ORB_MAX_LEVEL + (INVOKER_SCEPTER_ORB_BONUS if scepter_orb == orb else 0)
+                    level_text = f"{level}/{max_level}"
+                else:
+                    invoker_scaling = self._invoker_scaling_text(ability)
+                    if invoker_scaling:
+                        max_level = INVOKER_ORB_MAX_LEVEL + INVOKER_SCEPTER_ORB_BONUS
+                        level_text = invoker_scaling
             damage_payload = self._ability_damage_payload(ability, level, self.current_stats)
             damage_text = "-"
             if damage_payload["instant"] or damage_payload["dot_dps"]:
@@ -2374,9 +2709,11 @@ class DatasetHeroApp:
             effect_parts = [str(effect) for effect in (ability.get("effects", []) or [])[:8]]
             if self._is_free_innate_ability(ability, index):
                 effect_parts.insert(0, "Free innate")
+            if invoker_scaling:
+                effect_parts.insert(0, f"Scales with {invoker_scaling}")
             effects = ", ".join(effect_parts)
             row = (
-                f"{level}/{max_level}",
+                level_text,
                 str(ability.get("type", "") or "-"),
                 damage_text,
                 self._ability_metric_text(ability, "cooldown", level),
@@ -2503,6 +2840,14 @@ class DatasetHeroApp:
             "attack_backswing": attack_backswing,
         }
 
+    def _current_attack_damage(self, stats, caster_effects, current_time):
+        damage = _to_float(stats.get("total_attack_damage"))
+        for effect in self._active_effects(caster_effects, current_time):
+            damage += effect.get("attack_damage_bonus", 0.0)
+            if effect.get("attack_damage_pct"):
+                damage *= max(0.0, 1 + effect["attack_damage_pct"])
+        return damage
+
     def _expected_attack_multiplier(self, hero_data, skill_state):
         multiplier = 1.0
         notes = []
@@ -2576,12 +2921,17 @@ class DatasetHeroApp:
                 target_effects.append(effect)
 
         attack_speed_bonus = self._ability_metric_value(ability, "attackSpeedBonus", ability_level, selected_talents, default=None)
-        if attack_speed_bonus is not None and duration > 0:
-            caster_effects.append({
+        attack_damage_bonus = self._ability_metric_value(ability, "attackDamageBonus", ability_level, selected_talents, default=None)
+        if duration > 0 and (attack_speed_bonus is not None or attack_damage_bonus is not None):
+            effect = {
                 "name": str(ability.get("name", "Buff")),
                 "expires": current_time + duration,
-                "attack_speed_bonus": _to_float(attack_speed_bonus),
-            })
+            }
+            if attack_speed_bonus is not None:
+                effect["attack_speed_bonus"] = _to_float(attack_speed_bonus)
+            if attack_damage_bonus is not None:
+                effect["attack_damage_bonus"] = _to_float(attack_damage_bonus)
+            caster_effects.append(effect)
 
     def _advance_simulation_time(self, target, target_effects, current_time, next_time, damage_events):
         if target is None or next_time <= current_time:
@@ -2754,7 +3104,7 @@ class DatasetHeroApp:
             for hit in ready_hits:
                 if hit["kind"] == "attack":
                     multiplier, notes = self._expected_attack_multiplier(hero_data, skill_state)
-                    raw_damage = _to_float(stats.get("total_attack_damage")) * multiplier
+                    raw_damage = self._current_attack_damage(stats, caster_effects, current_time) * multiplier
                     effective = self._apply_damage_to_target(raw_damage, "Physical", target, target_effects, current_time)
                     total_effective_damage += effective
                     self._apply_attack_debuffs(target_effects, current_time)

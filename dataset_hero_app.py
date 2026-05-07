@@ -13,11 +13,20 @@ DEFAULT_INVENTORY_SLOTS = 6
 DEFAULT_ACTION_SLOTS = 10
 MAX_SKILL_BUILD_LEVEL = 30
 DEFAULT_TIMELINE_SECONDS = 20
+SKILL_BUILD_COLUMNS = 10
+SKILL_SLOT_PIXEL_WIDTH = 64
+SKILL_SLOT_PIXEL_HEIGHT = 64
+SKILL_SLOT_BUTTON_WRAP = 58
 HERO_GRID_COLUMNS = 6
 HERO_SEARCH_RESULT_LIMIT = 60
 HERO_PICKER_BUTTON_PIXEL_WIDTH = 96
 HERO_PICKER_BUTTON_PIXEL_HEIGHT = 54
 HERO_PICKER_BUTTON_WRAP = 88
+ITEM_GRID_COLUMNS = 4
+ITEM_SEARCH_RESULT_LIMIT = 120
+ITEM_PICKER_BUTTON_PIXEL_WIDTH = 168
+ITEM_PICKER_BUTTON_PIXEL_HEIGHT = 56
+ITEM_PICKER_BUTTON_WRAP = 154
 MAX_ATTRIBUTE_BONUS_POINTS = 7
 ATTRIBUTE_BONUS_PER_POINT = 2
 DISPLAY_STAT_ORDER = [
@@ -356,6 +365,7 @@ class DatasetHeroApp:
         self.level_var = tk.StringVar(value="1")
         self.attribute_bonus_summary_var = tk.StringVar(value="")
         self.inventory_vars = [tk.StringVar(value="") for _ in range(DEFAULT_INVENTORY_SLOTS)]
+        self.inventory_networth_var = tk.StringVar(value="")
         self.summary_var = tk.StringVar(value="")
         self.ability_summary_var = tk.StringVar(value="")
         self.simulation_summary_var = tk.StringVar(value="")
@@ -364,6 +374,7 @@ class DatasetHeroApp:
         self.skill_build_vars = [tk.StringVar(value="") for _ in range(MAX_SKILL_BUILD_LEVEL)]
         self.skill_option_map = {}
         self.skill_option_values = []
+        self.skill_picker_window = None
         self.talent_choice_vars = {tier: tk.StringVar(value="Left") for tier in TALENT_TIERS}
         self.talent_left_text_vars = {tier: tk.StringVar(value="") for tier in TALENT_TIERS}
         self.talent_right_text_vars = {tier: tk.StringVar(value="") for tier in TALENT_TIERS}
@@ -394,6 +405,13 @@ class DatasetHeroApp:
         self.hero_picker_image_cache = {}
         self.hero_picker_icon_missing = set()
         self.hero_search_var.trace_add("write", lambda *_: self._refresh_hero_grid())
+        self.item_search_var = tk.StringVar(value="")
+        self.item_filter_status_var = tk.StringVar(value="")
+        self.item_picker_window = None
+        self.item_picker_slot_index = None
+        self.item_grid_canvas = None
+        self.item_grid_frame = None
+        self.item_search_var.trace_add("write", lambda *_: self._refresh_item_grid())
 
         self._create_widgets()
         self._update_hero_dependent_options(reset_build=True)
@@ -472,7 +490,7 @@ class DatasetHeroApp:
         skill_header.pack(fill="x", padx=8, pady=(8, 4))
         ttk.Label(
             skill_header,
-            text="Each level can learn an ability or attribute bonus. Talent choices unlock separately by hero level.",
+            text="Each square is one hero level slot. Innate and talent unlocks are free; attribute bonus consumes a slot.",
             foreground="#666",
         ).pack(side="left")
         ttk.Button(skill_header, text="Auto Fill To Level", command=self._auto_fill_skill_build).pack(side="right")
@@ -480,27 +498,32 @@ class DatasetHeroApp:
 
         self.skill_build_grid = ttk.Frame(skill_frame)
         self.skill_build_grid.pack(fill="x", padx=8, pady=(0, 8))
-        self.skill_build_combos = []
-        for index, build_var in enumerate(self.skill_build_vars):
-            row = index // 5
-            col = (index % 5) * 2
-            ttk.Label(self.skill_build_grid, text=f"{index + 1:02d}").grid(
-                row=row,
-                column=col,
-                sticky="e",
-                padx=(0, 4),
-                pady=3,
-            )
-            combo = ttk.Combobox(
+        self.skill_build_buttons = []
+        for index, _build_var in enumerate(self.skill_build_vars):
+            row = index // SKILL_BUILD_COLUMNS
+            column = index % SKILL_BUILD_COLUMNS
+            button_host = tk.Frame(
                 self.skill_build_grid,
-                textvariable=build_var,
-                values=[],
-                state="readonly",
-                width=26,
+                width=SKILL_SLOT_PIXEL_WIDTH,
+                height=SKILL_SLOT_PIXEL_HEIGHT,
+                bd=0,
+                highlightthickness=0,
             )
-            combo.grid(row=row, column=col + 1, sticky="w", padx=(0, 10), pady=3)
-            combo.bind("<<ComboboxSelected>>", lambda e: self.recalculate())
-            self.skill_build_combos.append(combo)
+            button_host.grid_propagate(False)
+            button_host.grid(row=row, column=column, sticky="w", padx=(0, 4), pady=(0, 4))
+            button = tk.Button(
+                button_host,
+                wraplength=SKILL_SLOT_BUTTON_WRAP,
+                justify="center",
+                padx=1,
+                pady=1,
+                font=("Arial", 8),
+                borderwidth=1,
+                highlightthickness=0,
+                command=lambda slot_index=index: self._open_skill_slot_picker(slot_index),
+            )
+            button.place(x=0, y=0, relwidth=1, relheight=1)
+            self.skill_build_buttons.append(button)
 
         talent_frame = ttk.LabelFrame(content, text="Talent Choices")
         talent_frame.pack(fill="x", pady=(0, 12))
@@ -570,21 +593,34 @@ class DatasetHeroApp:
         inventory_frame = ttk.LabelFrame(content, text="Inventory")
         inventory_frame.pack(fill="x", pady=(0, 12))
 
-        for index, item_var in enumerate(self.inventory_vars):
-            row = index // 2
-            col = (index % 2) * 2
-            ttk.Label(inventory_frame, text=f"Slot {index + 1}").grid(row=row, column=col, sticky="w", padx=(8, 6), pady=6)
-            combo = ttk.Combobox(
-                inventory_frame,
-                textvariable=item_var,
-                values=self.item_names,
-                state="normal",
-                width=28,
+        inventory_header = ttk.Frame(inventory_frame)
+        inventory_header.grid(row=0, column=0, columnspan=6, sticky="ew", padx=8, pady=(8, 4))
+        ttk.Label(inventory_header, textvariable=self.inventory_networth_var, font=("Arial", 10, "bold")).pack(side="left")
+
+        self.inventory_buttons = []
+        for index, _item_var in enumerate(self.inventory_vars):
+            row = 1 + (index // 2)
+            column = (index % 2) * 3
+            ttk.Label(inventory_frame, text=f"Slot {index + 1}").grid(
+                row=row,
+                column=column,
+                sticky="w",
+                padx=(8, 6),
+                pady=5,
             )
-            combo.grid(row=row, column=col + 1, sticky="w", padx=(0, 12), pady=6)
-            combo.bind("<<ComboboxSelected>>", lambda e: self.recalculate())
-            combo.bind("<KeyRelease>", lambda e, var=item_var: self._handle_combobox_keyrelease(e, var, self.item_names))
-            combo.bind("<FocusOut>", lambda e, var=item_var: self._normalize_combobox_value(var, self.item_names))
+            button = ttk.Button(
+                inventory_frame,
+                text="",
+                width=30,
+                command=lambda slot_index=index: self._open_item_picker(slot_index),
+            )
+            button.grid(row=row, column=column + 1, sticky="w", padx=(0, 6), pady=5)
+            ttk.Button(
+                inventory_frame,
+                text="Clear",
+                command=lambda slot_index=index: self._clear_inventory_slot(slot_index),
+            ).grid(row=row, column=column + 2, sticky="w", padx=(0, 12), pady=5)
+            self.inventory_buttons.append(button)
 
         adjustments_frame = ttk.LabelFrame(content, text="Manual Stat Adjustments")
         adjustments_frame.pack(fill="x", pady=(0, 12))
@@ -1094,6 +1130,193 @@ class DatasetHeroApp:
         self._close_hero_picker()
         self._on_hero_changed()
 
+    def _item_cost_value(self, item_name):
+        item_data = self.items.get(item_name, {})
+        if not isinstance(item_data, dict):
+            return 0.0
+        return max(0.0, _to_float(item_data.get("cost"), default=0.0))
+
+    def _inventory_networth(self):
+        return sum(self._item_cost_value(item_name) for item_name in self._selected_item_names())
+
+    def _inventory_slot_text(self, slot_index):
+        item_name = self.inventory_vars[slot_index].get().strip()
+        if not item_name:
+            return "Empty"
+        if item_name not in self.items:
+            display_name = item_name if len(item_name) <= 24 else f"{item_name[:22]}..."
+            return f"{display_name} (?)"
+        display_name = item_name if len(item_name) <= 24 else f"{item_name[:22]}..."
+        return f"{display_name} ({_format_number(self._item_cost_value(item_name))}g)"
+
+    def _refresh_inventory_buttons(self):
+        for index, button in enumerate(getattr(self, "inventory_buttons", [])):
+            button.configure(text=self._inventory_slot_text(index))
+        networth = self._inventory_networth()
+        self.inventory_networth_var.set(f"Inventory networth: {_format_number(networth)}g")
+
+    def _clear_inventory_slot(self, slot_index):
+        if 0 <= slot_index < len(self.inventory_vars):
+            self.inventory_vars[slot_index].set("")
+        self._refresh_inventory_buttons()
+        self.recalculate()
+
+    def _clear_item_search(self):
+        self.item_search_var.set("")
+
+    def _item_search_score(self, item_name, query):
+        return self._hero_search_score(item_name, query)
+
+    def _filtered_item_names(self):
+        all_items = sorted(self.items.keys())
+        query = self.item_search_var.get().strip()
+        if not query:
+            return all_items, len(all_items)
+
+        scored = [(self._item_search_score(item_name, query), item_name) for item_name in all_items]
+        matches = [(score, item_name) for score, item_name in scored if score >= 0.34]
+        matches.sort(key=lambda item: (-item[0], item[1]))
+        item_names = [item_name for _score, item_name in matches]
+        return item_names[:ITEM_SEARCH_RESULT_LIMIT], len(item_names)
+
+    def _item_picker_button_text(self, item_name):
+        display_name = item_name if len(item_name) <= 32 else f"{item_name[:30]}..."
+        return f"{display_name}\n{_format_number(self._item_cost_value(item_name))}g"
+
+    def _open_item_picker(self, slot_index):
+        if self.item_picker_window is not None and self.item_picker_window.winfo_exists():
+            self.item_picker_window.lift()
+            self.item_picker_window.focus_force()
+            return
+
+        self.item_picker_slot_index = slot_index
+        window = tk.Toplevel(self.parent)
+        self.item_picker_window = window
+        window.title(f"Choose Item - Slot {slot_index + 1}")
+        window.geometry("760x620")
+        window.minsize(600, 420)
+        window.transient(self.parent.winfo_toplevel())
+        window.protocol("WM_DELETE_WINDOW", self._close_item_picker)
+
+        header = ttk.Frame(window, padding=(12, 12, 12, 6))
+        header.pack(fill="x")
+        ttk.Label(header, text="Search").pack(side="left", padx=(0, 6))
+        search_entry = ttk.Entry(header, textvariable=self.item_search_var, width=34)
+        search_entry.pack(side="left", padx=(0, 10))
+        search_entry.bind("<Return>", lambda _event: self._select_first_visible_item())
+        ttk.Button(header, text="Clear", command=self._clear_item_search).pack(side="left", padx=(0, 10))
+        ttk.Button(header, text="Empty Slot", command=lambda: self._select_item_from_picker("")).pack(side="left", padx=(0, 10))
+        ttk.Label(header, textvariable=self.item_filter_status_var, foreground="#666").pack(side="left")
+
+        grid_outer = ttk.Frame(window, padding=(12, 0, 12, 12))
+        grid_outer.pack(fill="both", expand=True)
+        self.item_grid_canvas = tk.Canvas(grid_outer, highlightthickness=1, highlightbackground="#d0d0d0")
+        item_grid_scroll = ttk.Scrollbar(grid_outer, orient="vertical", command=self.item_grid_canvas.yview)
+        self.item_grid_frame = ttk.Frame(self.item_grid_canvas)
+        self.item_grid_frame.bind(
+            "<Configure>",
+            lambda _event: self.item_grid_canvas.configure(scrollregion=self.item_grid_canvas.bbox("all")),
+        )
+        self.item_grid_canvas.create_window((0, 0), window=self.item_grid_frame, anchor="nw")
+        self.item_grid_canvas.configure(yscrollcommand=item_grid_scroll.set)
+        self.item_grid_canvas.pack(side="left", fill="both", expand=True)
+        item_grid_scroll.pack(side="right", fill="y")
+
+        self.item_search_var.set("")
+        search_entry.focus_set()
+        self._refresh_item_grid()
+        try:
+            window.grab_set()
+        except tk.TclError:
+            pass
+
+    def _close_item_picker(self):
+        if self.item_picker_window is not None and self.item_picker_window.winfo_exists():
+            try:
+                self.item_picker_window.grab_release()
+            except tk.TclError:
+                pass
+            self.item_picker_window.destroy()
+        self.item_picker_window = None
+        self.item_picker_slot_index = None
+        self.item_grid_canvas = None
+        self.item_grid_frame = None
+
+    def _select_item_from_picker(self, item_name):
+        slot_index = self.item_picker_slot_index
+        if slot_index is not None and 0 <= slot_index < len(self.inventory_vars):
+            self.inventory_vars[slot_index].set(item_name)
+        self._close_item_picker()
+        self._refresh_inventory_buttons()
+        self.recalculate()
+
+    def _select_first_visible_item(self):
+        visible_items, _total_matches = self._filtered_item_names()
+        if visible_items:
+            self._select_item_from_picker(visible_items[0])
+
+    def _refresh_item_grid(self):
+        if self.item_grid_frame is None or self.item_grid_canvas is None:
+            return
+
+        for child in self.item_grid_frame.winfo_children():
+            child.destroy()
+
+        visible_items, total_matches = self._filtered_item_names()
+        selected_item = ""
+        if self.item_picker_slot_index is not None and 0 <= self.item_picker_slot_index < len(self.inventory_vars):
+            selected_item = self.inventory_vars[self.item_picker_slot_index].get().strip()
+
+        for index, item_name in enumerate(visible_items):
+            row = index // ITEM_GRID_COLUMNS
+            column = index % ITEM_GRID_COLUMNS
+            button_host = tk.Frame(
+                self.item_grid_frame,
+                width=ITEM_PICKER_BUTTON_PIXEL_WIDTH,
+                height=ITEM_PICKER_BUTTON_PIXEL_HEIGHT,
+                bd=0,
+                highlightthickness=0,
+            )
+            button_host.grid_propagate(False)
+            button_host.grid(row=row, column=column, sticky="w", padx=0, pady=0)
+            selected = item_name == selected_item
+            bg = "#e0f1e6" if selected else "#ffffff"
+            active_bg = "#c8e8d3" if selected else "#f2f2f2"
+            button = tk.Button(
+                button_host,
+                text=self._item_picker_button_text(item_name),
+                wraplength=ITEM_PICKER_BUTTON_WRAP,
+                justify="center",
+                padx=2,
+                pady=2,
+                font=("Arial", 8),
+                bg=bg,
+                activebackground=active_bg,
+                borderwidth=1,
+                highlightthickness=0,
+                command=lambda selected_item_name=item_name: self._select_item_from_picker(selected_item_name),
+            )
+            button.place(x=0, y=0, relwidth=1, relheight=1)
+
+        for column in range(ITEM_GRID_COLUMNS):
+            self.item_grid_frame.columnconfigure(column, weight=0)
+
+        if not visible_items:
+            ttk.Label(self.item_grid_frame, text="No items matched.").grid(row=0, column=0, sticky="w", padx=4, pady=4)
+
+        if self.item_search_var.get().strip():
+            if total_matches > len(visible_items):
+                status = f"{len(visible_items)} of {total_matches} matches"
+            else:
+                status = f"{total_matches} matches"
+        else:
+            status = f"{len(self.items)} items"
+        if selected_item:
+            status = f"{status} | Slot {self.item_picker_slot_index + 1}: {selected_item}"
+        self.item_filter_status_var.set(status)
+
+        self.item_grid_canvas.yview_moveto(0)
+
     def _on_hero_changed(self):
         self._update_hero_selector_summary()
         self._update_hero_dependent_options(reset_build=True)
@@ -1131,17 +1354,126 @@ class DatasetHeroApp:
             return labels[index]
         return str(index + 1)
 
+    def _is_free_innate_ability(self, ability, index):
+        type_text = str(ability.get("type", "") or "").strip().lower()
+        slot_text = str(ability.get("slot", ability.get("abilitySlot", "")) or "").strip().lower()
+        if ability.get("innate") is True or "innate" in type_text or "innate" in slot_text:
+            return True
+        return index == 0 and self._ability_max_level(ability) <= 1
+
     def _build_skill_option_records(self, hero_data):
         records = []
         for index, ability in enumerate(self._hero_abilities(hero_data)):
             name = str(ability.get("name") or f"Ability {index + 1}").strip()
             if not name:
                 continue
+            if self._is_free_innate_ability(ability, index):
+                continue
             label = f"{self._ability_slot_label(index)}: {name}"
             records.append({"label": label, "kind": "ability", "index": index})
 
         records.append({"label": "Attribute Bonus (+2 all)", "kind": "attribute_bonus"})
         return records
+
+    def _skill_slot_label_text(self, value):
+        record = self.skill_option_map.get(value)
+        if not record:
+            return "-"
+        if record.get("kind") == "attribute_bonus":
+            return "+Attr"
+        label = str(value or "")
+        return label.split(":", 1)[1].strip() if ":" in label else label
+
+    def _skill_button_text(self, index):
+        label = self._skill_slot_label_text(self.skill_build_vars[index].get())
+        if len(label) > 16:
+            label = f"{label[:14]}..."
+        return f"{index + 1:02d}\n{label}"
+
+    def _refresh_skill_build_buttons(self):
+        current_level = self._parse_level()
+        for index, button in enumerate(getattr(self, "skill_build_buttons", [])):
+            value = self.skill_build_vars[index].get().strip()
+            is_active_slot = index < current_level
+            if value:
+                bg = "#d7f0df" if is_active_slot else "#ececec"
+                active_bg = "#c1e6cf" if is_active_slot else "#e0e0e0"
+                fg = "#173323" if is_active_slot else "#555555"
+            else:
+                bg = "#ffffff" if is_active_slot else "#f3f3f3"
+                active_bg = "#edf7f0" if is_active_slot else "#ececec"
+                fg = "#1d1d1d" if is_active_slot else "#777777"
+            button.configure(
+                text=self._skill_button_text(index),
+                bg=bg,
+                activebackground=active_bg,
+                fg=fg,
+                activeforeground=fg,
+            )
+
+    def _open_skill_slot_picker(self, slot_index):
+        if self.skill_picker_window is not None and self.skill_picker_window.winfo_exists():
+            self.skill_picker_window.lift()
+            self.skill_picker_window.focus_force()
+            return
+
+        window = tk.Toplevel(self.parent)
+        self.skill_picker_window = window
+        window.title(f"Choose Level {slot_index + 1} Skill")
+        window.geometry("360x360")
+        window.minsize(320, 260)
+        window.transient(self.parent.winfo_toplevel())
+        window.protocol("WM_DELETE_WINDOW", self._close_skill_picker)
+
+        container = ttk.Frame(window, padding=12)
+        container.pack(fill="both", expand=True)
+        ttk.Label(container, text=f"Level {slot_index + 1:02d}").pack(anchor="w", pady=(0, 8))
+        ttk.Button(container, text="Empty Slot", command=lambda: self._set_skill_slot(slot_index, "")).pack(fill="x", pady=(0, 6))
+
+        options_canvas = tk.Canvas(container, highlightthickness=1, highlightbackground="#d0d0d0")
+        options_scroll = ttk.Scrollbar(container, orient="vertical", command=options_canvas.yview)
+        options_frame = ttk.Frame(options_canvas)
+        options_frame.bind(
+            "<Configure>",
+            lambda _event: options_canvas.configure(scrollregion=options_canvas.bbox("all")),
+        )
+        options_window = options_canvas.create_window((0, 0), window=options_frame, anchor="nw")
+        options_canvas.bind(
+            "<Configure>",
+            lambda event: options_canvas.itemconfigure(options_window, width=event.width),
+        )
+        options_canvas.configure(yscrollcommand=options_scroll.set)
+        options_canvas.pack(side="left", fill="both", expand=True)
+        options_scroll.pack(side="right", fill="y")
+
+        for row_index, option in enumerate(self.skill_option_values[1:]):
+            ttk.Button(
+                options_frame,
+                text=option,
+                command=lambda selected=option: self._set_skill_slot(slot_index, selected),
+            ).grid(row=row_index, column=0, sticky="ew", padx=6, pady=3)
+        options_frame.columnconfigure(0, weight=1)
+
+        try:
+            window.grab_set()
+        except tk.TclError:
+            pass
+
+    def _close_skill_picker(self):
+        if self.skill_picker_window is not None and self.skill_picker_window.winfo_exists():
+            try:
+                self.skill_picker_window.grab_release()
+            except tk.TclError:
+                pass
+            self.skill_picker_window.destroy()
+        self.skill_picker_window = None
+
+    def _set_skill_slot(self, slot_index, value):
+        if 0 <= slot_index < len(self.skill_build_vars):
+            self.skill_build_vars[slot_index].set(value)
+        self._close_skill_picker()
+        self._refresh_skill_build_buttons()
+        self.recalculate()
 
     def _talent_text(self, hero_data, tier, side):
         talents = hero_data.get("talents", {})
@@ -1164,8 +1496,7 @@ class DatasetHeroApp:
         records = self._build_skill_option_records(hero_data)
         self.skill_option_map = {record["label"]: record for record in records}
         self.skill_option_values = [""] + [record["label"] for record in records]
-        for combo in getattr(self, "skill_build_combos", []):
-            combo["values"] = self.skill_option_values
+        self._refresh_skill_build_buttons()
         self._refresh_talent_texts(hero_data)
 
         action_values = [ACTION_EMPTY, ACTION_AUTO_ATTACK, ACTION_STOP]
@@ -1184,12 +1515,14 @@ class DatasetHeroApp:
             for action_var in self.action_choice_vars:
                 if action_var.get() not in action_values:
                     action_var.set(ACTION_EMPTY)
+        self._refresh_skill_build_buttons()
 
     def _clear_skill_build(self):
         self._syncing_skill_build = True
         for build_var in self.skill_build_vars:
             build_var.set("")
         self._syncing_skill_build = False
+        self._refresh_skill_build_buttons()
         self.recalculate()
 
     def _auto_fill_skill_build(self, recalculate=True):
@@ -1197,6 +1530,8 @@ class DatasetHeroApp:
         abilities = self._hero_abilities(hero_data)
         ability_labels = []
         for index, ability in enumerate(abilities):
+            if self._is_free_innate_ability(ability, index):
+                continue
             if self._ability_max_level(ability) <= 1:
                 continue
             label = f"{self._ability_slot_label(index)}: {ability.get('name')}"
@@ -1228,6 +1563,7 @@ class DatasetHeroApp:
                 chosen = "Attribute Bonus (+2 all)"
             self.skill_build_vars[level_index].set(chosen)
         self._syncing_skill_build = False
+        self._refresh_skill_build_buttons()
 
         if recalculate:
             self.recalculate()
@@ -1266,6 +1602,9 @@ class DatasetHeroApp:
         abilities = self._hero_abilities(hero_data)
         ability_levels = [0 for _ in abilities]
         max_levels = [self._ability_max_level(ability) for ability in abilities]
+        for index, ability in enumerate(abilities):
+            if self._is_free_innate_ability(ability, index):
+                ability_levels[index] = min(1, max_levels[index])
         selected_talent_ids, selected_talent_labels = self._get_active_talents(hero_data, int(level))
         attribute_bonus_points = 0
 
@@ -1735,6 +2074,7 @@ class DatasetHeroApp:
             "attack_point_manip": 0.0,
             "primary_attribute": primary_attribute,
             "selected_items": selected_items,
+            "inventory_networth": sum(self._item_cost_value(item_name) for item_name in selected_items),
             "applied_talent_labels": applied_talent_labels,
             "attribute_bonus": {
                 "manual": manual_attribute_points,
@@ -1818,7 +2158,12 @@ class DatasetHeroApp:
             f"Attribute bonus: {attribute_summary.get('total', 0)}/{MAX_ATTRIBUTE_BONUS_POINTS} level-slot points "
             f"(+{attribute_summary.get('flat', 0)} to each stat)"
         )
-        item_summary = ", ".join(stats["selected_items"]) if stats["selected_items"] else "No items selected"
+        networth_text = f"{_format_number(stats.get('inventory_networth', 0))}g"
+        item_summary = (
+            f"{', '.join(stats['selected_items'])} ({networth_text})"
+            if stats["selected_items"]
+            else f"No items selected ({networth_text})"
+        )
         talent_summary = ", ".join(stats["applied_talent_labels"]) if stats["applied_talent_labels"] else "No stat talents applied"
         self.summary_var.set(f"Level {level} | {item_summary} | {talent_summary}")
         self.current_skill_state = skill_state
@@ -1833,6 +2178,8 @@ class DatasetHeroApp:
             value = stats.get(key, "")
             var.set("Inf" if isinstance(value, float) and math.isinf(value) else _format_number(value))
         if self._widgets_ready:
+            self._refresh_skill_build_buttons()
+            self._refresh_inventory_buttons()
             self._refresh_ability_tree()
             self._refresh_simulation()
 
@@ -2003,7 +2350,7 @@ class DatasetHeroApp:
         ability_levels = self.current_skill_state.get("ability_levels", [0 for _ in abilities])
         learned = sum(1 for level in ability_levels if level > 0)
         self.ability_summary_var.set(
-            f"{hero_name}: {len(abilities)} abilities loaded, {learned} currently leveled from the skill build."
+            f"{hero_name}: {len(abilities)} abilities loaded, {learned} currently active from innate/build slots."
         )
 
         rows = []
@@ -2024,7 +2371,10 @@ class DatasetHeroApp:
                         parts.append(f"{_format_number(damage_payload['dot_dps'])}/s")
                 damage_text = f"{' + '.join(parts)} {damage_payload['damage_type']}"
 
-            effects = ", ".join(str(effect) for effect in (ability.get("effects", []) or [])[:8])
+            effect_parts = [str(effect) for effect in (ability.get("effects", []) or [])[:8]]
+            if self._is_free_innate_ability(ability, index):
+                effect_parts.insert(0, "Free innate")
+            effects = ", ".join(effect_parts)
             row = (
                 f"{level}/{max_level}",
                 str(ability.get("type", "") or "-"),
